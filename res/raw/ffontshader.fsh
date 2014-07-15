@@ -1,3 +1,4 @@
+#version 100
 uniform sampler2D u_Texture;
 uniform lowp vec4 u_Color;
 varying mediump vec2 uv;

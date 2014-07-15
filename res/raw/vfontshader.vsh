@@ -1,3 +1,4 @@
+#version 100
 uniform vec3 u_Position;
 uniform lowp float u_Size;
 attribute mediump vec2 a_Position;
@@ -9,3 +10,4 @@ void main ()
   gl_Position.xy = (u_Position.xy + (a_Position * u_Size));
   gl_Position.z = u_Position.z;
 }
+

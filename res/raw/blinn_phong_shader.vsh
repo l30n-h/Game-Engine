@@ -1,3 +1,4 @@
+#version 100
 uniform mat4 u_MVMatrix, u_MVPMatrix;
 uniform mat3 u_NMatrix;
 attribute vec4 a_Position;
