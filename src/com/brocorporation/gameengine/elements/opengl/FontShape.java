@@ -15,11 +15,14 @@ import com.brocorporation.gameengine.utils.Vector3f;
 import com.brocorporation.gameengine.utils.Vector4f;
 
 public class FontShape extends GLShape {
-	protected final static byte COORDS_PER_VERTEX = 4;
-	protected final static byte STRIDE = COORDS_PER_VERTEX * BYTES_PER_FLOAT;
+	protected final static byte COORDS_PER_POSITION = 2;
+	protected final static byte COORDS_PER_TEXTURE = 2;
+	protected final static byte COORDS_PER_UNIT = COORDS_PER_POSITION
+			+ COORDS_PER_TEXTURE;
+	protected final static byte STRIDE = COORDS_PER_UNIT * BYTES_PER_FLOAT;
 	protected final static byte EDGES_PER_CHAR = 4;
 	protected final static byte VERTICES_PER_CHAR = EDGES_PER_CHAR
-			* COORDS_PER_VERTEX;
+			* COORDS_PER_UNIT;
 	protected final static byte INDICES_PER_CHAR = 6;
 	protected final static byte BYTES_PER_VERTICES_PER_CHAR = VERTICES_PER_CHAR
 			* BYTES_PER_FLOAT;
@@ -114,8 +117,8 @@ public class FontShape extends GLShape {
 		for (int i = 0; i < length; i++) {
 			final char c = text.charAt(i);
 			if (c == '\n') {
-				positionX = offset * glyphWidth;
-				positionY -= glyphHeight;
+				// positionX = offset * glyphWidth;
+				// positionY -= glyphHeight;
 				continue;
 			}
 			final int col;
@@ -164,7 +167,6 @@ public class FontShape extends GLShape {
 			iBuffer.put(indicesOffset);
 			iBuffer.put(i2);
 			iBuffer.put((short) (indicesOffset + 3));
-
 			indicesOffset += EDGES_PER_CHAR;
 		}
 		vBuffer.flip();
@@ -180,13 +182,7 @@ public class FontShape extends GLShape {
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	public void remove(int remove) {
-		if (remove > 0) {
-			count = Math.max(0, count - remove);
-		}
-	}
-
-	public void setTo(int count) {
+	public void setLength(int count) {
 		count = Math.max(0, Math.min(count, maxChars));
 	}
 
@@ -209,13 +205,12 @@ public class FontShape extends GLShape {
 		final int uvHandle = aHandle[FontShader.a_UV];
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer[VBO]);
 		GL20.glEnableVertexAttribArray(positionHandle);
-		GL20.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX,
-				GL11.GL_FLOAT, false, STRIDE, 0);
 		GL20.glEnableVertexAttribArray(uvHandle);
-		GL20.glVertexAttribPointer(uvHandle, COORDS_PER_VERTEX, GL11.GL_FLOAT,
+		GL20.glVertexAttribPointer(positionHandle, COORDS_PER_POSITION,
+				GL11.GL_FLOAT, false, STRIDE, 0);
+		GL20.glVertexAttribPointer(uvHandle, COORDS_PER_TEXTURE, GL11.GL_FLOAT,
 				false, STRIDE, 8);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-
 		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, buffer[IBO]);
 		GL11.glDrawElements(GL11.GL_TRIANGLES, count * INDICES_PER_CHAR,
 				GL11.GL_UNSIGNED_SHORT, 0);

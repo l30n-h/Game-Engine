@@ -1,6 +1,6 @@
 #version 100
-uniform mat4 u_MVPMatrix;
-attribute vec4 a_Position;
+uniform mediump mat4 u_MVPMatrix;
+attribute mediump vec4 a_Position;
 void main ()
 {
 	gl_Position = u_MVPMatrix * a_Position;

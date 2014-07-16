@@ -24,7 +24,6 @@ import com.brocorporation.gameengine.elements.collision.Contact;
 import com.brocorporation.gameengine.elements.collision.Convex;
 import com.brocorporation.gameengine.elements.collision.Frustum;
 import com.brocorporation.gameengine.elements.collision.GJK;
-import com.brocorporation.gameengine.elements.collision.IShape;
 import com.brocorporation.gameengine.elements.collision.MPR;
 import com.brocorporation.gameengine.elements.collision.Material;
 import com.brocorporation.gameengine.elements.collision.Octree;
@@ -76,8 +75,8 @@ public class MyGLSurfaceView extends GameEngine {
 	private final List<Object> frustumList = new ArrayList<Object>();
 
 	public MyGLSurfaceView() {
-		//super(60, 80);
-		
+		// super(60, 80);
+
 		final Vector3f p1 = new Vector3f(0, 0f, 0);
 		final Vector3f p2 = new Vector3f(1f, 1f, 1f);
 		final Vector3f direction = new Vector3f(1, 0, 1);
@@ -103,8 +102,10 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(+1, +1, +1).add(p2) });
 		Vector3f normal = new Vector3f();
 		System.out.println("Intersects " + MPR.intersects(cB1, cB2));
-		System.out.println("Intersects " + MPR.intersects(Contact.DEFAULT, cB1, cB2));
-		System.out.println("Distance   "+Contact.DEFAULT.getDistance()+"\tNormal     " + Contact.DEFAULT.getNormal());
+		System.out.println("Intersects "
+				+ MPR.intersects(Contact.DEFAULT, cB1, cB2));
+		System.out.println("Distance   " + Contact.DEFAULT.getDistance()
+				+ "\tNormal     " + Contact.DEFAULT.getNormal());
 		System.out.println("Intersects " + GJK.intersects(cB1, cB2));
 		System.out.println("Distance   "
 				+ GJK.distance(Contact.DEFAULT, cB1, cB2));
@@ -118,8 +119,8 @@ public class MyGLSurfaceView extends GameEngine {
 				+ GJK.rayCast(hit, normal, p1, direction, cB1, cB2));
 		System.out.println("\tPoint: " + hit.getPoint());
 		System.out.println("\tNormal: " + normal);
-		
-		//System.exit(0);
+
+		// System.exit(0);
 	}
 
 	public void create() {
@@ -473,7 +474,7 @@ public class MyGLSurfaceView extends GameEngine {
 		actor.setGLShape(actorShape);
 		actor.setJumpingHeight(2);
 		actor.isGravityEnabled(true);
-		//actor.setMaterial(new Material(0.f, 1F, 0.9F));
+		// actor.setMaterial(new Material(0.f, 1F, 0.9F));
 		world.add(actor);
 
 		final TrackingCamera camera = new TrackingCamera();
@@ -499,7 +500,6 @@ public class MyGLSurfaceView extends GameEngine {
 		fontShape.setSize(1f / 8);
 		fontShape.setColor(0, 1, 0, 1);
 		fontShape.setText("FPS:", 0);
-		primitiveShape.setColor(1, 0, 0, 1);
 
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glCullFace(GL11.GL_BACK);
@@ -572,8 +572,9 @@ public class MyGLSurfaceView extends GameEngine {
 								min = hit.getScalar();
 								sB = p.getShape().getAABB();
 							}
-						} else if (o instanceof IShape) {
-							final AABB b = ((IShape) o).getAABB();
+						} else if (o instanceof Collidable) {
+							final AABB b = ((Collidable) o).getShape()
+									.getAABB();
 							if (b.getAABB().intersectsRay(hit, fromPoint, dir,
 									0, min)) {
 								min = hit.getScalar();
@@ -615,6 +616,9 @@ public class MyGLSurfaceView extends GameEngine {
 				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
 					renderRoom = !renderRoom;
 				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_F6) {
+					renderDynamics = !renderDynamics;
+				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					if (isPaused) {
 						resume();
@@ -642,11 +646,12 @@ public class MyGLSurfaceView extends GameEngine {
 			world.update(uInfo);
 	}
 
-	boolean renderRoom = true;
+	boolean renderRoom = true, renderDynamics = true;
 	boolean renderbounds, renderSweptBounds, renderTree, renderRay;
 
 	int frames = 0;
 	long lastTime = System.currentTimeMillis();
+	float w = -2;
 
 	private void fps() {
 		frames++;
@@ -691,21 +696,21 @@ public class MyGLSurfaceView extends GameEngine {
 					mvpTempMatrix);
 		}
 		world.getTree().retrieve(frustumList, frustum);
-
-		for (final Object bounds : frustumList) {
-			if (bounds != null && bounds instanceof StaticBody) {
-				final StaticBody body = (StaticBody) bounds;
-				// /if (transformable.isVisible()) {TODO
-				final GLShape shape = body.getGLShape();
-				if (shape != null && shape instanceof MainShape) {
-					((MainShape) shape).render(body.getAffineTransform());
+		if (renderDynamics) {
+			for (final Object bounds : frustumList) {
+				if (bounds != null && bounds instanceof StaticBody) {
+					final StaticBody body = (StaticBody) bounds;
+					// /if (transformable.isVisible()) {TODO
+					final GLShape shape = body.getGLShape();
+					if (shape != null && shape instanceof MainShape) {
+						((MainShape) shape).render(body.getAffineTransform());
+					}
+					// }
 				}
-				// }
 			}
+			coinShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
+			actorShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
 		}
-		coinShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
-		actorShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
-
 		primitiveShader.use();
 		if (selectedBody != null) {
 			primitiveShape.setColor(0, 1, 0, 1);
@@ -751,7 +756,6 @@ public class MyGLSurfaceView extends GameEngine {
 					fromPoint.z + dir.z * 100000);
 			primitiveShape.render(vpMatrix);
 		}
-
 		fontShader.use();
 		// GL11.glDepthMask(false);
 		GL11.glEnable(GL11.GL_BLEND);
