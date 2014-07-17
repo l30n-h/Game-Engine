@@ -1,5 +1,7 @@
 package com.brocorporation.gameengine.utils;
 
+import com.brocorporation.gameengine.elements.collision.MPR;
+
 public class Distance {
 
 	protected final static Vector3f AB = new Vector3f();
@@ -363,8 +365,8 @@ public class Distance {
 
 	static Vector3f dir = new Vector3f();
 
-	public static boolean intersectsLineSegmentTriangle(Vector3f from,
-			Vector3f to, Vector3f normal, Vector3f A, Vector3f B, Vector3f C) {
+	public static boolean intersectsLineTriangle(Vector3f from,
+			Vector3f to, Vector3f normal, Vector3f A, Vector3f B, Vector3f C,boolean segment) {
 		dir.setSubtract(to, from);
 		float r = normal.dot(dir);
 		if (r <= 0) {
@@ -372,7 +374,7 @@ public class Distance {
 		}
 		CB.setSubtract(A, from);
 		r = normal.dot(CB) / r;
-		if (r > 1 || r < 0) {
+		if ((segment && r > 1) || r < 0) {
 			return false;
 		}
 		CB.setAddScaled(from, dir, r).subtract(A);
@@ -388,6 +390,33 @@ public class Distance {
 		if (s < 0 || s > 1)
 			return false;
 		float t = (abac * pab - abab * pac) / denom;
+		return t >= 0 && s + t <= 1;
+	}
+	
+	public static boolean intersectsLineTriangle(Vector3f from,
+			Vector3f to, Vector3f normal, Vector3f A, Vector3f B, Vector3f C) {
+		dir.setSubtract(to, from);
+		float r = normal.dot(dir);
+		if (r == 0) {
+			return false;
+		}
+		CB.setSubtract(A, from);
+		r = normal.dot(CB) / r;
+		CB.setAddScaled(from, dir, r).subtract(A);
+		AB.setSubtract(B, A);
+		AC.setSubtract(C, A);
+		float abab = AB.dot(AB);
+		float acac = AC.dot(AC);
+		float abac = AB.dot(AC);
+		float pab = CB.dot(AB);
+		float pac = CB.dot(AC);
+		float denom = abac * abac - abab * acac;
+		float s = (abac * pac - acac * pab) / denom;
+		MPR.bu.append("s "+s+"\n");
+		if (s < 0 || s > 1)
+			return false;
+		float t = (abac * pab - abab * pac) / denom;
+		MPR.bu.append("t "+t+"\n");
 		return t >= 0 && s + t <= 1;
 	}
 }

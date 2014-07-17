@@ -65,6 +65,8 @@ public class MPR {
 		bu.append("\n\n");
 		final int res = discoverPortal(shape1, shape2);
 		if (res < 0) {
+			contact.setDistance(0);
+			contact.getNormal().set(0,0,0);
 			return false;
 		} else if (res == 1) {
 			findPenetrationTouch(contact, shape1, shape2);
@@ -72,6 +74,8 @@ public class MPR {
 			findPenetrationSegment(contact);
 		} else if (res == 0) {
 //			if (!refinePortal(shape1, shape2)) {
+//				contact.setDistance(0);
+//				contact.getNormal().set(0,0,0);
 //				return false;
 //			}
 //			findPenetrationS(contact, shape1, shape2);
@@ -140,23 +144,6 @@ public class MPR {
 			temp1.setSubtract(e1.v, e0.v);
 			temp2.setSubtract(e2.v, e0.v);
 			dir.setCross(temp1, temp2);
-//			temp1.setSubtract(e1.v, e0.v);
-//			temp2.setSubtract(e3.v, e0.v);
-//			dir.setCross(temp1, temp2);
-//			if(dir.dot(e0.v)>0)dir.invert();
-//			if(dir.dot(e2.v)<=0){
-//				set(e2, e3);
-//			} else{
-//				temp1.setSubtract(e3.v, e0.v);
-//				temp2.setSubtract(e2.v, e0.v);
-//				dir.setCross(temp1, temp2);
-//				if(dir.dot(e0.v)>0)dir.invert();
-//				if(dir.dot(e1.v)<=0){
-//					set(e1, e3);
-//				} else{
-//					return 0;
-//				}
-//			}
 		}
 	}
 
@@ -201,61 +188,27 @@ public class MPR {
 			temp3.setCross(e4.v, e0.v);
 			bu.append("expand: "+e1.v.dot(temp3) + "\t" + e2.v.dot(temp3) + "\t"
 					+ e3.v.dot(temp3) + "\n");
-			bu.append("s4: "+Distance.distanceToPlane(zero, e1.v, e2.v, e3.v)+"\ts3: "+Distance.distanceToPlane(zero, e1.v, e2.v, e4.v)+"\ts2: "+Distance.distanceToPlane(zero, e1.v, e3.v, e4.v)+"\ts1: "+Distance.distanceToPlane(zero, e2.v, e3.v, e4.v)+"\n");
-			bu.append("s4: "+Distance.distanceToTriangle(zero, e1.v, e2.v, e3.v)+"\ts3: "+Distance.distanceToTriangle(zero, e1.v, e2.v, e4.v)+"\ts2: "+Distance.distanceToTriangle(zero, e1.v, e3.v, e4.v)+"\ts1: "+Distance.distanceToTriangle(zero, e2.v, e3.v, e4.v)+"\n");
-			bu.append("s4: "+Distance.removeFromTriangle(e1.v, e2.v, e3.v)+"\ts3: "+Distance.removeFromTriangle(e1.v, e2.v, e4.v)+"\ts2: "+Distance.removeFromTriangle(e1.v, e3.v, e4.v)+"\ts1: "+Distance.removeFromTriangle(e2.v, e3.v, e4.v)+"\n");
-			temp3.setCross(dir,e4.v).setCross(e4.v,temp3);
-			bu.append(temp3+"\n");
-			bu.append(e1.v.dot(temp3) + "\t" + e2.v.dot(temp3) + "\t"
-					+ e3.v.dot(temp3) +"\t"+ e4.v.dot(temp3)+ "\n");
 			
-			float a = e1.v.dot(e4.v);
-			float b = e2.v.dot(e4.v);
-			float c = e3.v.dot(e4.v);
-			bu.append(a + "\t" + b + "\t"+ c+"\n");
-			if(a>0){
-				if(b>0){
-					temp3.setCross(e4.v, e3.v);
-					if(Math.abs(temp3.dot(e1.v))>Math.abs(temp3.dot(e2.v))){
-						set(e1,e4);
-					} else{
-						set(e2,e4);
-					}
-				} else if(c>0){
-					temp3.setCross(e4.v, e2.v);
-					if(Math.abs(temp3.dot(e1.v))>Math.abs(temp3.dot(e3.v))){
-						set(e1,e4);
-					} else{
-						set(e3,e4);
-					}
-				} else{
-					set(e1,e4);
-				}
-			}else if(b>0){
-				if(c>0){
-					temp3.setCross(e4.v, e1.v);
-					if(Math.abs(temp3.dot(e2.v))>Math.abs(temp3.dot(e3.v))){
-						set(e2,e4);
-					} else{
-						set(e3,e4);
-					}
-				} else{
-					set(e2,e4);
-				}
-			} else {
+			
+			v4v1.setSubtract(e4.v, e1.v);
+			v4v2.setSubtract(e4.v, e2.v);
+			v4v3.setSubtract(e4.v, e3.v);
+			temp1.setCross(v4v1, v4v2);
+			boolean a = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e2.v);
+			temp1.setCross(v4v1, v4v3);
+			boolean b = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e3.v);
+			temp1.setCross(v4v2, v4v3);
+			boolean c = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e2.v, e3.v);
+			if(a){
 				set(e3,e4);
-			}
-			if(a>b){
-				if(a>c){
-					set(e1,e4);
-				} else{
-					set(e3,e4);
-				}
-			} else if(b>c){
+			} else if(b){
 				set(e2,e4);
-			}else{
-				set(e3,e4);
-			}
+			} else if(c){
+				set(e1,e4);
+			}//ELSE search in dir of edge?¿?
+			bu.append(a + "\t" + b + "\t"+c + "\n");
+			
+			
 			
 			//expandPortal(e4);
 			iterations++;
@@ -361,12 +314,28 @@ public class MPR {
 		}
 	}
 
-	
 	protected static void expandPortal(Element e) {
 		temp3.setCross(e.v, e0.v);
 		bu.append("expand: "+e1.v.dot(temp3) + "\t" + e2.v.dot(temp3) + "\t"
 				+ e3.v.dot(temp3) + "\n");
-		bu.append("s4: "+Distance.distanceToPlane(zero, e1.v, e2.v, e3.v)+"\ts3: "+Distance.distanceToPlane(zero, e1.v, e2.v, e.v)+"\ts2: "+Distance.distanceToPlane(zero, e1.v, e3.v, e.v)+"\ts1: "+Distance.distanceToPlane(zero, e2.v, e3.v, e.v)+"\n\n");
+		if (e1.v.dot(temp3) > 0) {
+			if (e2.v.dot(temp3) > 0) {
+				set(e1, e);
+			} else {
+				set(e3, e);
+			}
+		} else {
+			if (e3.v.dot(temp3) > 0) {
+				set(e2, e);
+			} else {
+				set(e1, e);
+			}
+		}
+	}
+	
+	
+	protected static void expandPortalS(Element e) {
+		temp3.setCross(e.v, e0.v);
 		if (e1.v.dot(temp3) > 0) {
 			if (e2.v.dot(temp3) > 0) {
 				set(e1, e);

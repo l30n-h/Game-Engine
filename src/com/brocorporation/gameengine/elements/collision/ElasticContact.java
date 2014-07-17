@@ -10,10 +10,10 @@ public class ElasticContact extends Constraint {
 	protected final static Vector3f tangentFrictionImpulse = new Vector3f();
 	protected final static Vector3f rV = new Vector3f();
 
-	protected final static float percent = 0.5f;
-	protected final static float slop = 0.05f;
-//	protected final static float percent = 1;
-//	protected final static float slop = 0.0f;
+//	protected final static float percent = 0.5f;
+//	protected final static float slop = 0.05f;
+	protected final static float percent = 1;
+	protected final static float slop = 0.0f;
 
 	protected Vector3f normal = new Vector3f();
 	protected float distance;
@@ -116,9 +116,10 @@ public class ElasticContact extends Constraint {
 		if (distance > 0) {
 			distance = 0;
 		} else if ((distance += slop) < 0) {
-			rV.setScale(normal, percent * distance);
-			dynA.getPositionCorrection().subtract(rV);
-			dynB.getPositionCorrection().add(rV);
+			rV.setScale(normal, percent*(distance/(dynA.getInverseMass() + dynB
+					.getInverseMass())));
+			dynA.getPositionCorrection().subtractScaled(rV,dynA.getInverseMass());
+			dynB.getPositionCorrection().addScaled(rV,dynB.getInverseMass());
 		}
 		final Vector3f dynAlV = dynA.getLinearVelocity();
 		final Vector3f dynBlV = dynB.getLinearVelocity();
