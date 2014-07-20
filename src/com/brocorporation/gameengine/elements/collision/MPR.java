@@ -52,7 +52,7 @@ public class MPR {
 		return true;
 	}
 	
-	public static boolean getPenetration(Contact contact, IShape shape1, IShape shape2) {
+	public static boolean getPenetration2(Contact contact, IShape shape1, IShape shape2) {
 		bu.setLength(0);
 		Vector3f[] v1 = ((Convex) shape1).getVertices();
 		Vector3f[] v2 = ((Convex) shape2).getVertices();
@@ -83,6 +83,44 @@ public class MPR {
 		}
 		return true;
 	}
+	
+	public static boolean getPenetration(Contact contact, IShape shape1, IShape shape2) {
+		bu.setLength(0);
+		Vector3f[] v1 = ((Convex) shape1).getVertices();
+		Vector3f[] v2 = ((Convex) shape2).getVertices();
+		for (int i = 0; i < v1.length; i++) {
+			for (int j = 0; j < v2.length; j++) {
+				temp1.setSubtract(v1[i], v2[j]);
+				bu.append("p" + i + "" + j + ":Punkt(" + temp1.toString().replaceAll("E", "*10^")+")\n");
+			}
+		}
+		bu.append("\n\n");
+		
+		getOriginRayDirection(shape1,shape2);
+		minSupport(e1, shape1, shape2, e0.v);
+		temp1.setSubtract(e0.v, e1.v);
+		dir.setCross(e0.v,temp1).setCross(dir,temp1);
+		maxSupport(e2,shape1,shape2,dir);
+		temp1.setSubtract(e1.v, e2.v);
+		dir.setCross(e1.v,temp1).setCross(dir,temp1);
+		maxSupport(e3, shape1, shape2, dir);
+		
+		temp3.set(dir);
+		portalDir(dir);
+		temp1.setSubtract(e0.v, e1.v);
+		float dt3 = dir.dot(temp3);
+		float dt1 = dir.dot(temp1);
+		float d1 = dir.dot(e1.v);
+		float d0 = -dir.dot(e0.v);
+		if(d0<0){//TODO
+			dir.invert();
+			bu.append("preinvert\n");
+		}
+		bu.append(d0+"\t"+d1+"\t"+dt1+"\t"+dt3+"\n");//TODO dir
+		
+		findPenetration(contact, shape1,shape2);
+		return true;
+	}
 
 	public static class Element {
 		public Vector3f v = new Vector3f();
@@ -97,8 +135,8 @@ public class MPR {
 	static Element e4 = new Element();
 
 	static Vector3f dir = new Vector3f();
-
-	protected static byte discoverPortal(IShape shape1, IShape shape2) {
+	
+	protected static void getOriginRayDirection(IShape shape1, IShape shape2){
 		e0.v.setSubtract(e0.pA.set(shape1.getPosition()),
 				e0.pB.set(shape2.getPosition()));
 		bu.append("discover\n");
@@ -106,6 +144,10 @@ public class MPR {
 		if (e0.v.isZero()) {
 			e0.v.set(0.00001f, 0, 0);
 		}
+	}
+
+	protected static byte discoverPortal(IShape shape1, IShape shape2) {
+		getOriginRayDirection(shape1,shape2);
 		minSupport(e1, shape1, shape2, e0.v);
 		if (e1.v.dot(e0.v) >= 0)
 			return -1;
@@ -131,7 +173,7 @@ public class MPR {
 			bu.append("v1:Punkt(" + e1.v + ")\n");
 			bu.append("v2:Punkt(" + e2.v + ")\n");
 			bu.append("v3:Punkt(" + e3.v + ")\n");
-			bu.append("d : " + dir + "\n\n");
+			bu.append("d:Vektor(" + dir + ")\n\n");
 			if (e3.v.dot(dir) <= 0)
 				return -1;
 			if (temp1.setCross(e1.v, e3.v).dot(e0.v) < 0) {
@@ -173,14 +215,17 @@ public class MPR {
 			IShape shape2) {
 		bu.append("penetration\n");
 		int iterations = 0;
+		int l = -1;
 		while (true) {
-			portalDir(dir);
+			
+			
+			
 			maxSupport(e4, shape1, shape2, dir);
 			bu.append("v1:Punkt(" + e1.v + ")\n");
 			bu.append("v2:Punkt(" + e2.v + ")\n");
 			bu.append("v3:Punkt(" + e3.v + ")\n");
 			bu.append("v4:Punkt(" + e4.v + ")\n");
-			bu.append("d : " + dir + "\n");
+			bu.append("d:Vektor(" + dir + ")\n");
 			if (portalReachTolerance(e4, dir) || iterations > MAX_ITERATIONS) {
 				break;
 			}
@@ -194,28 +239,54 @@ public class MPR {
 			v4v2.setSubtract(e4.v, e2.v);
 			v4v3.setSubtract(e4.v, e3.v);
 			temp1.setCross(v4v1, v4v2);
-			boolean a = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e2.v);
+			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e2.v);
+			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e1.v, e2.v);
+			float c3 = Math.abs(Distance.planeBl(zero, dir, temp1, e4.v));
 			temp1.setCross(v4v1, v4v3);
-			boolean b = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e3.v);
+			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e3.v);
+			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e1.v, e3.v);
+			float b3 = Math.abs(Distance.planeBl(zero, dir, temp1, e4.v));
 			temp1.setCross(v4v2, v4v3);
-			boolean c = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e2.v, e3.v);
-			if(a){
-				set(e3,e4);
-			} else if(b){
-				set(e2,e4);
-			} else if(c){
+			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e2.v, e3.v);
+			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e2.v, e3.v);
+			float a3 = Math.abs(Distance.planeBl(zero, dir, temp1, e4.v));
+			bu.append("sp dir: "+a1 + "\t" + b1 + "\t"+c1 + "\n");
+			bu.append("v0 dir: "+a2 + "\t" + b2 + "\t"+c2 + "\n");
+			bu.append("r  dir: "+a3 + "\t" + b3 + "\t"+c3 + "\n");
+			if(a1 && l != 1){
 				set(e1,e4);
-			}//ELSE search in dir of edge?¿?
-			bu.append(a + "\t" + b + "\t"+c + "\n");
+				l = 1;
+			} else if(b1&& l != 2){
+				set(e2,e4);
+				l = 2;
+			} else if(c1&& l != 3){
+				set(e3,e4);
+				l = 3;
+			}else{
+				break;
+			}
 			
 			
-			
-			//expandPortal(e4);
+//			expandPortal(e4);
 			iterations++;
 			bu.append("\n");
+			//______________
+			temp3.set(dir);
+			portalDir(dir);
+			
+			temp1.setSubtract(e0.v, e1.v);
+			float d3 = dir.dot(temp3);
+			float d2 = dir.dot(temp1);
+			float d1 = dir.dot(e1.v);
+			float d0 = -dir.dot(e0.v);
+			
+			if(d3<0){//TODO
+				dir.invert();
+				bu.append("invert\n");
+			}
+			bu.append(d0+"\t"+d1+"\t"+d2+"\t"+d3+"\n");
 		}
 		final Vector3f n = contact.getNormal();
-		//float d = Distance.distanceToPlane(n, e1.v, e2.v, e3.v);
 		n.setNorm(dir);
 		float d = e1.v.dot(n);
 		if (d <= CollideEpsilon/*_2*/) {
@@ -313,28 +384,8 @@ public class MPR {
 							* invHalfSum);
 		}
 	}
-
+	
 	protected static void expandPortal(Element e) {
-		temp3.setCross(e.v, e0.v);
-		bu.append("expand: "+e1.v.dot(temp3) + "\t" + e2.v.dot(temp3) + "\t"
-				+ e3.v.dot(temp3) + "\n");
-		if (e1.v.dot(temp3) > 0) {
-			if (e2.v.dot(temp3) > 0) {
-				set(e1, e);
-			} else {
-				set(e3, e);
-			}
-		} else {
-			if (e3.v.dot(temp3) > 0) {
-				set(e2, e);
-			} else {
-				set(e1, e);
-			}
-		}
-	}
-	
-	
-	protected static void expandPortalS(Element e) {
 		temp3.setCross(e.v, e0.v);
 		if (e1.v.dot(temp3) > 0) {
 			if (e2.v.dot(temp3) > 0) {

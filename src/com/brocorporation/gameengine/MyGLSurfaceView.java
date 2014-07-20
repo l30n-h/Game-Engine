@@ -459,7 +459,7 @@ public class MyGLSurfaceView extends GameEngine {
 		// world.add(b);
 		// }
 
-		actor2 = new Actor(new Convex(a), 120);
+		actor2 = new Actor(new Convex(a), 0);
 		actor2.setPosition(0, 0, 12);
 		actor2.setGLShape(actorShape);
 		actor2.rotate(0, 45, 0);

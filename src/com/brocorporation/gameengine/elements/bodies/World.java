@@ -49,7 +49,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 //							ElasticContactSolver.addContact(plane, dynBody,
 //									c.getNormal(), c.getDistance());
 //						}
-						if(MPR.getPenetration(c,plane.getShape(),dynShape))
+						MPR.getPenetration(c,plane.getShape(),dynShape);
 						ElasticContactSolver.addContact(plane, dynBody,c.getNormal(), c.getDistance());
 					//} else {
 					//	ElasticContactSolver.addContact(plane, dynBody,
@@ -126,6 +126,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			} else {
 				SpeculativeContactSolver.addContact(dynBody1, dynBody2,
 						c.getNormal(), c.getDistance());
+				
 			}
 
 			dynBody1.onCollide(dynBody2);
