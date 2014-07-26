@@ -152,7 +152,7 @@ public class GJK {
 				break;
 			simplex.add(w);
 			d_2 = closestPointToOrigin(v, simplex);
-		}
+		}	
 		simplex.clear();
 		return true;
 	}

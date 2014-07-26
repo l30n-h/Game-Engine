@@ -56,8 +56,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 					//			c.getNormal(), c.getDistance());
 					//}
 				} else {
-					SpeculativeContactSolver.addContact(plane, dynBody,
-							c.getNormal(), c.getDistance());
+					//SpeculativeContactSolver.addContact(plane, dynBody,
+					//		c.getNormal(), c.getDistance());
 				}
 
 				stcBody.onCollide(dynBody);
@@ -124,8 +124,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 //							c.getNormal(), c.getDistance());
 //				}
 			} else {
-				SpeculativeContactSolver.addContact(dynBody1, dynBody2,
-						c.getNormal(), c.getDistance());
+				//SpeculativeContactSolver.addContact(dynBody1, dynBody2,
+				//		c.getNormal(), c.getDistance());
 				
 			}
 

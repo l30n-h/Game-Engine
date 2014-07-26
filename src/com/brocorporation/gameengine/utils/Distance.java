@@ -258,17 +258,18 @@ public class Distance {
 
 		return dist;
 	}
-
-	public static int removeFromTriangle(Vector3f A, Vector3f B, Vector3f C) {
+	static Vector3f AP = new Vector3f();
+	public static int removeFromTriangle(Vector3f P, Vector3f A, Vector3f B, Vector3f C) {
+		AP.setSubtract(P, A);
 		AB.setSubtract(B, A);
 		AC.setSubtract(C, A);
 		CB.setSubtract(B, C);
 		dir.setCross(AB, AC);
 		int front = 0;
-		if (temp.setCross(AB, dir).dot(A) < 0) {
+		if (temp.setCross(AB, dir).dot(AP) > 0) {
 			front += 1;
 		}
-		if (temp.setCross(dir, AC).dot(A) < 0) {
+		if (temp.setCross(dir, AC).dot(AP) > 0) {
 			front += 2;
 		}
 		if (temp.setCross(dir, CB).dot(B) < 0) {
@@ -281,7 +282,7 @@ public class Distance {
 		} else if (front == 2) {
 			return 2;
 		} else if (front == 3) {
-			if (A.dot(AB) < 0)
+			if (AP.dot(AB) > 0)
 				return 3;
 			return 2;
 		} else if (front == 4) {
@@ -389,7 +390,7 @@ public class Distance {
 		float t = (abac * pab - abab * pac) / denom;
 		return t >= 0 && s + t <= 1;
 	}
-
+	
 	public static boolean intersectsLineTriangle(Vector3f from, Vector3f to,
 			Vector3f normal, Vector3f A, Vector3f B, Vector3f C) {
 		dir.setSubtract(to, from);
@@ -414,9 +415,35 @@ public class Distance {
 		float t = (abac * pab - abab * pac) / denom;
 		return t >= 0 && s + t <= 1;
 	}
-	
-	public static float planeBl(Vector3f from, Vector3f to,
-			Vector3f normal, Vector3f A){
+
+	public static boolean intersectsLineTriangleGJK(Vector3f from,
+			Vector3f dir, Vector3f normal, Vector3f A, Vector3f B, Vector3f C) {
+		float r = normal.dot(dir);
+		if (r == 0) {
+			return false;
+		}
+		CB.setSubtract(A, from);
+		r = normal.dot(CB) / r;
+		if (r <= 0)
+			return false;
+		CB.setAddScaled(from, dir, r).subtract(A);
+		AB.setSubtract(B, A);
+		AC.setSubtract(C, A);
+		float abab = AB.dot(AB);
+		float acac = AC.dot(AC);
+		float abac = AB.dot(AC);
+		float pab = CB.dot(AB);
+		float pac = CB.dot(AC);
+		float denom = abac * abac - abab * acac;
+		float s = (abac * pac - acac * pab) / denom;
+		if (s < 0 || s > 1)
+			return false;
+		float t = (abac * pab - abab * pac) / denom;
+		return t >= 0 && s + t <= 1;
+	}
+
+	public static float planeBl(Vector3f from, Vector3f to, Vector3f normal,
+			Vector3f A) {
 		dir.setSubtract(to, from);
 		float r = normal.dot(dir);
 		if (r == 0) {

@@ -75,7 +75,7 @@ public class MyGLSurfaceView extends GameEngine {
 	private final List<Object> frustumList = new ArrayList<Object>();
 
 	public MyGLSurfaceView() {
-		// super(60, 80);
+		 super(40, 80);
 
 		final Vector3f p1 = new Vector3f(0, 0f, 0);
 		final Vector3f p2 = new Vector3f(1f, 1f, 1f);
