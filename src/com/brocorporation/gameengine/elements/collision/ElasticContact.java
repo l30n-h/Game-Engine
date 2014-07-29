@@ -10,7 +10,7 @@ public class ElasticContact extends Constraint {
 	protected final static Vector3f tangentFrictionImpulse = new Vector3f();
 	protected final static Vector3f rV = new Vector3f();
 
-	protected final static float percent = 0.5f;
+	protected final static float percent = 0.8f;
 	protected final static float slop = 0.05f;
 //	protected final static float percent = 1;
 //	protected final static float slop = 0.0f;

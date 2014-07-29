@@ -320,14 +320,15 @@ public class MPR {
 	protected static boolean refinePortal(IShape shape1, IShape shape2) {
 		bu.append("refine\n");
 		while (true) {
+			portalDir(dir);
 			bu.append("v1:Punkt(" + e1.v + ")\n");
 			bu.append("v2:Punkt(" + e2.v + ")\n");
 			bu.append("v3:Punkt(" + e3.v + ")\n");
-			portalDir(dir);
 			if (dir.dot(e1.v) >= 0)
 				return true;
 			maxSupport(e4, shape1, shape2, dir);
 			bu.append("v4:Punkt(" + e4.v + ")\n");
+			bu.append("d:Vektor(" + dir + ")\n\n");
 			if (dir.dot(e4.v) < 0 || portalReachTolerance(e4, dir)) {
 				return false;
 			}
@@ -372,6 +373,7 @@ public class MPR {
 	static Vector3f zero = new Vector3f();
 
 	public static StringBuilder bu = new StringBuilder();
+	static boolean out = false;
 
 	protected static void findPenetration(Contact contact, IShape shape1,
 			IShape shape2) {
@@ -421,21 +423,20 @@ public class MPR {
 			bu.append("r  dir: "+a3 + "\t" + b3 + "\t"+c3 + "\n");
 			bu.append("n  dir: "+a4 + "\t" + b4 + "\t"+c4 + "\n");
 			bu.append("xdot4 : "+a5 + "\t" + b5 + "\t"+c5 + "\n");
-			if(a1 && l != 1){
-				set(e1,e4);
-				l = 1;
-			} else if(b1&& l != 2){
-				set(e2,e4);
-				l = 2;
-			} else if(c1&& l != 3){
-				set(e3,e4);
-				l = 3;
-			}else{
-				break;
-			}
+//			if(a1 && l != 1){
+//				set(e1,e4);
+//				l = 1;
+//			} else if(b1&& l != 2){
+//				set(e2,e4);
+//				l = 2;
+//			} else if(c1&& l != 3){
+//				set(e3,e4);
+//				l = 3;
+//			}else{
+//				break;
+//			}
 			
-			
-//			expandPortal(e4);
+			expandPortal(e4);
 			iterations++;
 			bu.append("\n");
 		}
@@ -456,7 +457,6 @@ public class MPR {
 			if (d > 0.1 || iterations>5)
 				System.out.println(bu);
 		}
-		bu.setLength(0);
 	}
 	
 	static Vector3f v4v1 = new Vector3f();

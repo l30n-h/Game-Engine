@@ -30,27 +30,47 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	protected StaticLight activeLight;
 
 	final static Vector3f temp = new Vector3f();
-
 	@Override
 	public void broadphaseCollision(final DynamicBody dynBody,
 			final StaticBody stcBody, final IUpdateInfo uInfo) {
+		final Contact c = Contact.DEFAULT;
+		final IShape stcShape = stcBody.getShape();
+		final IShape dynShape = dynBody.getShape();
+		if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
+			if (c.getDistance() == 0 /*&& MPR.intersects(c, stcShape, dynShape)*/) {
+//				ElasticContactSolver.addContact(stcBody, dynBody,
+//						c.getNormal(), c.getDistance());
+				MPR.getPenetration(c,stcShape,dynShape);
+				ElasticContactSolver.addContact(stcBody, dynBody,c.getNormal(), c.getDistance());
+			}
+
+		} else {
+				SpeculativeContactSolver.addContact(stcBody, dynBody,
+						c.getNormal(), c.getDistance());
+		}
+		
+		
+		
+		
+		
+	/*	
 		if (stcBody instanceof Plane) {
 			final Plane plane = (Plane) stcBody;
 			final Vector3f n = plane.getNormal();
 			if (plane.getSide(dynBody.getPosition()) != Plane.BACK
 					&& n.dot(dynBody.getLinearVelocity()) <= 0) {
 				final IShape dynShape = dynBody.getShape();
-				final Contact c = Contact.DEFAULT;
+				//final Contact c = Contact.DEFAULT;
 				if (GJK.intersects(c, plane.getShape(), dynShape, 0f)) {
 //					if (c.getDistance() == 0) {
 //						ElasticContactSolver.addContact(plane, dynBody, n,
 //								plane.getDistance(dynShape));
-//						if (MPR.intersects(c, plane.getShape(), dynShape)) {
-//							ElasticContactSolver.addContact(plane, dynBody,
-//									c.getNormal(), c.getDistance());
-//						}
-						MPR.getPenetration(c,plane.getShape(),dynShape);
-						ElasticContactSolver.addContact(plane, dynBody,c.getNormal(), c.getDistance());
+						if (MPR.intersects(c, plane.getShape(), dynShape)) {
+							ElasticContactSolver.addContact(plane, dynBody,
+									c.getNormal(), c.getDistance());
+						}
+//						MPR.getPenetration(c,plane.getShape(),dynShape);
+//						ElasticContactSolver.addContact(plane, dynBody,c.getNormal(), c.getDistance());
 					//} else {
 					//	ElasticContactSolver.addContact(plane, dynBody,
 					//			c.getNormal(), c.getDistance());
@@ -78,7 +98,9 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			}
 			stcBody.onCollide(dynBody);
 			dynBody.onCollide(stcBody);
-		}
+		}*/
+		stcBody.onCollide(dynBody);
+		dynBody.onCollide(stcBody);
 	}
 
 	@Override
@@ -106,26 +128,17 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			final Contact c = Contact.DEFAULT;
 			final IShape dS1 = dynBody1.getShape();
 			final IShape dS2 = dynBody2.getShape();
-			if (GJK.intersects(c, dS1, dS2, 0.0f)) {
-//				if (c.getDistance() == 0) {
-//					float d = AABB.getDistance(temp, dynBody1.getShape()
-//							.getAABB(), dynBody2.getShape().getAABB());
-//					ElasticContactSolver
-//							.addContact(dynBody1, dynBody2, temp, d);
-//					 if(MPR.intersects(c, dS1, dS2)){
-//						 ElasticContactSolver.addContact(dynBody1, dynBody2,
-//								 c.getNormal(), c.getDistance());
-//					 }
-					 MPR.getPenetration(c, dS1, dS2);
-					ElasticContactSolver.addContact(dynBody1, dynBody2,
-							 c.getNormal(), c.getDistance());
-//				} else {
-//					ElasticContactSolver.addContact(dynBody1, dynBody2,
-//							c.getNormal(), c.getDistance());
-//				}
+			if (GJK.intersects(c, dS1, dS2, 0.02f)) {
+					 if(c.getDistance() == 0 && MPR.intersects(c, dS1, dS2)){
+						 ElasticContactSolver.addContact(dynBody1, dynBody2,
+								 c.getNormal(), c.getDistance());
+//						 MPR.getPenetration(c, dS1, dS2);
+//							ElasticContactSolver.addContact(dynBody1, dynBody2,
+//									 c.getNormal(), c.getDistance());
+					 }
 			} else {
-				//SpeculativeContactSolver.addContact(dynBody1, dynBody2,
-				//		c.getNormal(), c.getDistance());
+				SpeculativeContactSolver.addContact(dynBody1, dynBody2,
+						c.getNormal(), c.getDistance());
 				
 			}
 
