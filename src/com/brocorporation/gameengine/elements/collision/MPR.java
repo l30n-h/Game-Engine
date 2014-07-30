@@ -52,38 +52,6 @@ public class MPR {
 		return true;
 	}
 	
-	public static boolean getPenetration2(Contact contact, IShape shape1, IShape shape2) {
-		bu.setLength(0);
-		Vector3f[] v1 = ((Convex) shape1).getVertices();
-		Vector3f[] v2 = ((Convex) shape2).getVertices();
-		for (int i = 0; i < v1.length; i++) {
-			for (int j = 0; j < v2.length; j++) {
-				temp1.setSubtract(v1[i], v2[j]);
-				bu.append("p" + i + "" + j + ":Punkt(" + temp1.toString().replaceAll("E", "*10^")+")\n");
-			}
-		}
-		bu.append("\n\n");
-		final int res = discoverPortal(shape1, shape2);
-		if (res < 0) {
-			contact.setDistance(0);
-			contact.getNormal().set(0,0,0);
-			return false;
-		} else if (res == 1) {
-			findPenetrationTouch(contact, shape1, shape2);
-		} else if (res == 2) {
-			findPenetrationSegment(contact);
-		} else if (res == 0) {
-//			if (!refinePortal(shape1, shape2)) {
-//				contact.setDistance(0);
-//				contact.getNormal().set(0,0,0);
-//				return false;
-//			}
-//			findPenetrationS(contact, shape1, shape2);
-			findPenetration(contact,shape1,shape2);
-		}
-		return true;
-	}
-	
 	public static boolean getPenetration(Contact contact, IShape shape1, IShape shape2) {
 		bu.setLength(0);
 		Vector3f[] v1 = ((Convex) shape1).getVertices();
@@ -465,26 +433,23 @@ public class MPR {
 
 	protected static void findPenetrationS(Contact c, IShape shape1,
 			IShape shape2) {
-		int iterations = 0;
-		while (true) {
+		for(int i = 0;i<MAX_ITERATIONS;i++){
 			portalDir(dir);
 			maxSupport(e4, shape1, shape2, dir);
-			if (portalReachTolerance(e4, dir) || iterations > MAX_ITERATIONS) {
-				final Vector3f n = c.getNormal();
-				float d = Distance.distanceToTriangle(n, e1.v, e2.v, e3.v);
-				if (d <= CollideEpsilon_2) {
-					findPenetrationTouch(c, shape1, shape2);
-				} else {
-					d = (float) Math.sqrt(d);
-					c.setDistance(-d);
-					n.norm();
-					findPos(c.getPointA(), shape1, shape2, n);
-				}
-				return;
-			}
+			if (portalReachTolerance(e4, dir))break;
 			expandPortal(e4);
-			iterations++;
 		}
+		final Vector3f n = c.getNormal();
+		float d = Distance.distanceToTriangle(n, e1.v, e2.v, e3.v);
+		if (d <= CollideEpsilon_2) {
+			findPenetrationTouch(c, shape1, shape2);
+		} else {
+			d = (float) Math.sqrt(d);
+			c.setDistance(-d);
+			n.norm();
+			findPos(c.getPointA(), shape1, shape2, n);
+		}
+		return;
 	}
 
 	protected static void findPenetrationTouch(Contact c, IShape shape1,

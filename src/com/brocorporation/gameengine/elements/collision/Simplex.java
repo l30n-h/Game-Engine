@@ -63,12 +63,18 @@ public class Simplex {
 		}
 		return null;
 	}
-
-	public Element getNew() {
+	
+	public Element getNewElement() {
 		if (size < 4) {
-			return elements[size++];
+			return elements[size];
 		}
 		return null;
+	}
+	
+	public void addElement(){
+		if (size < 4) {	
+			size++;
+		}
 	}
 
 	public void swap(int a, int b) {
