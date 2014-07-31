@@ -16,8 +16,6 @@ public class GJK {
 	private final static Vector3f v0 = new Vector3f();
 	private final static Vector3f p = new Vector3f();
 	private final static Vector3f w = new Vector3f();
-	private final static Vector3f s1 = new Vector3f();
-	private final static Vector3f s2 = new Vector3f();
 	private static float s;
 	private static float t;
 	private static float lastS, lastT;
@@ -36,7 +34,6 @@ public class GJK {
 			do {
 				e = simplex.getNewElement();
 				MinkowskiDifference.getMinSupport(e, shape1, shape2, v);
-				minSupport(e.v, shape1, shape2, v);
 				if (simplex.contains(e.v)) {
 					break;
 				}
@@ -86,7 +83,6 @@ public class GJK {
 			do {
 				e = simplex.getNewElement();
 				MinkowskiDifference.getMinSupport(e, shape1, shape2, v);
-				minSupport(e.v, shape1, shape2, v);
 				if (checkIntersection) {
 					final float vw = v.dot(e.v);
 					if (vw > 0 && vw * vw > r2_2 * d_2) {
@@ -133,19 +129,21 @@ public class GJK {
 
 	public static boolean intersects(final IShape shape1, final Vector3f vertex) {
 		simplex.clear();
-		v.setSubtract(shape1.getPosition(), vertex);
-		maxSupport(v, shape1, vertex, v);
-		simplex.add(v);
+		Element e = simplex.getNewElement();
+		MinkowskiDifference.getMaxSupport(e, shape1, vertex, v);
+		simplex.addElement();
+		v.set(e.v);
 		float d_2 = v.dot(v);
 		int i = 0;
 		while (d_2 > EPSILON_2 && i++ < MAX_ITERATIONS) {
-			minSupport(w, shape1, vertex, v);
-			if (v.dot(w) > 0) {
+			e = simplex.getNewElement();
+			MinkowskiDifference.getMinSupport(e, shape1, vertex, v);
+			if (v.dot(e.v) > 0) {
 				return false;
 			}
-			if (simplex.contains(w))
+			if (simplex.contains(e.v))
 				break;
-			simplex.add(w);
+			simplex.addElement();
 			d_2 = closestPointToOrigin(v, simplex);
 		}
 		return true;
@@ -154,18 +152,21 @@ public class GJK {
 	public static boolean intersects(IShape shape1, IShape shape2) {
 		simplex.clear();
 		v.setSubtract(shape1.getPosition(), shape2.getPosition());
-		maxSupport(v, shape1, shape2, v);
-		simplex.add(v);
+		Element e = simplex.getNewElement();
+		MinkowskiDifference.getMaxSupport(e, shape1, shape2, v);
+		simplex.addElement();
+		v.set(e.v);
 		float d_2 = v.dot(v);
 		int i = 0;
 		while (d_2 > EPSILON_2 && i++ < MAX_ITERATIONS) {
-			minSupport(w, shape1, shape2, v);
-			if (v.dot(w) > 0) {
+			e = simplex.getNewElement();
+			MinkowskiDifference.getMinSupport(e, shape1, shape2, v);
+			if (v.dot(e.v) > 0) {
 				return false;
 			}
-			if (simplex.contains(w))
+			if (simplex.contains(e.v))
 				break;
-			simplex.add(w);
+			simplex.addElement();
 			d_2 = closestPointToOrigin(v, simplex);
 		}
 		return true;
@@ -220,8 +221,9 @@ public class GJK {
 				return false;
 			}
 			i++;
-			maxSupport(p, stcShape, dynShape, v);
-			w.setSubtract(x, p);
+			final Element e = simplex.getNewElement();
+			MinkowskiDifference.getMaxSupport(e, stcShape, dynShape, v);
+			w.setSubtract(x, e.v);
 			final float vdotw = v.dot(w);
 			if (vdotw > 0) {
 				final float vdotdirection = v.dot(direction);
@@ -233,8 +235,8 @@ public class GJK {
 					normal.set(v);
 				}
 			}
-			if (!simplex.contains(p))
-				simplex.add(p);
+			if (!simplex.contains(e.v))
+				simplex.addElement();
 			d_2 = closestPointToOrigin(v, simplex);
 		}
 		hit.setScalar(s);
@@ -487,34 +489,6 @@ public class GJK {
 			}
 			return closestPointToOrigin(result, simplex);
 		}
-	}
-
-	private static void maxSupport(final Vector3f result, final IShape shape1,
-			final Vector3f vertex, final Vector3f direction) {
-		shape1.getMaxAlongDirection(s1, direction);
-		s2.set(vertex);
-		result.setSubtract(s1, s2);
-	}
-
-	private static void minSupport(final Vector3f result, final IShape shape1,
-			final Vector3f vertex, final Vector3f direction) {
-		shape1.getMinAlongDirection(s1, direction);
-		s2.set(vertex);
-		result.setSubtract(s1, s2);
-	}
-
-	private static void maxSupport(final Vector3f result, final IShape shape1,
-			final IShape shape2, final Vector3f direction) {
-		shape1.getMaxAlongDirection(s1, direction);
-		shape2.getMinAlongDirection(s2, direction);
-		result.setSubtract(s1, s2);
-	}
-
-	private static void minSupport(final Vector3f result, final IShape shape1,
-			final IShape shape2, final Vector3f direction) {
-		shape1.getMinAlongDirection(s1, direction);
-		shape2.getMaxAlongDirection(s2, direction);
-		result.setSubtract(s1, s2);
 	}
 
 	public static void getClosestPoints(Contact c, Simplex simplex,

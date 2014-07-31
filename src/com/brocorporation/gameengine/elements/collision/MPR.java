@@ -1,5 +1,6 @@
 package com.brocorporation.gameengine.elements.collision;
 
+import com.brocorporation.gameengine.elements.collision.Simplex.Element;
 import com.brocorporation.gameengine.utils.Distance;
 import com.brocorporation.gameengine.utils.Vector3f;
 
@@ -31,7 +32,8 @@ public class MPR {
 		for (int i = 0; i < v1.length; i++) {
 			for (int j = 0; j < v2.length; j++) {
 				temp1.setSubtract(v1[i], v2[j]);
-				bu.append("p" + i + "" + j + ":Punkt(" + temp1.toString().replaceAll("E", "*10^")+")\n");
+				bu.append("p" + i + "" + j + ":Punkt("
+						+ temp1.toString().replaceAll("E", "*10^") + ")\n");
 			}
 		}
 		bu.append("\n\n");
@@ -51,65 +53,72 @@ public class MPR {
 		}
 		return true;
 	}
-	
-	public static boolean getPenetration(Contact contact, IShape shape1, IShape shape2) {
+
+	public static boolean getPenetration(Contact contact, IShape shape1,
+			IShape shape2) {
 		bu.setLength(0);
 		Vector3f[] v1 = ((Convex) shape1).getVertices();
 		Vector3f[] v2 = ((Convex) shape2).getVertices();
 		for (int i = 0; i < v1.length; i++) {
 			for (int j = 0; j < v2.length; j++) {
 				temp1.setSubtract(v1[i], v2[j]);
-				bu.append("p" + i + "" + j + ":Punkt(" + temp1.toString().replaceAll("E", "*10^")+")\n");
+				bu.append("p" + i + "" + j + ":Punkt("
+						+ temp1.toString().replaceAll("E", "*10^") + ")\n");
 			}
 		}
 		bu.append("\n\n");
-		
-		getOriginRayDirection(shape1,shape2);
+
+		getOriginRayDirection(shape1, shape2);
 		minSupport(e1, shape1, shape2, e0.v);
-		
+
 		temp1.setSubtract(e0.v, e1.v);
-		dir.setCross(e0.v,temp1).setCross(dir,temp1);
-		maxSupport(e2,shape1,shape2,dir);
-		
+		dir.setCross(e0.v, temp1).setCross(dir, temp1);
+		maxSupport(e2, shape1, shape2, dir);
+
 		float e2e0 = Distance.distanceToLineSegment(temp1, e2.v, e0.v);
 		float e1e0 = Distance.distanceToLineSegment(temp1, e1.v, e0.v);
 		float min = e1e0;
-		if(e2e0<e1e0){
-			bu.append("lv1:Punkt(" + e1.v.toString().replaceAll("E", "*10^")+")\t");
+		if (e2e0 < e1e0) {
+			bu.append("lv1:Punkt(" + e1.v.toString().replaceAll("E", "*10^")
+					+ ")\t");
 			bu.append("e2 nearer to e0 than e1\n");
-			set(e1,e2);
+			set(e1, e2);
 			temp1.setSubtract(e0.v, e1.v);
-			dir.setCross(e0.v,temp1).setCross(dir,temp1);
-			maxSupport(e2,shape1,shape2,dir);
-			min =e2e0;
+			dir.setCross(e0.v, temp1).setCross(dir, temp1);
+			maxSupport(e2, shape1, shape2, dir);
+			min = e2e0;
 		}
-		
+
 		temp1.setSubtract(e1.v, e2.v);
-		dir.setCross(e1.v,temp1).setCross(dir,temp1);
+		dir.setCross(e1.v, temp1).setCross(dir, temp1);
 		maxSupport(e3, shape1, shape2, dir);
 		float e3e0 = Distance.distanceToLineSegment(temp1, e3.v, e0.v);
-		if(e3e0<min){
-			set(e1,e3);
+		if (e3e0 < min) {
+			set(e1, e3);
 			temp1.setSubtract(e1.v, e2.v);
-			dir.setCross(e1.v,temp1).setCross(dir,temp1);
+			dir.setCross(e1.v, temp1).setCross(dir, temp1);
 			maxSupport(e3, shape1, shape2, dir);
 		}
-		bu.append(e1e0+"\t"+e2e0+"\t"+e3e0+"\n");
-		
-		//------------------------------------------
+		bu.append(e1e0 + "\t" + e2e0 + "\t" + e3e0 + "\n");
+
+		// ------------------------------------------
 		portalDir(dir);
 		temp3.setSubtract(e1.v, e0.v);
 		float d01 = dir.dot(temp3);
-		temp1.set(e0.v.x*(1+Math.abs(dir.x)),e0.v.y*(1+Math.abs(dir.y)),e0.v.z*(1+Math.abs(dir.z)));
+		temp1.set(e0.v.x * (1 + Math.abs(dir.x)), e0.v.y
+				* (1 + Math.abs(dir.y)), e0.v.z * (1 + Math.abs(dir.z)));
 		float d02 = -dir.dot(temp1);
 		float d00 = -dir.dot(e0.v);
-		if(d02<0){//TODO
+		if (d02 < 0) {// TODO
 			dir.invert();
 			bu.append("preinvert\n");
 		}
-		bu.append(d00+"\t"+d01+"\t"+d02+"\n");//TODO direction must be perfect; problems if v0 is almost in E123
-		//------------------------------------------
-		
+		bu.append(d00 + "\t" + d01 + "\t" + d02 + "\n");// TODO direction must
+														// be perfect; problems
+														// if v0 is almost in
+														// E123
+		// ------------------------------------------
+
 		bu.append("penetration\n");
 		int iterations = 0;
 		int l = -1;
@@ -126,102 +135,106 @@ public class MPR {
 			v4v1.setSubtract(e4.v, e1.v);
 			v4v2.setSubtract(e4.v, e2.v);
 			v4v3.setSubtract(e4.v, e3.v);
-			temp1.setCross(v4v1, v4v2);if(temp1.dot(e1.v)>0)temp1.invert();
+			temp1.setCross(v4v1, v4v2);
+			if (temp1.dot(e1.v) > 0)
+				temp1.invert();
 			int c0 = Distance.removeFromTriangle(zero, e1.v, e2.v, e4.v);
-			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e2.v);
-			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e1.v, e2.v);
+			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e1.v, e2.v);
+			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e1.v, e2.v);
 			float c3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float c4 = Distance.planeBl(zero, e0.v, temp1, e4.v);
 			float c5 = temp1.dot(dir);
 			float c6 = e3.v.dot(e4.v);
-			temp1.setCross(v4v1, v4v3);if(temp1.dot(e3.v)>0)temp1.invert();
+			temp1.setCross(v4v1, v4v3);
+			if (temp1.dot(e3.v) > 0)
+				temp1.invert();
 			int b0 = Distance.removeFromTriangle(zero, e1.v, e4.v, e3.v);
-			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e3.v);
-			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e1.v, e3.v);
+			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e1.v, e3.v);
+			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e1.v, e3.v);
 			float b3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float b4 = Distance.planeBl(zero, e0.v, temp1, e4.v);
 			float b5 = temp1.dot(dir);
 			float b6 = e2.v.dot(e4.v);
-			temp1.setCross(v4v2, v4v3);if(temp1.dot(e2.v)>0)temp1.invert();
+			temp1.setCross(v4v2, v4v3);
+			if (temp1.dot(e2.v) > 0)
+				temp1.invert();
 			int a0 = Distance.removeFromTriangle(zero, e4.v, e2.v, e3.v);
-			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e2.v, e3.v);
-			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e2.v, e3.v);
+			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e2.v, e3.v);
+			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e2.v, e3.v);
 			float a3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float a4 = Distance.planeBl(zero, e0.v, temp1, e4.v);
 			float a5 = temp1.dot(dir);
 			float a6 = e1.v.dot(e4.v);
 			temp3.setCross(e4.v, e0.v);
-			bu.append("expand: "+e1.v.dot(temp3) + "\t" + e2.v.dot(temp3) + "\t"
-					+ e3.v.dot(temp3) + "\n");
-			bu.append("vert O: "+a0+ "\t"+b0+ "\t"+c0+ "\n");
-			bu.append("sp dir: "+a1 + "\t" + b1 + "\t"+c1 + "\n");
-			bu.append("v0 dir: "+a2 + "\t" + b2 + "\t"+c2 + "\n");
-			bu.append("r  dir: "+a3 + "\t" + b3 + "\t"+c3 + "\n");
-			bu.append("r   e0: "+a4 + "\t" + b4 + "\t"+c4 + "\n");
-			bu.append("n  dir: "+a5 + "\t" + b5 + "\t"+c5 + "\n");
-			bu.append("xdot4 : "+a6 + "\t" + b6 + "\t"+c6 + "\n");
-			bu.append("last  :" + l+"\n");
-			if(a1 && l != 1){
-				set(e1,e4);
+			bu.append("expand: " + e1.v.dot(temp3) + "\t" + e2.v.dot(temp3)
+					+ "\t" + e3.v.dot(temp3) + "\n");
+			bu.append("vert O: " + a0 + "\t" + b0 + "\t" + c0 + "\n");
+			bu.append("sp dir: " + a1 + "\t" + b1 + "\t" + c1 + "\n");
+			bu.append("v0 dir: " + a2 + "\t" + b2 + "\t" + c2 + "\n");
+			bu.append("r  dir: " + a3 + "\t" + b3 + "\t" + c3 + "\n");
+			bu.append("r   e0: " + a4 + "\t" + b4 + "\t" + c4 + "\n");
+			bu.append("n  dir: " + a5 + "\t" + b5 + "\t" + c5 + "\n");
+			bu.append("xdot4 : " + a6 + "\t" + b6 + "\t" + c6 + "\n");
+			bu.append("last  :" + l + "\n");
+			if (a1 && l != 1) {
+				set(e1, e4);
 				l = 1;
-			} else if(b1&& l != 2){
-				set(e2,e4);
+			} else if (b1 && l != 2) {
+				set(e2, e4);
 				l = 2;
-			} else if(c1&& l != 3){
-				set(e3,e4);
+			} else if (c1 && l != 3) {
+				set(e3, e4);
 				l = 3;
-			}else{
+			} else {
 				break;
 			}
-			
-			
-//			expandPortal(e4);
+
+			// expandPortal(e4);
 			iterations++;
 			bu.append("\n");
-			//------------------------------------------
+			// ------------------------------------------
 			temp3.set(dir);
 			portalDir(dir);
-			
+
 			temp1.setSubtract(e0.v, e1.v);
 			float d3 = dir.dot(temp3);
 			float d2 = dir.dot(temp1);
 			float d1 = dir.dot(e1.v);
 			float d0 = -dir.dot(e0.v);
-			
-			if(d3<0){//TODO discover direction must be perfect
+
+			if (d3 < 0) {// TODO discover direction must be perfect
 				dir.invert();
 				bu.append("invert\n");
-				//break;
+				// break;
 			}
-			//------------------------------------------
-			bu.append(d0+"\t"+d1+"\t"+d2+"\t"+d3+"\n");
+			// ------------------------------------------
+			bu.append(d0 + "\t" + d1 + "\t" + d2 + "\t" + d3 + "\n");
 		}
 		final Vector3f n = contact.getNormal();
 		n.setNorm(dir);
 		float d = e1.v.dot(n);
-		if (d <= CollideEpsilon/*_2*/) {
+		if (d <= CollideEpsilon/* _2 */) {
 			findPenetrationTouch(contact, shape1, shape2);
 		} else {
-			//d = (float) Math.sqrt(d);
+			// d = (float) Math.sqrt(d);
 			contact.setDistance(-d);
-			//n.norm();
+			// n.norm();
 			findPos(contact.getPointA(), shape1, shape2, n);
 
 			bu.append("n : " + n + "\t" + d + "\n");
-			bu.append(iterations
-					+ "____________________________________\n");
-			//if(out)
-			if (d > 0.1 || iterations>5)
+			bu.append(iterations + "____________________________________\n");
+			// if(out)
+			if (d > 0.1 || iterations > 5)
 				System.out.println(bu);
 		}
 		bu.setLength(0);
 		return true;
-	}
-
-	public static class Element {
-		public Vector3f v = new Vector3f();
-		public Vector3f pA = new Vector3f();
-		public Vector3f pB = new Vector3f();
 	}
 
 	static Element e0 = new Element();
@@ -231,8 +244,8 @@ public class MPR {
 	static Element e4 = new Element();
 
 	static Vector3f dir = new Vector3f();
-	
-	protected static void getOriginRayDirection(IShape shape1, IShape shape2){
+
+	protected static void getOriginRayDirection(IShape shape1, IShape shape2) {
 		e0.v.setSubtract(e0.pA.set(shape1.getPosition()),
 				e0.pB.set(shape2.getPosition()));
 		bu.append("discover\n");
@@ -243,7 +256,7 @@ public class MPR {
 	}
 
 	protected static byte discoverPortal(IShape shape1, IShape shape2) {
-		getOriginRayDirection(shape1,shape2);
+		getOriginRayDirection(shape1, shape2);
 		minSupport(e1, shape1, shape2, e0.v);
 		if (e1.v.dot(e0.v) >= 0)
 			return -1;
@@ -300,40 +313,52 @@ public class MPR {
 			if (dir.dot(e4.v) < 0 || portalReachTolerance(e4, dir)) {
 				return false;
 			}
-			//-------------------------------------------------------------------------------------
+			// -------------------------------------------------------------------------------------
 			v4v1.setSubtract(e4.v, e1.v);
 			v4v2.setSubtract(e4.v, e2.v);
 			v4v3.setSubtract(e4.v, e3.v);
 			temp1.setCross(v4v1, v4v2);
-			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e2.v);
-			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e1.v, e2.v);
+			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e1.v, e2.v);
+			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e1.v, e2.v);
 			float c3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float c4 = temp1.dot(dir);
 			float c5 = e3.v.dot(e4.v);
 			temp1.setCross(v4v1, v4v3);
-			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e3.v);
-			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e1.v, e3.v);
+			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e1.v, e3.v);
+			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e1.v, e3.v);
 			float b3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float b4 = temp1.dot(dir);
 			float b5 = e2.v.dot(e4.v);
 			temp1.setCross(v4v2, v4v3);
-			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e2.v, e3.v);
-			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e2.v, e3.v);
+			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e2.v, e3.v);
+			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e2.v, e3.v);
 			float a3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float a4 = temp1.dot(dir);
 			float a5 = e1.v.dot(e4.v);
-			bu.append("vert O: "+Distance.removeFromTriangle(zero, e4.v, e2.v, e3.v)+ "\t"+Distance.removeFromTriangle(zero, e1.v, e4.v, e3.v)+ "\t"+Distance.removeFromTriangle(zero, e1.v, e2.v, e4.v)+ "\t" + "\n");
-			bu.append("sp dir: "+a1 + "\t" + b1 + "\t"+c1 + "\n");
-			bu.append("v0 dir: "+a2 + "\t" + b2 + "\t"+c2 + "\n");
-			bu.append("r  dir: "+a3 + "\t" + b3 + "\t"+c3 + "\n");
-			bu.append("n  dir: "+a4 + "\t" + b4 + "\t"+c4 + "\n");
-			bu.append("xdot4 : "+a5 + "\t" + b5 + "\t"+c5 + "\n");
-			
+			bu.append("vert O: "
+					+ Distance.removeFromTriangle(zero, e4.v, e2.v, e3.v)
+					+ "\t"
+					+ Distance.removeFromTriangle(zero, e1.v, e4.v, e3.v)
+					+ "\t"
+					+ Distance.removeFromTriangle(zero, e1.v, e2.v, e4.v)
+					+ "\t" + "\n");
+			bu.append("sp dir: " + a1 + "\t" + b1 + "\t" + c1 + "\n");
+			bu.append("v0 dir: " + a2 + "\t" + b2 + "\t" + c2 + "\n");
+			bu.append("r  dir: " + a3 + "\t" + b3 + "\t" + c3 + "\n");
+			bu.append("n  dir: " + a4 + "\t" + b4 + "\t" + c4 + "\n");
+			bu.append("xdot4 : " + a5 + "\t" + b5 + "\t" + c5 + "\n");
+
 			temp3.setCross(e4.v, e0.v);
-			bu.append("expand: "+e1.v.dot(temp3) + "\t" + e2.v.dot(temp3) + "\t"
-					+ e3.v.dot(temp3) + "\n");
-			
-			//-------------------------------------------------------------------------------------
+			bu.append("expand: " + e1.v.dot(temp3) + "\t" + e2.v.dot(temp3)
+					+ "\t" + e3.v.dot(temp3) + "\n");
+
+			// -------------------------------------------------------------------------------------
 			expandPortal(e4);
 		}
 	}
@@ -360,50 +385,61 @@ public class MPR {
 				break;
 			}
 			temp3.setCross(e4.v, e0.v);
-			bu.append("expand: "+e1.v.dot(temp3) + "\t" + e2.v.dot(temp3) + "\t"
-					+ e3.v.dot(temp3) + "\n");
-			
-			
+			bu.append("expand: " + e1.v.dot(temp3) + "\t" + e2.v.dot(temp3)
+					+ "\t" + e3.v.dot(temp3) + "\n");
+
 			v4v1.setSubtract(e4.v, e1.v);
 			v4v2.setSubtract(e4.v, e2.v);
 			v4v3.setSubtract(e4.v, e3.v);
 			temp1.setCross(v4v1, v4v2);
-			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e2.v);
-			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e1.v, e2.v);
+			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e1.v, e2.v);
+			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e1.v, e2.v);
 			float c3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float c4 = temp1.dot(dir);
 			float c5 = e3.v.dot(e4.v);
 			temp1.setCross(v4v1, v4v3);
-			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e1.v, e3.v);
-			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e1.v, e3.v);
+			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e1.v, e3.v);
+			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e1.v, e3.v);
 			float b3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float b4 = temp1.dot(dir);
 			float b5 = e2.v.dot(e4.v);
 			temp1.setCross(v4v2, v4v3);
-			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1, e4.v, e2.v, e3.v);
-			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1, e4.v, e2.v, e3.v);
+			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1,
+					e4.v, e2.v, e3.v);
+			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
+					e4.v, e2.v, e3.v);
 			float a3 = Distance.planeBl(zero, dir, temp1, e4.v);
 			float a4 = temp1.dot(dir);
 			float a5 = e1.v.dot(e4.v);
-			bu.append("vert O: "+Distance.removeFromTriangle(zero, e4.v, e2.v, e3.v)+ "\t"+Distance.removeFromTriangle(zero, e1.v, e4.v, e3.v)+ "\t"+Distance.removeFromTriangle(zero, e1.v, e2.v, e4.v)+ "\t" + "\n");
-			bu.append("sp dir: "+a1 + "\t" + b1 + "\t"+c1 + "\n");
-			bu.append("v0 dir: "+a2 + "\t" + b2 + "\t"+c2 + "\n");
-			bu.append("r  dir: "+a3 + "\t" + b3 + "\t"+c3 + "\n");
-			bu.append("n  dir: "+a4 + "\t" + b4 + "\t"+c4 + "\n");
-			bu.append("xdot4 : "+a5 + "\t" + b5 + "\t"+c5 + "\n");
-//			if(a1 && l != 1){
-//				set(e1,e4);
-//				l = 1;
-//			} else if(b1&& l != 2){
-//				set(e2,e4);
-//				l = 2;
-//			} else if(c1&& l != 3){
-//				set(e3,e4);
-//				l = 3;
-//			}else{
-//				break;
-//			}
-			
+			bu.append("vert O: "
+					+ Distance.removeFromTriangle(zero, e4.v, e2.v, e3.v)
+					+ "\t"
+					+ Distance.removeFromTriangle(zero, e1.v, e4.v, e3.v)
+					+ "\t"
+					+ Distance.removeFromTriangle(zero, e1.v, e2.v, e4.v)
+					+ "\t" + "\n");
+			bu.append("sp dir: " + a1 + "\t" + b1 + "\t" + c1 + "\n");
+			bu.append("v0 dir: " + a2 + "\t" + b2 + "\t" + c2 + "\n");
+			bu.append("r  dir: " + a3 + "\t" + b3 + "\t" + c3 + "\n");
+			bu.append("n  dir: " + a4 + "\t" + b4 + "\t" + c4 + "\n");
+			bu.append("xdot4 : " + a5 + "\t" + b5 + "\t" + c5 + "\n");
+			// if(a1 && l != 1){
+			// set(e1,e4);
+			// l = 1;
+			// } else if(b1&& l != 2){
+			// set(e2,e4);
+			// l = 2;
+			// } else if(c1&& l != 3){
+			// set(e3,e4);
+			// l = 3;
+			// }else{
+			// break;
+			// }
+
 			expandPortal(e4);
 			iterations++;
 			bu.append("\n");
@@ -411,32 +447,32 @@ public class MPR {
 		final Vector3f n = contact.getNormal();
 		n.setNorm(dir);
 		float d = e1.v.dot(n);
-		if (d <= CollideEpsilon/*_2*/) {
+		if (d <= CollideEpsilon/* _2 */) {
 			findPenetrationTouch(contact, shape1, shape2);
 		} else {
-			//d = (float) Math.sqrt(d);
+			// d = (float) Math.sqrt(d);
 			contact.setDistance(-d);
-			//n.norm();
+			// n.norm();
 			findPos(contact.getPointA(), shape1, shape2, n);
 
 			bu.append("n : " + n + "\t" + d + "\n");
-			bu.append(iterations
-					+ "____________________________________\n");
-			if (d > 0.1 || iterations>5)
+			bu.append(iterations + "____________________________________\n");
+			if (d > 0.1 || iterations > 5)
 				System.out.println(bu);
 		}
 	}
-	
+
 	static Vector3f v4v1 = new Vector3f();
 	static Vector3f v4v2 = new Vector3f();
 	static Vector3f v4v3 = new Vector3f();
 
 	protected static void findPenetrationS(Contact c, IShape shape1,
 			IShape shape2) {
-		for(int i = 0;i<MAX_ITERATIONS;i++){
+		for (int i = 0; i < MAX_ITERATIONS; i++) {
 			portalDir(dir);
 			maxSupport(e4, shape1, shape2, dir);
-			if (portalReachTolerance(e4, dir))break;
+			if (portalReachTolerance(e4, dir))
+				break;
 			expandPortal(e4);
 		}
 		final Vector3f n = c.getNormal();
@@ -501,7 +537,7 @@ public class MPR {
 							* invHalfSum);
 		}
 	}
-	
+
 	protected static void expandPortal(Element e) {
 		temp3.setCross(e.v, e0.v);
 		if (e1.v.dot(temp3) > 0) {

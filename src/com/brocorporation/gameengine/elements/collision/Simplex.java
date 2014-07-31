@@ -26,16 +26,6 @@ public class Simplex {
 		}
 	}
 
-	public void add(Vector3f v, Vector3f s1, Vector3f s2) {
-		if (size < 4) {
-			final Element e = elements[size];
-			e.v.set(v);
-			e.pA.set(s1);
-			e.pB.set(s2);
-			size++;
-		}
-	}
-
 	public boolean contains(Vector3f v) {
 		for (int i = 0; i < size; i++) {
 			if (elements[i].v.equals(v)) {
@@ -63,16 +53,16 @@ public class Simplex {
 		}
 		return null;
 	}
-	
+
 	public Element getNewElement() {
 		if (size < 4) {
 			return elements[size];
 		}
 		return null;
 	}
-	
-	public void addElement(){
-		if (size < 4) {	
+
+	public void addElement() {
+		if (size < 4) {
 			size++;
 		}
 	}
@@ -118,7 +108,7 @@ public class Simplex {
 		ref = null;
 	}
 
-	public class Element {
+	public static class Element {
 		public Vector3f v = new Vector3f();
 		public Vector3f ref = new Vector3f();
 		public Vector3f pA = new Vector3f();
@@ -138,6 +128,13 @@ public class Simplex {
 
 		public Vector3f getRef() {
 			return ref;
+		}
+		
+		public void set(Element e){
+			v.set(e.v);
+			ref.set(e.ref);
+			pA.set(e.pA);
+			pB.set(e.pB);
 		}
 	}
 }
