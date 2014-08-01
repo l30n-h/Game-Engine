@@ -126,7 +126,7 @@ public class GJK {
 			return false;
 		}
 	}
-
+	
 	public static boolean intersects(final IShape shape1, final Vector3f vertex) {
 		simplex.clear();
 		Element e = simplex.getNewElement();

@@ -36,7 +36,7 @@ public class Simplex {
 	}
 
 	public Vector3f getV(int i) {
-		if (0 <= i && i < size) {
+		if (0 <= i && i < 4) {
 			if (ref == null) {
 				return elements[i].v;
 			} else {
@@ -48,7 +48,7 @@ public class Simplex {
 	}
 
 	public Element get(int i) {
-		if (0 <= i && i < size) {
+		if (0 <= i && i < 4) {
 			return elements[i];
 		}
 		return null;
@@ -68,7 +68,7 @@ public class Simplex {
 	}
 
 	public void swap(int a, int b) {
-		if (a < size && b < size && a >= 0 && b >= 0) {
+		if (a < 4 && b < 4 && a >= 0 && b >= 0) {
 			final Element e = elements[a];
 			elements[a] = elements[b];
 			elements[b] = e;
@@ -129,8 +129,8 @@ public class Simplex {
 		public Vector3f getRef() {
 			return ref;
 		}
-		
-		public void set(Element e){
+
+		public void set(Element e) {
 			v.set(e.v);
 			ref.set(e.ref);
 			pA.set(e.pA);

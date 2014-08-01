@@ -37,10 +37,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		final IShape stcShape = stcBody.getShape();
 		final IShape dynShape = dynBody.getShape();
 		if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
-			if (c.getDistance() == 0 /*&& MPR.intersects(c, stcShape, dynShape)*/) {
-//				ElasticContactSolver.addContact(stcBody, dynBody,
-//						c.getNormal(), c.getDistance());
-				MPR.getPenetration(c,stcShape,dynShape);
+			if (c.getDistance() == 0 && MPR.intersects(c, stcShape, dynShape)) {
+//				MPR.getPenetration(c,stcShape,dynShape);
 				ElasticContactSolver.addContact(stcBody, dynBody,c.getNormal(), c.getDistance());
 			}
 
