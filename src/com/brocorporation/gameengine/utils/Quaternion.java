@@ -2,8 +2,8 @@ package com.brocorporation.gameengine.utils;
 
 public class Quaternion extends Vector4f {
 
-	public final static float PIOVER180 = (float) Math.PI / 180F;
-	public final static float PIOVER360 = (float) Math.PI / 360F;
+	public final static float PIOVER180 = (float) Math.PI / 180;
+	public final static float PIOVER360 = (float) Math.PI / 360;
 
 	public Quaternion() {
 		super(0, 0, 0, 1);
@@ -75,8 +75,8 @@ public class Quaternion extends Vector4f {
 		final float sq = wx * wx + wy * wy + wz * wz;
 		float qw;
 		float s;
-		if (sq < 0.6F) {
-			qw = 1.0f - sq * 0.125f;
+		if (sq < 0.6f) {
+			qw = 1 - sq * 0.125f;
 			s = 0.5f - sq * 0.02083333333f;
 		} else {
 			final float thetaMag = (float) Math.sqrt(sq);
@@ -202,15 +202,15 @@ public class Quaternion extends Vector4f {
 		final float wy = w * y;
 		final float wz = w * z;
 
-		final float l0 = 1F - 2F * (y2 + z2);
-		final float l1 = 2F * (xy + wz);
-		final float l2 = 2F * (xz - wy);
-		final float l4 = 2F * (xy - wz);
-		final float l5 = 1F - 2F * (x2 + z2);
-		final float l6 = 2F * (yz + wx);
-		final float l8 = 2F * (xz + wy);
-		final float l9 = 2F * (yz - wx);
-		final float l10 = 1F - 2F * (x2 + y2);
+		final float l0 = 1 - 2 * (y2 + z2);
+		final float l1 = 2 * (xy + wz);
+		final float l2 = 2 * (xz - wy);
+		final float l4 = 2 * (xy - wz);
+		final float l5 = 1 - 2 * (x2 + z2);
+		final float l6 = 2 * (yz + wx);
+		final float l8 = 2 * (xz + wy);
+		final float l9 = 2 * (yz - wx);
+		final float l10 = 1 - 2 * (x2 + y2);
 		final float r0 = rhs[rhsOffset];
 		final float r1 = rhs[rhsOffset + 1];
 		final float r2 = rhs[rhsOffset + 2];
@@ -253,15 +253,15 @@ public class Quaternion extends Vector4f {
 		final float wy = w * y;
 		final float wz = w * z;
 
-		final float r0 = 1F - 2F * (y2 + z2);
-		final float r1 = 2F * (xy + wz);
-		final float r2 = 2F * (xz - wy);
-		final float r4 = 2F * (xy - wz);
-		final float r5 = 1F - 2F * (x2 + z2);
-		final float r6 = 2F * (yz + wx);
-		final float r8 = 2F * (xz + wy);
-		final float r9 = 2F * (yz - wx);
-		final float r10 = 1F - 2F * (x2 + y2);
+		final float r0 = 1 - 2 * (y2 + z2);
+		final float r1 = 2 * (xy + wz);
+		final float r2 = 2 * (xz - wy);
+		final float r4 = 2 * (xy - wz);
+		final float r5 = 1 - 2 * (x2 + z2);
+		final float r6 = 2 * (yz + wx);
+		final float r8 = 2 * (xz + wy);
+		final float r9 = 2 * (yz - wx);
+		final float r10 = 1 - 2 * (x2 + y2);
 		final float l0 = lhs[lhsOffset];
 		final float l1 = lhs[lhsOffset + 1];
 		final float l2 = lhs[lhsOffset + 2];
@@ -303,17 +303,17 @@ public class Quaternion extends Vector4f {
 		final float wy = w * y;
 		final float wz = w * z;
 
-		result[0] = 1F - 2F * (y2 + z2);
-		result[1] = 2F * (xy + wz);
-		result[2] = 2F * (xz - wy);
+		result[0] = 1 - 2 * (y2 + z2);
+		result[1] = 2 * (xy + wz);
+		result[2] = 2 * (xz - wy);
 		result[3] = 0;
-		result[4] = 2F * (xy - wz);
-		result[5] = 1F - 2F * (x2 + z2);
-		result[6] = 2F * (yz + wx);
+		result[4] = 2 * (xy - wz);
+		result[5] = 1 - 2 * (x2 + z2);
+		result[6] = 2 * (yz + wx);
 		result[7] = 0;
-		result[8] = 2F * (xz + wy);
-		result[9] = 2F * (yz - wx);
-		result[10] = 1F - 2F * (x2 + y2);
+		result[8] = 2 * (xz + wy);
+		result[9] = 2 * (yz - wx);
+		result[10] = 1 - 2 * (x2 + y2);
 		result[11] = 0;
 		result[12] = 0;
 		result[13] = 0;

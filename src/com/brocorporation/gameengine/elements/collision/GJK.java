@@ -16,9 +16,7 @@ public class GJK {
 	private final static Vector3f v0 = new Vector3f();
 	private final static Vector3f p = new Vector3f();
 	private final static Vector3f w = new Vector3f();
-	private static float s;
-	private static float t;
-	private static float lastS, lastT;
+	private static float s, t, lastS, lastT;
 
 	public static float distance(Contact contact, IShape shape1, IShape shape2) {
 		simplex.clear();
@@ -126,7 +124,7 @@ public class GJK {
 			return false;
 		}
 	}
-	
+
 	public static boolean intersects(final IShape shape1, final Vector3f vertex) {
 		simplex.clear();
 		Element e = simplex.getNewElement();

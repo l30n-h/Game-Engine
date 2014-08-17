@@ -17,7 +17,6 @@ import com.brocorporation.gameengine.elements.collision.Octree;
 import com.brocorporation.gameengine.elements.collision.RaycastHit;
 import com.brocorporation.gameengine.elements.collision.SpeculativeContactSolver;
 import com.brocorporation.gameengine.elements.collision.Tree;
-import com.brocorporation.gameengine.utils.Vector3f;
 
 public class World implements CollisionDetection.BroadphaseCallback {
 
@@ -29,74 +28,30 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	protected Camera activeCamera;
 	protected StaticLight activeLight;
 
-	final static Vector3f temp = new Vector3f();
 	@Override
 	public void broadphaseCollision(final DynamicBody dynBody,
 			final StaticBody stcBody, final IUpdateInfo uInfo) {
 		final Contact c = Contact.DEFAULT;
 		final IShape stcShape = stcBody.getShape();
 		final IShape dynShape = dynBody.getShape();
+		// check relVel running into each other
 		if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
-			if (c.getDistance() == 0 && MPR.intersects(c, stcShape, dynShape)) {
-//				MPR.getPenetration(c,stcShape,dynShape);
-				ElasticContactSolver.addContact(stcBody, dynBody,c.getNormal(), c.getDistance());
-			}
-
-		} else {
-				SpeculativeContactSolver.addContact(stcBody, dynBody,
-						c.getNormal(), c.getDistance());
-		}
-		
-		
-		
-		
-		
-	/*	
-		if (stcBody instanceof Plane) {
-			final Plane plane = (Plane) stcBody;
-			final Vector3f n = plane.getNormal();
-			if (plane.getSide(dynBody.getPosition()) != Plane.BACK
-					&& n.dot(dynBody.getLinearVelocity()) <= 0) {
-				final IShape dynShape = dynBody.getShape();
-				//final Contact c = Contact.DEFAULT;
-				if (GJK.intersects(c, plane.getShape(), dynShape, 0f)) {
-//					if (c.getDistance() == 0) {
-//						ElasticContactSolver.addContact(plane, dynBody, n,
-//								plane.getDistance(dynShape));
-						if (MPR.intersects(c, plane.getShape(), dynShape)) {
-							ElasticContactSolver.addContact(plane, dynBody,
-									c.getNormal(), c.getDistance());
-						}
-//						MPR.getPenetration(c,plane.getShape(),dynShape);
-//						ElasticContactSolver.addContact(plane, dynBody,c.getNormal(), c.getDistance());
-					//} else {
-					//	ElasticContactSolver.addContact(plane, dynBody,
-					//			c.getNormal(), c.getDistance());
-					//}
-				} else {
-					//SpeculativeContactSolver.addContact(plane, dynBody,
-					//		c.getNormal(), c.getDistance());
+			if (c.getDistance() == 0) {
+				if (MPR.intersects(c, stcShape, dynShape)) {
+					if(c.getDistance()<-1)uInfo.pause();
+					// MPR.getPenetration(c,stcShape,dynShape);
+					ElasticContactSolver.addContact(stcBody, dynBody,
+							c.getNormal(), c.getDistance());
+					
 				}
-
-				stcBody.onCollide(dynBody);
-				dynBody.onCollide(stcBody);
+			} else {
+				ElasticContactSolver.addContact(stcBody, dynBody,
+						c.getNormal(), c.getDistance());
 			}
 		} else {
-			final IShape dynShape = dynBody.getShape();
-			final IShape stcShape = stcBody.getShape();
-			final Contact c = Contact.DEFAULT;
-			float d = GJK.distance(c, stcShape, dynShape);
-			if (d > 0) {
-				SpeculativeContactSolver.addContact(stcBody, dynBody,
-						c.getNormal(), d);
-			} else {
-				d = AABB.getDistance(temp, stcShape.getAABB(),
-						dynShape.getAABB());
-				ElasticContactSolver.addContact(stcBody, dynBody, temp, d);
-			}
-			stcBody.onCollide(dynBody);
-			dynBody.onCollide(stcBody);
-		}*/
+			SpeculativeContactSolver.addContact(stcBody, dynBody,
+					c.getNormal(), c.getDistance());
+		}
 		stcBody.onCollide(dynBody);
 		dynBody.onCollide(stcBody);
 	}
@@ -127,19 +82,20 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			final IShape dS1 = dynBody1.getShape();
 			final IShape dS2 = dynBody2.getShape();
 			if (GJK.intersects(c, dS1, dS2, 0.02f)) {
-					 if(c.getDistance() == 0 && MPR.intersects(c, dS1, dS2)){
-						 ElasticContactSolver.addContact(dynBody1, dynBody2,
-								 c.getNormal(), c.getDistance());
-//						 MPR.getPenetration(c, dS1, dS2);
-//							ElasticContactSolver.addContact(dynBody1, dynBody2,
-//									 c.getNormal(), c.getDistance());
-					 }
+				if (c.getDistance() == 0) {
+					if (MPR.intersects(c, dS1, dS2)) {
+						// MPR.getPenetration(c, dS1, dS2);
+						ElasticContactSolver.addContact(dynBody1, dynBody2,
+								c.getNormal(), c.getDistance());
+					}
+				} else {
+					ElasticContactSolver.addContact(dynBody1, dynBody2,
+							c.getNormal(), c.getDistance());
+				}
 			} else {
 				SpeculativeContactSolver.addContact(dynBody1, dynBody2,
 						c.getNormal(), c.getDistance());
-				
 			}
-
 			dynBody1.onCollide(dynBody2);
 			dynBody2.onCollide(dynBody1);
 		}

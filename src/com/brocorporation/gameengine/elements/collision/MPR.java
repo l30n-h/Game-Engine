@@ -16,8 +16,8 @@ public class MPR {
 	protected final static Vector3f temp3 = new Vector3f();
 	protected final static Simplex simplex = new Simplex();
 	protected final static Element e0 = new Element();
-	
-	static Element e1,e2,e3,e4;
+
+	static Element e1, e2, e3, e4;
 
 	static Vector3f dir = new Vector3f();
 
@@ -33,7 +33,8 @@ public class MPR {
 
 	public static boolean intersects(Contact contact, IShape shape1,
 			IShape shape2) {
-		bu.setLength(0);out = false;
+		bu.setLength(0);
+		out = false;
 		Vector3f[] v1 = ((Convex) shape1).getVertices();
 		Vector3f[] v2 = ((Convex) shape2).getVertices();
 		for (int i = 0; i < v1.length; i++) {
@@ -61,8 +62,8 @@ public class MPR {
 		}
 		return true;
 	}
-	
-	public static void initElementsFromSimplex(Simplex s){
+
+	public static void initElementsFromSimplex(Simplex s) {
 		e1 = s.get(0);
 		e2 = s.get(1);
 		e3 = s.get(2);
@@ -71,7 +72,8 @@ public class MPR {
 
 	public static boolean getPenetration(Contact contact, IShape shape1,
 			IShape shape2) {
-		bu.setLength(0);out = false;
+		bu.setLength(0);
+		out = false;
 		Vector3f[] v1 = ((Convex) shape1).getVertices();
 		Vector3f[] v2 = ((Convex) shape2).getVertices();
 		for (int i = 0; i < v1.length; i++) {
@@ -367,9 +369,9 @@ public class MPR {
 			temp3.setCross(e4.v, e0.v);
 			bu.append("expand: " + e1.v.dot(temp3) + "\t" + e2.v.dot(temp3)
 					+ "\t" + e3.v.dot(temp3) + "\n");
-			bu.append("expand_2: " + e1.v.dot(temp3)/temp3.dot(temp3) + "\t" + e2.v.dot(temp3)/temp3.dot(temp3)
-					+ "\t" + e3.v.dot(temp3)/temp3.dot(temp3) + "\n");
-
+			bu.append("expand_2: " + e1.v.dot(temp3) / temp3.dot(temp3) + "\t"
+					+ e2.v.dot(temp3) / temp3.dot(temp3) + "\t"
+					+ e3.v.dot(temp3) / temp3.dot(temp3) + "\n");
 			// -------------------------------------------------------------------------------------
 			expandPortal(e4);
 		}
@@ -444,9 +446,10 @@ public class MPR {
 			temp3.setCross(e4.v, e0.v);
 			bu.append("expand: " + e1.v.dot(temp3) + "\t" + e2.v.dot(temp3)
 					+ "\t" + e3.v.dot(temp3) + "\n");
-			bu.append("expand_2: " + e1.v.dot(temp3)/temp3.dot(temp3) + "\t" + e2.v.dot(temp3)/temp3.dot(temp3)
-					+ "\t" + e3.v.dot(temp3)/temp3.dot(temp3) + "\n");
-			
+			bu.append("expand_2: " + e1.v.dot(temp3) / temp3.dot(temp3) + "\t"
+					+ e2.v.dot(temp3) / temp3.dot(temp3) + "\t"
+					+ e3.v.dot(temp3) / temp3.dot(temp3) + "\n");
+
 			// -------------------------------------------------------------------------------------
 			// if(a1 && l != 1){
 			// set(e1,e4);
@@ -460,8 +463,8 @@ public class MPR {
 			// }else{
 			// break;
 			// }
-
 			expandPortal(e4);
+
 			iterations++;
 			bu.append("\n");
 		}
@@ -478,7 +481,7 @@ public class MPR {
 
 			bu.append("n : " + n + "\t" + d + "\n");
 			bu.append(iterations + "____________________________________\n");
-			//if(out)
+			// if(out)
 			if (d > 0.1 || iterations > 5)
 				System.out.println(bu);
 		}
