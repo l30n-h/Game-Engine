@@ -38,11 +38,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
 			if (c.getDistance() == 0) {
 				if (MPR.intersects(c, stcShape, dynShape)) {
-					if(c.getDistance()<-1)uInfo.pause();
-					// MPR.getPenetration(c,stcShape,dynShape);
 					ElasticContactSolver.addContact(stcBody, dynBody,
 							c.getNormal(), c.getDistance());
-					
 				}
 			} else {
 				ElasticContactSolver.addContact(stcBody, dynBody,
@@ -84,7 +81,6 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			if (GJK.intersects(c, dS1, dS2, 0.02f)) {
 				if (c.getDistance() == 0) {
 					if (MPR.intersects(c, dS1, dS2)) {
-						// MPR.getPenetration(c, dS1, dS2);
 						ElasticContactSolver.addContact(dynBody1, dynBody2,
 								c.getNormal(), c.getDistance());
 					}

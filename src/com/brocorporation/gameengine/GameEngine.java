@@ -51,7 +51,7 @@ public abstract class GameEngine implements IUpdateInfo {
 			}
 			final long lastTime = startTime;
 			startTime = System.nanoTime();
-			setRate((float) ((startTime - lastTime) * (1E-9)));
+			setRate((float) ((startTime - lastTime) * 1E-9));
 			update(this);
 			render();
 			Display.update();

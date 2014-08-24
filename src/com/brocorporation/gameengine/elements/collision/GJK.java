@@ -1,6 +1,7 @@
 package com.brocorporation.gameengine.elements.collision;
 
 import com.brocorporation.gameengine.elements.collision.Simplex.Element;
+import com.brocorporation.gameengine.utils.Distance;
 import com.brocorporation.gameengine.utils.Vector3f;
 
 public class GJK {
@@ -39,7 +40,7 @@ public class GJK {
 				v0.set(v);
 				d0_2 = d_2;
 				d_2 = closestPointToOrigin(v, simplex);
-				if (d_2 >= d0_2) {
+				if (d_2 >= d0_2 || Float.isNaN(d_2)) {
 					v.set(v0);
 					d_2 = d0_2;
 					break;
@@ -94,7 +95,7 @@ public class GJK {
 				v0.set(v);
 				d0_2 = d_2;
 				d_2 = closestPointToOrigin(v, simplex);
-				if (d_2 >= d0_2) {
+				if (d_2 >= d0_2 || Float.isNaN(d_2)) {
 					v.set(v0);
 					d_2 = d0_2;
 					break;
@@ -113,12 +114,20 @@ public class GJK {
 			return true;
 		}
 		getClosestPoints(contact, simplex, v);
-		d_2 = (float) Math.sqrt(d_2);
 		if (checkIntersection) {
-			contact.setDistance(-(r2 - d_2));
-			contact.getNormal().setScale(v, -1 / d_2);
+			if (simplex.size() == 3) {
+				contact.setDistance(-(r2 - (float) Math.sqrt(Distance
+						.distanceToPlane(v, simplex.getV(2), simplex.getV(1),
+								simplex.getV(0)))));
+				contact.getNormal().setInvert(v).norm();
+			} else {
+				d_2 = (float) Math.sqrt(d_2);
+				contact.setDistance(-(r2 - d_2));
+				contact.getNormal().setScale(v, -1 / d_2);
+			}
 			return true;
 		} else {
+			d_2 = (float) Math.sqrt(d_2);
 			contact.setDistance(d_2);
 			contact.getNormal().setScale(v, -1 / d_2);
 			return false;
@@ -275,6 +284,8 @@ public class GJK {
 		final float aab = A.dot(AB);
 		final float aac = A.dot(AC);
 		final float det = Math.abs(abab * acac - abac * abac);
+		if (det == 0)
+			return Float.NaN;
 		s = abac * aac - acac * aab;
 		t = abac * aab - abab * aac;
 		if (s + t <= det) {
@@ -326,7 +337,6 @@ public class GJK {
 				} else {
 					s = -aab / abab;
 					result.setAddScaled(A, AB, s);
-
 				}
 			} else {
 				float invDet = 1 / det;
