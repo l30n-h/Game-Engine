@@ -33,18 +33,20 @@ public class MPR {
 
 	public static boolean intersects(Contact contact, IShape shape1,
 			IShape shape2) {
-		bu.setLength(0);
-		out = false;
-		Vector3f[] v1 = ((Convex) shape1).getVertices();
-		Vector3f[] v2 = ((Convex) shape2).getVertices();
-		for (int i = 0; i < v1.length; i++) {
-			for (int j = 0; j < v2.length; j++) {
-				temp1.setSubtract(v1[i], v2[j]);
-				bu.append("p" + i + "" + j + ":Punkt("
-						+ temp1.toString().replaceAll("E", "*10^") + ")\n");
+		if (debug) {
+			out = false;
+			bu.setLength(0);
+			Vector3f[] v1 = ((Convex) shape1).getVertices();
+			Vector3f[] v2 = ((Convex) shape2).getVertices();
+			for (int i = 0; i < v1.length; i++) {
+				for (int j = 0; j < v2.length; j++) {
+					temp1.setSubtract(v1[i], v2[j]);
+					bu.append("p" + i + "" + j + ":Punkt("
+							+ temp1.toString().replaceAll("E", "*10^") + ")\n");
+				}
 			}
+			bu.append("\n\n");
 		}
-		bu.append("\n\n");
 		initElementsFromSimplex(simplex);
 		final int res = discoverPortal(shape1, shape2);
 		if (res < 0) {
@@ -71,12 +73,15 @@ public class MPR {
 	}
 
 	protected static void getOriginRayDirection(IShape shape1, IShape shape2) {
-		e0.v.setSubtract(e0.pA.set(shape1.getPosition()),
-				e0.pB.set(shape2.getPosition()));
-		bu.append("discover\n");
-		bu.append("v0:Punkt(" + e0.v + ")\n");
+		// e0.v.setSubtract(e0.pA.set(shape1.getPosition()),
+		// e0.pB.set(shape2.getPosition()));
+		AABB.getDistance(e0.v, shape2.getAABB(), shape1.getAABB());
 		if (e0.v.isZero()) {
 			e0.v.set(0.00001f, 0, 0);
+		}
+		if (debug) {
+			bu.append("discover\n");
+			bu.append("v0:Punkt(" + e0.v + ")\n");
 		}
 	}
 
@@ -100,14 +105,17 @@ public class MPR {
 			e1 = e2;
 			e2 = e;
 			dir.invert();
-			bu.append("swap 1<->2\n");
+			if (debug)
+				bu.append("swap 1<->2\n");
 		}
 		while (true) {
 			maxSupport(e3, shape1, shape2, dir);
-			bu.append("v1:Punkt(" + e1.v + ")\n");
-			bu.append("v2:Punkt(" + e2.v + ")\n");
-			bu.append("v3:Punkt(" + e3.v + ")\n");
-			bu.append("d:Vektor(" + dir + ")\n\n");
+			if (debug) {
+				bu.append("v1:Punkt(" + e1.v + ")\n");
+				bu.append("v2:Punkt(" + e2.v + ")\n");
+				bu.append("v3:Punkt(" + e3.v + ")\n");
+				bu.append("d:Vektor(" + dir + ")\n\n");
+			}
 			if (e3.v.dot(dir) <= 0)
 				return -1;
 			if (temp1.setCross(e1.v, e3.v).dot(e0.v) < 0) {
@@ -124,72 +132,25 @@ public class MPR {
 	}
 
 	protected static boolean refinePortal(IShape shape1, IShape shape2) {
-		bu.append("refine\n");
+		if (debug)
+			bu.append("refine\n");
 		while (true) {
 			portalDir(dir);
-			bu.append("v1:Punkt(" + e1.v + ")\n");
-			bu.append("v2:Punkt(" + e2.v + ")\n");
-			bu.append("v3:Punkt(" + e3.v + ")\n");
+			if (debug) {
+				bu.append("v1:Punkt(" + e1.v + ")\n");
+				bu.append("v2:Punkt(" + e2.v + ")\n");
+				bu.append("v3:Punkt(" + e3.v + ")\n");
+			}
 			if (dir.dot(e1.v) >= 0)
 				return true;
 			maxSupport(e4, shape1, shape2, dir);
-			bu.append("v4:Punkt(" + e4.v + ")\n");
-			bu.append("d:Vektor(" + dir + ")\n\n");
+			if (debug) {
+				bu.append("v4:Punkt(" + e4.v + ")\n");
+				bu.append("d:Vektor(" + dir + ")\n\n");
+			}
 			if (dir.dot(e4.v) < 0 || portalReachTolerance(e4, dir)) {
 				return false;
 			}
-			// -------------------------------------------------------------------------------------
-			v4v1.setSubtract(e4.v, e1.v);
-			v4v2.setSubtract(e4.v, e2.v);
-			v4v3.setSubtract(e4.v, e3.v);
-			temp1.setCross(v4v1, v4v2);
-			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1,
-					e4.v, e1.v, e2.v);
-			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
-					e4.v, e1.v, e2.v);
-			float c31 = Distance.planeBl(zero, e0.v, temp1, e4.v);
-			float c32 = Distance.planeBl(zero, dir, temp1, e4.v);
-			float c4 = temp1.dot(dir);
-			float c5 = e3.v.dot(e4.v);
-			temp1.setCross(v4v1, v4v3);
-			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1,
-					e4.v, e1.v, e3.v);
-			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
-					e4.v, e1.v, e3.v);
-			float b31 = Distance.planeBl(zero, e0.v, temp1, e4.v);
-			float b32 = Distance.planeBl(zero, dir, temp1, e4.v);
-			float b4 = temp1.dot(dir);
-			float b5 = e2.v.dot(e4.v);
-			temp1.setCross(v4v2, v4v3);
-			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1,
-					e4.v, e2.v, e3.v);
-			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
-					e4.v, e2.v, e3.v);
-			float a31 = Distance.planeBl(zero, e0.v, temp1, e4.v);
-			float a32 = Distance.planeBl(zero, dir, temp1, e4.v);
-			float a4 = temp1.dot(dir);
-			float a5 = e1.v.dot(e4.v);
-			bu.append("vert O: "
-					+ Distance.removeFromTriangle(zero, e4.v, e2.v, e3.v)
-					+ "\t"
-					+ Distance.removeFromTriangle(zero, e1.v, e4.v, e3.v)
-					+ "\t"
-					+ Distance.removeFromTriangle(zero, e1.v, e2.v, e4.v)
-					+ "\t" + "\n");
-			bu.append("sp dir: " + a1 + "\t" + b1 + "\t" + c1 + "\n");
-			bu.append("v0 dir: " + a2 + "\t" + b2 + "\t" + c2 + "\n");
-			bu.append("r  v0: " + a31 + "\t" + b31 + "\t" + c31 + "\n");
-			bu.append("r  dir: " + a32 + "\t" + b32 + "\t" + c32 + "\n");
-			bu.append("n  dir: " + a4 + "\t" + b4 + "\t" + c4 + "\n");
-			bu.append("xdot4 : " + a5 + "\t" + b5 + "\t" + c5 + "\n");
-
-			temp3.setCross(e4.v, e0.v);
-			bu.append("expand: " + e1.v.dot(temp3) + "\t" + e2.v.dot(temp3)
-					+ "\t" + e3.v.dot(temp3) + "\n");
-			bu.append("expand_2: " + e1.v.dot(temp3) / temp3.dot(temp3) + "\t"
-					+ e2.v.dot(temp3) / temp3.dot(temp3) + "\t"
-					+ e3.v.dot(temp3) / temp3.dot(temp3) + "\n");
-			// -------------------------------------------------------------------------------------
 			expandPortal(e4);
 		}
 	}
@@ -198,79 +159,29 @@ public class MPR {
 
 	public static StringBuilder bu = new StringBuilder();
 	static boolean out = false;
+	static boolean debug = false;
 
 	protected static void findPenetration(Contact contact, IShape shape1,
 			IShape shape2) {
-		bu.append("penetration\n");
+		if (debug)
+			bu.append("penetration\n");
 		int iterations = 0;
 		while (true) {
 			portalDir(dir);
 			maxSupport(e4, shape1, shape2, dir);
-			bu.append("v1:Punkt(" + e1.v + ")\n");
-			bu.append("v2:Punkt(" + e2.v + ")\n");
-			bu.append("v3:Punkt(" + e3.v + ")\n");
-			bu.append("v4:Punkt(" + e4.v + ")\n");
-			bu.append("d:Vektor(" + dir + ")\n");
+			if (debug) {
+				bu.append("v1:Punkt(" + e1.v + ")\n");
+				bu.append("v2:Punkt(" + e2.v + ")\n");
+				bu.append("v3:Punkt(" + e3.v + ")\n");
+				bu.append("v4:Punkt(" + e4.v + ")\n");
+				bu.append("d:Vektor(" + dir + ")\n\n");
+			}
 			if (portalReachTolerance(e4, dir) || iterations > MAX_ITERATIONS) {
 				break;
 			}
-			// -------------------------------------------------------------------------------------
-			v4v1.setSubtract(e4.v, e1.v);
-			v4v2.setSubtract(e4.v, e2.v);
-			v4v3.setSubtract(e4.v, e3.v);
-			temp1.setCross(v4v1, v4v2);
-			boolean c1 = Distance.intersectsLineTriangle(zero, dir, temp1,
-					e4.v, e1.v, e2.v);
-			boolean c2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
-					e4.v, e1.v, e2.v);
-			float c31 = Distance.planeBl(zero, e0.v, temp1, e4.v);
-			float c32 = Distance.planeBl(zero, dir, temp1, e4.v);
-			float c4 = temp1.dot(dir);
-			float c5 = e3.v.dot(e4.v);
-			temp1.setCross(v4v1, v4v3);
-			boolean b1 = Distance.intersectsLineTriangle(zero, dir, temp1,
-					e4.v, e1.v, e3.v);
-			boolean b2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
-					e4.v, e1.v, e3.v);
-			float b31 = Distance.planeBl(zero, e0.v, temp1, e4.v);
-			float b32 = Distance.planeBl(zero, dir, temp1, e4.v);
-			float b4 = temp1.dot(dir);
-			float b5 = e2.v.dot(e4.v);
-			temp1.setCross(v4v2, v4v3);
-			boolean a1 = Distance.intersectsLineTriangle(zero, dir, temp1,
-					e4.v, e2.v, e3.v);
-			boolean a2 = Distance.intersectsLineTriangle(zero, e0.v, temp1,
-					e4.v, e2.v, e3.v);
-			float a31 = Distance.planeBl(zero, e0.v, temp1, e4.v);
-			float a32 = Distance.planeBl(zero, dir, temp1, e4.v);
-			float a4 = temp1.dot(dir);
-			float a5 = e1.v.dot(e4.v);
-			bu.append("vert O: "
-					+ Distance.removeFromTriangle(zero, e4.v, e2.v, e3.v)
-					+ "\t"
-					+ Distance.removeFromTriangle(zero, e1.v, e4.v, e3.v)
-					+ "\t"
-					+ Distance.removeFromTriangle(zero, e1.v, e2.v, e4.v)
-					+ "\t" + "\n");
-			bu.append("sp dir: " + a1 + "\t" + b1 + "\t" + c1 + "\n");
-			bu.append("v0 dir: " + a2 + "\t" + b2 + "\t" + c2 + "\n");
-			bu.append("r  v0: " + a31 + "\t" + b31 + "\t" + c31 + "\n");
-			bu.append("r  dir: " + a32 + "\t" + b32 + "\t" + c32 + "\n");
-			bu.append("n  dir: " + a4 + "\t" + b4 + "\t" + c4 + "\n");
-			bu.append("xdot4 : " + a5 + "\t" + b5 + "\t" + c5 + "\n");
-
-			temp3.setCross(e4.v, e0.v);
-			bu.append("expand: " + e1.v.dot(temp3) + "\t" + e2.v.dot(temp3)
-					+ "\t" + e3.v.dot(temp3) + "\n");
-			bu.append("expand_2: " + e1.v.dot(temp3) / temp3.dot(temp3) + "\t"
-					+ e2.v.dot(temp3) / temp3.dot(temp3) + "\t"
-					+ e3.v.dot(temp3) / temp3.dot(temp3) + "\n");
-
-			// -------------------------------------------------------------------------------------
 			expandPortal(e4);
 
 			iterations++;
-			bu.append("\n");
 		}
 		final Vector3f n = contact.getNormal();
 		n.setNorm(dir);
@@ -283,11 +194,13 @@ public class MPR {
 			// n.norm();
 			findPos(contact.getPointA(), shape1, shape2, n);
 
-			bu.append("n : " + n + "\t" + d + "\n");
-			bu.append(iterations + "____________________________________\n");
-			// if(out)
-			if (d > 0.1 || iterations > 5)
-				System.out.println(bu);
+			if (debug) {
+				bu.append("n : " + n + "\t" + d + "\n");
+				bu.append(iterations + "____________________________________\n");
+				// if(out)
+				if (d > 0.1 || iterations > 5)
+					System.out.println(bu);
+			}
 		}
 	}
 
@@ -366,9 +279,9 @@ public class MPR {
 							* invHalfSum);
 		}
 	}
-	
+
 	protected static void expandPortal(Element e) {
-		//temp3.setCross(e.v,e0.v);
+		// temp3.setCross(e.v,e0.v);
 		temp3.setCross(dir, e.v);
 		if (e1.v.dot(temp3) > 0) {
 			if (e2.v.dot(temp3) > 0) {
