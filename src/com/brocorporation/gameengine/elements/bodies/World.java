@@ -34,13 +34,18 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		final Contact c = Contact.DEFAULT;
 		final IShape stcShape = stcBody.getShape();
 		final IShape dynShape = dynBody.getShape();
-		// check relVel running into each other
 		if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
 			if (c.getDistance() == 0) {
-				if (MPR.intersects(c, stcShape, dynShape)) {
+				float dd = AABB.getDistance(c.getNormal(), stcBody.getShape().getAABB(), dynBody.getShape().getAABB());
+				if(dd<=0){
+					c.setDistance(dd);
 					ElasticContactSolver.addContact(stcBody, dynBody,
 							c.getNormal(), c.getDistance());
 				}
+				//if (MPR.intersects(c, stcShape, dynShape)) {
+				//	ElasticContactSolver.addContact(stcBody, dynBody,
+				//			c.getNormal(), c.getDistance());
+				//}
 			} else {
 				ElasticContactSolver.addContact(stcBody, dynBody,
 						c.getNormal(), c.getDistance());
@@ -51,7 +56,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		}
 		stcBody.onCollide(dynBody);
 		dynBody.onCollide(stcBody);
-	}
+	}//TODO MPR AABB.distance as input not suitable 
 
 	@Override
 	public void broadphaseCollision(final DynamicBody dynBody1,
@@ -114,8 +119,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		}
 		CollisionDetection.checkBroadphase(this, updateList, collisionTree,
 				uInfo);
-		SpeculativeContactSolver.run(uInfo);
 		ElasticContactSolver.run(uInfo);
+		SpeculativeContactSolver.run(uInfo);
 
 		collisionTree.optimize();
 		if (uInfo.isPreRendering()) {

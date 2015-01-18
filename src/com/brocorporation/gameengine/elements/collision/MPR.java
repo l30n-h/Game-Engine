@@ -73,9 +73,10 @@ public class MPR {
 	}
 
 	protected static void getOriginRayDirection(IShape shape1, IShape shape2) {
-		// e0.v.setSubtract(e0.pA.set(shape1.getPosition()),
-		// e0.pB.set(shape2.getPosition()));
-		AABB.getDistance(e0.v, shape2.getAABB(), shape1.getAABB());
+		// TODO editable
+		 e0.v.setSubtract(e0.pA.set(shape1.getPosition()),
+		 e0.pB.set(shape2.getPosition()));
+//		AABB.getDistance(e0.v, shape2.getAABB(), shape1.getAABB());
 		if (e0.v.isZero()) {
 			e0.v.set(0.00001f, 0, 0);
 		}
@@ -87,14 +88,14 @@ public class MPR {
 
 	protected static byte discoverPortal(IShape shape1, IShape shape2) {
 		getOriginRayDirection(shape1, shape2);
-		minSupport(e1, shape1, shape2, e0.v);
+		MinkowskiDifference.getMinSupport(e1, shape1, shape2, e0.v);
 		if (e1.v.dot(e0.v) >= 0)
 			return -1;
 		dir.setCross(e0.v, e1.v);
 		if (dir.isZero()) {
 			return 2;
 		}
-		maxSupport(e2, shape1, shape2, dir);
+		MinkowskiDifference.getMaxSupport(e2, shape1, shape2, dir);
 		if (e2.v.dot(dir) <= 0)
 			return -1;
 		temp1.setSubtract(e1.v, e0.v);
@@ -109,7 +110,7 @@ public class MPR {
 				bu.append("swap 1<->2\n");
 		}
 		while (true) {
-			maxSupport(e3, shape1, shape2, dir);
+			MinkowskiDifference.getMaxSupport(e3, shape1, shape2, dir);
 			if (debug) {
 				bu.append("v1:Punkt(" + e1.v + ")\n");
 				bu.append("v2:Punkt(" + e2.v + ")\n");
@@ -141,9 +142,10 @@ public class MPR {
 				bu.append("v2:Punkt(" + e2.v + ")\n");
 				bu.append("v3:Punkt(" + e3.v + ")\n");
 			}
+			;
 			if (dir.dot(e1.v) >= 0)
 				return true;
-			maxSupport(e4, shape1, shape2, dir);
+			MinkowskiDifference.getMaxSupport(e4, shape1, shape2, dir);
 			if (debug) {
 				bu.append("v4:Punkt(" + e4.v + ")\n");
 				bu.append("d:Vektor(" + dir + ")\n\n");
@@ -154,8 +156,6 @@ public class MPR {
 			expandPortal(e4);
 		}
 	}
-
-	static Vector3f zero = new Vector3f();
 
 	public static StringBuilder bu = new StringBuilder();
 	static boolean out = false;
@@ -168,7 +168,7 @@ public class MPR {
 		int iterations = 0;
 		while (true) {
 			portalDir(dir);
-			maxSupport(e4, shape1, shape2, dir);
+			MinkowskiDifference.getMaxSupport(e4, shape1, shape2, dir);
 			if (debug) {
 				bu.append("v1:Punkt(" + e1.v + ")\n");
 				bu.append("v2:Punkt(" + e2.v + ")\n");
@@ -197,22 +197,17 @@ public class MPR {
 			if (debug) {
 				bu.append("n : " + n + "\t" + d + "\n");
 				bu.append(iterations + "____________________________________\n");
-				// if(out)
-				if (d > 0.1 || iterations > 5)
+				if (out || d > 0.1 || iterations > 5)
 					System.out.println(bu);
 			}
 		}
 	}
 
-	static Vector3f v4v1 = new Vector3f();
-	static Vector3f v4v2 = new Vector3f();
-	static Vector3f v4v3 = new Vector3f();
-
 	protected static void findPenetrationS(Contact c, IShape shape1,
 			IShape shape2) {
 		for (int i = 0; i < MAX_ITERATIONS; i++) {
 			portalDir(dir);
-			maxSupport(e4, shape1, shape2, dir);
+			MinkowskiDifference.getMaxSupport(e4, shape1, shape2, dir);
 			if (portalReachTolerance(e4, dir))
 				break;
 			expandPortal(e4);
@@ -281,8 +276,9 @@ public class MPR {
 	}
 
 	protected static void expandPortal(Element e) {
-		// temp3.setCross(e.v,e0.v);
-		temp3.setCross(dir, e.v);
+		// TODO editable
+		temp3.setCross(e.v,e0.v);
+		//temp3.setCross(dir, e.v);
 		if (e1.v.dot(temp3) > 0) {
 			if (e2.v.dot(temp3) > 0) {
 				set(e1, e);
@@ -307,20 +303,6 @@ public class MPR {
 	protected static boolean portalReachTolerance(Element e, Vector3f dir) {
 		final float min = temp2.setSubtract(e.v, e1.v).dot(dir);
 		return min <= 0 || min * min <= CollideEpsilon_2 * dir.dot(dir);
-	}
-
-	protected static void minSupport(Element e, IShape shape1, IShape shape2,
-			Vector3f dir) {
-		shape1.getMinAlongDirection(e.pA, dir);
-		shape2.getMaxAlongDirection(e.pB, dir);
-		e.v.setSubtract(e.pA, e.pB);
-	}
-
-	protected static void maxSupport(Element e, IShape shape1, IShape shape2,
-			Vector3f dir) {
-		shape1.getMaxAlongDirection(e.pA, dir);
-		shape2.getMinAlongDirection(e.pB, dir);
-		e.v.setSubtract(e.pA, e.pB);
 	}
 
 	protected static void set(Element a, Element b) {

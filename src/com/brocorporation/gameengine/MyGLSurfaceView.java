@@ -119,8 +119,8 @@ public class MyGLSurfaceView extends GameEngine {
 				+ GJK.rayCast(hit, normal, p1, direction, cB1, cB2));
 		System.out.println("\tPoint: " + hit.getPoint());
 		System.out.println("\tNormal: " + normal);
-
-		// System.exit(0);
+		
+		//System.exit(0);
 	}
 
 	public void create() {
@@ -373,8 +373,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(1.1F, -1.75F, -18.6F),
 				new Vector3f(1.1F, -1.75F, 18.6F),
 				new Vector3f(1.1F, 9.75F, 18.6F),
-				new Vector3f(1.1F, 9.75F, -18.6F)
-		});
+				new Vector3f(1.1F, 9.75F, -18.6F) });
 		final Convex wallFront = new Convex(new Vector3f[] {
 				new Vector3f(-1.1F, -1.75F, 21.8F),
 				new Vector3f(10.4F, -1.75F, 21.8F),
@@ -444,21 +443,21 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-0.2f, +0.85f, -0.2f),
 				new Vector3f(-0.2f, -0.85f, +0.2f),
 				new Vector3f(-0.2f, -0.85f, -0.2f) };
-//		 final int bodyCount = 10;
-//		 final int hCount = bodyCount/2;
-//		 for(int i = 0;i<bodyCount;i++){
-//		
-//		 final RigidBody b = new RigidBody(new Convex(a),(i*20+20)*0+10);
-//		 if(i<hCount){
-//		 b.setPosition(0, -0.9f, 10-i*0.4f);
-//		 } else{
-//		 b.setPosition(0, -0.9f+1.75f, 10-(i-hCount)*0.4f);
-//		 }
-//		 b.setGLShape(actorShape);
-//		 //b.rotate(0, 30*i, 0);
-//		 b.isGravityEnabled(true);
-//		 world.add(b);
-//		 }
+		// final int bodyCount = 10;
+		// final int hCount = bodyCount/2;
+		// for(int i = 0;i<bodyCount;i++){
+		//
+		// final RigidBody b = new RigidBody(new Convex(a),(i*20+20)*0+10);
+		// if(i<hCount){
+		// b.setPosition(0, -0.9f, 10-i*0.4f);
+		// } else{
+		// b.setPosition(0, -0.9f+1.75f, 10-(i-hCount)*0.4f);
+		// }
+		// b.setGLShape(actorShape);
+		// //b.rotate(0, 30*i, 0);
+		// b.isGravityEnabled(true);
+		// world.add(b);
+		// }
 
 		actor2 = new Actor(new Convex(a), 0);
 		actor2.setPosition(0, 0, 12);
@@ -475,14 +474,14 @@ public class MyGLSurfaceView extends GameEngine {
 		actor.setGLShape(actorShape);
 		actor.setJumpingHeight(2);
 		actor.isGravityEnabled(true);
-		//actor.setMaterial(new Material(0.f, 1F, 0.9F));
+		// actor.setMaterial(new Material(0.f, 1F, 0.9F));
 		world.add(actor);
 
 		final TrackingCamera camera = new TrackingCamera();
-		camera.followBody(actor, 0, 1.6F, -3.5F);
+		camera.followBody(actor, 0, 1.6f, -3.5F);
 		camera.lookAtBody(actor.getPosition(), 0, 1.6F, 0);
 		final StaticLight light = new StaticLight(new AABB(), 0);
-		light.followBody(actor, 0, 1.7F, -1);
+		light.followBody(actor, 0, 1.7F, -3.5f);
 		world.setActiveCamera(camera);
 		world.setActiveLight(light);
 
@@ -652,7 +651,6 @@ public class MyGLSurfaceView extends GameEngine {
 
 	int frames = 0;
 	long lastTime = System.currentTimeMillis();
-	float w = -2;
 
 	private void fps() {
 		frames++;

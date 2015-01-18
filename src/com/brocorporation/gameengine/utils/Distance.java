@@ -1,9 +1,15 @@
 package com.brocorporation.gameengine.utils;
 
+import com.brocorporation.gameengine.elements.collision.Simplex;
+
+
 public class Distance {
 
+	protected final static Vector3f AP = new Vector3f();
 	protected final static Vector3f AB = new Vector3f();
 	protected final static Vector3f AC = new Vector3f();
+	protected final static Vector3f CB = new Vector3f();
+	protected final static Vector3f temp = new Vector3f();
 
 	public static float closestPointToLineSegment(Vector3f result, Vector3f A,
 			Vector3f B) {
@@ -33,6 +39,65 @@ public class Distance {
 		}
 		return (an * an) / result.dot(result);
 	}
+	
+	public static float closestPointToTriangle(Vector3f result, Simplex simplex) {
+		final Vector3f A = simplex.getV(2);
+		final Vector3f B = simplex.getV(1);
+		final Vector3f C = simplex.getV(0);
+		AB.setSubtract(B, A);
+		AC.setSubtract(C, A);
+		final float aab = -A.dot(AB);
+		final float aac = -A.dot(AC);float s,t;
+		if (aab <= 0 && aac <= 0) {
+			simplex.removeB();
+			simplex.removeC();
+			result.set(A);
+			return result.dot(result);
+		}
+		final float bab = -B.dot(AB);
+		final float bac = -B.dot(AC);
+		if (bab >= 0 && bac <= bab) {
+			simplex.removeA();
+			simplex.removeC();
+			result.set(B);
+			return result.dot(result);
+		}
+		final float vc = aab * bac - bab * aac;
+		if (vc <= 0 && aab >= 0 && bab <= 0) {
+			simplex.removeC();
+			s = aab / (aab - bab);
+			result.setAddScaled(A, AB, s);
+			return result.dot(result);
+		}
+		final float cab = -C.dot(AB);
+		final float cac = -C.dot(AC);
+		if (cac >= 0 && cab <= cac) {
+			simplex.removeA();
+			simplex.removeB();
+			result.set(C);
+			return result.dot(result);
+		}
+		final float vb = cab * aac - aab * cac;
+		if (vb <= 0 && aac >= 0 && cac <= 0) {
+			simplex.removeB();
+			s = aac / (aac - cac);
+			result.setAddScaled(A, AC, s);
+			return result.dot(result);
+		}
+		final float va = bab * cac - cab * bac;
+		final float bacmbab, cabmcac;
+		if (va <= 0 && (bacmbab = bac - bab) >= 0 && (cabmcac = cab - cac) >= 0) {
+			simplex.removeA();
+			s = bacmbab / (bacmbab + cabmcac);
+			result.setAddScaled(B, AB.setSubtract(C, B), s);
+			return result.dot(result);
+		}
+		final float denom = 1 / (va + vb + vc);
+		s = vb * denom;
+		t = vc * denom;
+		result.setAddScaled(A, AB, s).addScaled(AC, t);
+		return result.dot(result);
+	}
 
 	public static float closestPointToTriangle(Vector3f result, Vector3f A,
 			Vector3f B, Vector3f C) {
@@ -44,6 +109,8 @@ public class Distance {
 		final float aab = A.dot(AB);
 		final float aac = A.dot(AC);
 		final float det = Math.abs(abab * acac - abac * abac);
+		if (det == 0)
+			return Float.NaN;
 		float s = abac * aac - acac * aab;
 		float t = abac * aab - abab * aac;
 		if (s + t <= det) {
@@ -84,7 +151,6 @@ public class Distance {
 				} else {
 					s = -aab / abab;
 					result.setAddScaled(A, AB, s);
-
 				}
 			} else {
 				float invDet = 1 / det;
@@ -102,9 +168,8 @@ public class Distance {
 					if (numer >= denom) {
 						result.set(B);
 					} else {
-						s = numer / denom;
-						t = 1 - s;
-						result.setAddScaled(A, AB, s).addScaled(AC, t);
+						s = 1 - numer / denom;
+						result.setAddScaled(B, AB.setSubtract(C, B), s);
 					}
 				} else {
 					if (tmp1 <= 0) {
@@ -125,9 +190,8 @@ public class Distance {
 					if (numer >= denom) {
 						result.set(C);
 					} else {
-						t = numer / denom;
-						s = 1 - t;
-						result.setAddScaled(A, AB, s).addScaled(AC, t);
+						s = numer / denom;
+						result.setAddScaled(B, AB.setSubtract(C, B), s);
 					}
 				} else {
 					if (tmp1 <= 0) {
@@ -148,9 +212,8 @@ public class Distance {
 					if (numer >= denom) {
 						result.set(B);
 					} else {
-						s = numer / denom;
-						t = 1 - s;
-						result.setAddScaled(A, AB, s).addScaled(AC, t);
+						s = 1 - numer / denom;
+						result.setAddScaled(B, AB.setSubtract(C, B), s);
 					}
 				}
 			}
@@ -158,108 +221,8 @@ public class Distance {
 		return result.dot(result);
 	}
 
-	static Vector3f d1 = new Vector3f();
-	static Vector3f d2 = new Vector3f();
-	static Vector3f a = new Vector3f();
-	static Vector3f witness2 = new Vector3f();
-
-	public static float ccdVec3PointTriDist2(Vector3f P, Vector3f x0,
-			Vector3f B, Vector3f C, Vector3f witness) {
-		// Computation comes from analytic expression for triangle (x0, B, C)
-		// T(s, t) = x0 + s.d1 + t.d2, where d1 = B - x0 and d2 = C - x0 and
-		// Then equation for distance is:
-		// D(s, t) = | T(s, t) - P |^2
-		// This leads to minimization of quadratic function of two variables.
-		// The solution from is taken only if s is between 0 and 1, t is
-		// between 0 and 1 and t + s < 1, otherwise distance from segment is
-		// computed.
-		float u, v, w, p, q, r;
-		float s, t, dist, dist2;
-
-		d1.setSubtract(B, x0);
-		d2.setSubtract(C, x0);
-		a.setSubtract(x0, P);
-		u = a.dot(a);
-		v = d1.dot(d1);
-		w = d2.dot(d2);
-		p = a.dot(d1);
-		q = a.dot(d2);
-		r = d1.dot(d2);
-
-		s = (q * r - w * p) / (w * v - r * r);
-		t = (-s * r - q) / w;
-
-		if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && (t + s) <= 1) {
-
-			if (witness != null) {
-				d1.scale(s);
-				d2.scale(t);
-				witness.setAdd(x0, d1).add(d2);
-				AB.setSubtract(witness, P);
-				dist = AB.dot(AB);
-			} else {
-				dist = s * s * v;
-				dist += t * t * w;
-				dist += 2 * s * t * r;
-				dist += 2 * s * p;
-				dist += 2 * t * q;
-				dist += u;
-			}
-		} else {
-			dist = __ccdVec3PointSegmentDist2(P, x0, B, witness);
-
-			dist2 = __ccdVec3PointSegmentDist2(P, x0, C, witness2);
-			if (dist2 < dist) {
-				dist = dist2;
-				if (witness != null)
-					witness.set(witness2);
-			}
-
-			dist2 = __ccdVec3PointSegmentDist2(P, B, C, witness2);
-			if (dist2 < dist) {
-				dist = dist2;
-				if (witness != null)
-					witness.set(witness2);
-			}
-		}
-
-		return dist;
-	}
-
-	public static float __ccdVec3PointSegmentDist2(Vector3f P, Vector3f x0,
-			Vector3f b, Vector3f witness) {
-		float dist, t;
-		d1.setSubtract(b, x0);
-		a.setSubtract(x0, P);
-
-		t = -a.dot(d1) / d1.dot(d1);
-
-		if (t <= 0) {
-			AB.setSubtract(x0, P);
-			dist = AB.dot(AB);
-			if (witness != null)
-				witness.set(x0);
-		} else if (t >= 1) {
-			AB.setSubtract(b, P);
-			dist = AB.dot(AB);
-			if (witness != null)
-				witness.set(b);
-		} else {
-			if (witness != null) {
-				witness.setScale(d1, t).add(x0);
-				AB.setSubtract(witness, P);
-				dist = AB.dot(AB);
-			} else {
-				// recycling variables
-				d1.scale(t).add(a);
-				dist = d1.dot(d1);
-			}
-		}
-
-		return dist;
-	}
-	static Vector3f AP = new Vector3f();
-	public static int removeFromTriangle(Vector3f P, Vector3f A, Vector3f B, Vector3f C) {
+	public static int removeFromTriangle(Vector3f P, Vector3f A, Vector3f B,
+			Vector3f C) {
 		AP.setSubtract(P, A);
 		AB.setSubtract(B, A);
 		AC.setSubtract(C, A);
@@ -298,9 +261,6 @@ public class Distance {
 		}
 	}
 
-	protected final static Vector3f CB = new Vector3f();
-	protected final static Vector3f temp = new Vector3f();
-
 	public static float distanceToTriangle(Vector3f result, Vector3f A,
 			Vector3f B, Vector3f C) {
 		AB.setSubtract(B, A);
@@ -324,41 +284,24 @@ public class Distance {
 			}
 			return (an * an) / result.dot(result);
 		} else if (front == 1) {
-			return distanceToLineSegment(result, A, B);
+			return closestPointToLineSegment(result, A, B);
 		} else if (front == 2) {
-			return distanceToLineSegment(result, A, C);
+			return closestPointToLineSegment(result, A, C);
 		} else if (front == 3) {
 			if (A.dot(AB) < 0)
-				return distanceToLineSegment(result, A, B);
-			return distanceToLineSegment(result, A, C);
+				return closestPointToLineSegment(result, A, B);
+			return closestPointToLineSegment(result, A, C);
 		} else if (front == 4) {
-			return distanceToLineSegment(result, B, C);
+			return closestPointToLineSegment(result, B, C);
 		} else if (front == 5) {
 			if (B.dot(CB) > 0)
-				return distanceToLineSegment(result, B, C);
-			return distanceToLineSegment(result, A, B);
+				return closestPointToLineSegment(result, B, C);
+			return closestPointToLineSegment(result, A, B);
 		} else {
 			if (C.dot(AC) > 0)
-				return distanceToLineSegment(result, A, C);
-			return distanceToLineSegment(result, B, C);
+				return closestPointToLineSegment(result, A, C);
+			return closestPointToLineSegment(result, B, C);
 		}
-	}
-
-	public static float distanceToLineSegment(Vector3f result, Vector3f A,
-			Vector3f B) {
-		AB.setSubtract(B, A);
-		final float ABdotA = AB.dot(A);
-		if (ABdotA >= 0) {
-			result.set(A);
-		} else {
-			final float ABdotAB = -AB.dot(AB);
-			if (ABdotA <= ABdotAB) {
-				result.set(B);
-			} else {
-				result.setAddScaled(A, AB, ABdotA / ABdotAB);
-			}
-		}
-		return result.dot(result);
 	}
 
 	static Vector3f dir = new Vector3f();
@@ -390,7 +333,7 @@ public class Distance {
 		float t = (abac * pab - abab * pac) / denom;
 		return t >= 0 && s + t <= 1;
 	}
-	
+
 	public static boolean intersectsLineTriangle(Vector3f from, Vector3f to,
 			Vector3f normal, Vector3f A, Vector3f B, Vector3f C) {
 		dir.setSubtract(to, from);
