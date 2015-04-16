@@ -108,6 +108,17 @@ public class Simplex {
 		ref = null;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		char a = (char) ('A' + size() - 1);
+		for (int q = size() - 1; q >= 0; q--) {
+			b.append((char) (a - q) + ":Punkt("
+					+ getV(q).toString().replaceAll("E", "*10^") + ")\n");
+		}
+		return b.toString();
+	}
+
 	public static class Element {
 		public Vector3f v = new Vector3f();
 		public Vector3f ref = new Vector3f();

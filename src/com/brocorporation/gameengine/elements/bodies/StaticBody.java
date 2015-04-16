@@ -48,14 +48,13 @@ public class StaticBody extends Collidable implements
 		return shape.getPosition();
 	}
 
+	public Quaternion getOrientation() {
+		return affineTransform.getOrientation();
+	}
+
 	public void setRotation(final float x, final float y, final float z) {
 		affineTransform.setRotation(x, y, z);
 		updateOrientation = true;
-	}
-	
-
-	public Quaternion getOrientation() {
-		return affineTransform.getOrientation();
 	}
 
 	public void rotate(final float degreeX, final float degreeY,

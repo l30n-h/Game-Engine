@@ -103,8 +103,9 @@ public class GJK {
 				lastS = s;
 				if (simplex.size() == 3)
 					lastT = t;
-			} while (d_2 > EPSILON_2 && i++ < MAX_ITERATIONS
-					&& (d0_2 - 2 * v0.dot(v) + d_2) > EPSILON_2);
+			} while (d_2 > EPSILON_2
+					&& i++ < MAX_ITERATIONS
+					&& (checkIntersection || (d0_2 - 2 * v0.dot(v) + d_2) > EPSILON_2));
 		}
 		if (checkIntersection) {
 			if (d_2 <= EPSILON_2) {

@@ -3,23 +3,75 @@ package com.brocorporation.gameengine.elements.collision;
 import com.brocorporation.gameengine.utils.AffineTransform;
 import com.brocorporation.gameengine.utils.Vector3f;
 
-public class Sphere extends AABB {
+public class Sphere implements IShape {
 
+	protected final AABB aabb = new AABB();
 	protected float radius;
 
 	public Sphere(float r) {
 		radius = r;
-		setHalfsize(r, r, r);
+		aabb.setHalfsize(r, r, r);
 	}
 
 	public float getRadius() {
 		return radius;
 	}
 
+	public void setPosition(float x, float y, float z) {
+		aabb.setPosition(x, y, z);
+	}
+
+	public void setPosition(Vector3f v) {
+		aabb.setPosition(v);
+	}
+
 	@Override
 	public void updateBounds(AffineTransform affineTransform,
 			boolean updateTranslation, boolean updateOrientation) {
-		super.updateBounds(affineTransform, updateTranslation, false);
+		aabb.updateBounds(affineTransform, updateTranslation, false);
+	}
+
+	@Override
+	public Vector3f getMaxAlongDirection(Vector3f result, Vector3f dir) {
+		return result.setNorm(dir, radius).add(getPosition());
+	}
+
+	@Override
+	public Vector3f getMinAlongDirection(Vector3f result, Vector3f dir) {
+		return result.setNorm(dir, -radius).add(getPosition());
+	}
+
+	@Override
+	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
+			float inverseMass) {
+		inverseInertiaTensor[1] = inverseInertiaTensor[2] = inverseInertiaTensor[3] = inverseInertiaTensor[5] = inverseInertiaTensor[6] = inverseInertiaTensor[7] = 0;
+		inverseInertiaTensor[8] = inverseInertiaTensor[4] = inverseInertiaTensor[0] = inverseMass
+				/ (radius * radius * 4);
+	}
+
+	@Override
+	public Vector3f getPosition() {
+		return aabb.getPosition();
+	}
+
+	@Override
+	public AABB getAABB() {
+		return aabb;
+	}
+
+	@Override
+	public void setFrustumType(byte type) {
+		aabb.setFrustumType(type);
+	}
+
+	@Override
+	public byte getFrustumType() {
+		return aabb.getFrustumType();
+	}
+
+	@Override
+	public boolean hasChanged() {
+		return aabb.hasChanged();
 	}
 
 	public boolean intersects(final Sphere sphere) {
@@ -41,15 +93,5 @@ public class Sphere extends AABB {
 
 	public interface IBounds {
 		public Sphere getSphere();
-	}
-
-	@Override
-	public Vector3f getMaxAlongDirection(Vector3f result, Vector3f dir) {
-		return result.setNorm(dir, radius).add(position);
-	}
-
-	@Override
-	public Vector3f getMinAlongDirection(Vector3f result, Vector3f dir) {
-		return result.setNorm(dir, -radius).add(position);
 	}
 }

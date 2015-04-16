@@ -36,16 +36,19 @@ public class MPR {
 		if (debug) {
 			out = false;
 			bu.setLength(0);
-			Vector3f[] v1 = ((Convex) shape1).getVertices();
-			Vector3f[] v2 = ((Convex) shape2).getVertices();
-			for (int i = 0; i < v1.length; i++) {
-				for (int j = 0; j < v2.length; j++) {
-					temp1.setSubtract(v1[i], v2[j]);
-					bu.append("p" + i + "" + j + ":Punkt("
-							+ temp1.toString().replaceAll("E", "*10^") + ")\n");
+			if (shape1 instanceof Convex && shape2 instanceof Convex) {
+				Vector3f[] v1 = ((Convex) shape1).getVertices();
+				Vector3f[] v2 = ((Convex) shape2).getVertices();
+				for (int i = 0; i < v1.length; i++) {
+					for (int j = 0; j < v2.length; j++) {
+						temp1.setSubtract(v1[i], v2[j]);
+						bu.append("p" + i + "" + j + ":Punkt("
+								+ temp1.toString().replaceAll("E", "*10^")
+								+ ")\n");
+					}
 				}
+				bu.append("\n\n");
 			}
-			bu.append("\n\n");
 		}
 		initElementsFromSimplex(simplex);
 		final int res = discoverPortal(shape1, shape2);
@@ -60,7 +63,6 @@ public class MPR {
 				return false;
 			}
 			findPenetration(contact, shape1, shape2);
-
 		}
 		return true;
 	}
@@ -72,11 +74,12 @@ public class MPR {
 		e4 = s.get(3);
 	}
 
+	// relative vector after collision response not suitable
 	protected static void getOriginRayDirection(IShape shape1, IShape shape2) {
 		// TODO editable
-		 e0.v.setSubtract(e0.pA.set(shape1.getPosition()),
-		 e0.pB.set(shape2.getPosition()));
-//		AABB.getDistance(e0.v, shape2.getAABB(), shape1.getAABB());
+		e0.v.setSubtract(e0.pA.set(shape1.getPosition()),
+				e0.pB.set(shape2.getPosition()));
+		// e0.v.set(relVel);
 		if (e0.v.isZero()) {
 			e0.v.set(0.00001f, 0, 0);
 		}
@@ -92,6 +95,8 @@ public class MPR {
 		if (e1.v.dot(e0.v) >= 0)
 			return -1;
 		dir.setCross(e0.v, e1.v);
+		if (debug)
+			bu.append("d:Vektor(" + dir + ")\n\n");
 		if (dir.isZero()) {
 			return 2;
 		}
@@ -142,7 +147,6 @@ public class MPR {
 				bu.append("v2:Punkt(" + e2.v + ")\n");
 				bu.append("v3:Punkt(" + e3.v + ")\n");
 			}
-			;
 			if (dir.dot(e1.v) >= 0)
 				return true;
 			MinkowskiDifference.getMaxSupport(e4, shape1, shape2, dir);
@@ -157,9 +161,10 @@ public class MPR {
 		}
 	}
 
+	public static Vector3f relVel = new Vector3f();
 	public static StringBuilder bu = new StringBuilder();
-	static boolean out = false;
-	static boolean debug = false;
+	static boolean out;
+	static boolean debug = true;
 
 	protected static void findPenetration(Contact contact, IShape shape1,
 			IShape shape2) {
@@ -179,7 +184,7 @@ public class MPR {
 			if (portalReachTolerance(e4, dir) || iterations > MAX_ITERATIONS) {
 				break;
 			}
-			expandPortal(e4);
+			expandPortal(e4);// schwachpunkt wenn knapp falsche normale
 
 			iterations++;
 		}
@@ -277,8 +282,13 @@ public class MPR {
 
 	protected static void expandPortal(Element e) {
 		// TODO editable
-		temp3.setCross(e.v,e0.v);
-		//temp3.setCross(dir, e.v);
+		temp3.setCross(e.v, e0.v);
+		// temp3.setCross(dir, e.v);
+		// temp3.setCross(e.v, relVel);
+		float a1 = e1.v.dot(temp3);
+		float a2 = e2.v.dot(temp3);
+		float a3 = e3.v.dot(temp3);
+		bu.append(a1 + "\t" + a2 + "\t" + a3 + "\n");
 		if (e1.v.dot(temp3) > 0) {
 			if (e2.v.dot(temp3) > 0) {
 				set(e1, e);
@@ -310,4 +320,5 @@ public class MPR {
 		a.pA.set(b.pA);
 		a.pB.set(b.pB);
 	}
+
 }

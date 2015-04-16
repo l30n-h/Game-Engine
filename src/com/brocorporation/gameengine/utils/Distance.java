@@ -2,7 +2,6 @@ package com.brocorporation.gameengine.utils;
 
 import com.brocorporation.gameengine.elements.collision.Simplex;
 
-
 public class Distance {
 
 	protected final static Vector3f AP = new Vector3f();
@@ -39,7 +38,7 @@ public class Distance {
 		}
 		return (an * an) / result.dot(result);
 	}
-	
+
 	public static float closestPointToTriangle(Vector3f result, Simplex simplex) {
 		final Vector3f A = simplex.getV(2);
 		final Vector3f B = simplex.getV(1);
@@ -47,7 +46,8 @@ public class Distance {
 		AB.setSubtract(B, A);
 		AC.setSubtract(C, A);
 		final float aab = -A.dot(AB);
-		final float aac = -A.dot(AC);float s,t;
+		final float aac = -A.dot(AC);
+		float s, t;
 		if (aab <= 0 && aac <= 0) {
 			simplex.removeB();
 			simplex.removeC();

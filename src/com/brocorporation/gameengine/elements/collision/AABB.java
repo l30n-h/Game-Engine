@@ -18,6 +18,10 @@ public class AABB implements IShape {
 	public AABB() {
 	}
 
+	public AABB(float hx, float hy, float hz) {
+		setHalfsize(hx, hy, hz);
+	}
+
 	@Override
 	public Vector3f getPosition() {
 		return position;
@@ -77,6 +81,20 @@ public class AABB implements IShape {
 		return hasChanged;
 	}
 
+	@Override
+	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
+			float inverseMass) {
+		final float ww = halfsize.x * halfsize.x;
+		final float hh = halfsize.y * halfsize.y;
+		final float dd = halfsize.z * halfsize.z;
+		final float s = 3 * inverseMass;
+		// inverseInertiaTensor.set(s / (hh + dd), s / (ww + dd), s / (ww +
+		// hh));
+		inverseInertiaTensor[0] = s / (hh + dd);
+		inverseInertiaTensor[4] = s / (ww + dd);
+		inverseInertiaTensor[8] = s / (ww + hh);
+	}
+
 	public Vector3f getBaseHalfsize() {
 		return baseHalfsize;
 	}
@@ -85,22 +103,22 @@ public class AABB implements IShape {
 		return halfsize;
 	}
 
-	public void setPosition(float x, float y, float z) {
-		position.set(x, y, z);
-	}
-
 	public void setHalfsize(float x, float y, float z) {
 		baseHalfsize.set(x, y, z);
 		halfsize.set(x, y, z);
 	}
 
-	public void setPosition(Vector3f v) {
-		position.set(v);
-	}
-
 	public void setHalfsize(Vector3f v) {
 		baseHalfsize.set(v);
 		halfsize.set(v);
+	}
+
+	public void setPosition(float x, float y, float z) {
+		position.set(x, y, z);
+	}
+
+	public void setPosition(Vector3f v) {
+		position.set(v);
 	}
 
 	public void rotate(Quaternion q) {

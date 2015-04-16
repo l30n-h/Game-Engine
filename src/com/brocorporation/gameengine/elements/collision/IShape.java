@@ -12,13 +12,16 @@ public interface IShape {
 	public Vector3f getMinAlongDirection(Vector3f result, Vector3f dir);
 
 	public AABB getAABB();
-	
+
 	public void setFrustumType(byte type);
-	
+
 	public byte getFrustumType();
-	
+
 	public boolean hasChanged();
 
 	public void updateBounds(AffineTransform transform,
 			boolean updateTranslation, boolean updateOrientation);
+
+	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
+			float inverseMass);
 }

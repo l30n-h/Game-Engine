@@ -1,6 +1,7 @@
 package com.brocorporation.gameengine.elements.collision;
 
 import com.brocorporation.gameengine.utils.AffineTransform;
+import com.brocorporation.gameengine.utils.MatrixExt;
 import com.brocorporation.gameengine.utils.Quaternion;
 import com.brocorporation.gameengine.utils.Vector3f;
 
@@ -116,6 +117,12 @@ public class Convex implements IShape {
 	@Override
 	public boolean hasChanged() {
 		return hasChanged;
+	}
+
+	@Override
+	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
+			float inverseMass) {
+		MatrixExt.setNullM(inverseInertiaTensor);
 	}
 
 	public static void getCOM(Vector3f result, Vector3f[] points) {

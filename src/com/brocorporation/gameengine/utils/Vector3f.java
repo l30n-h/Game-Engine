@@ -121,6 +121,51 @@ public class Vector3f {
 				vector2.y, vector2.z, scalar);
 	}
 
+	public Vector3f multiplyVM3(final Vector3f vector, float[] rhsMat,
+			int rhsMatOffset) {
+		return set(x = rhsMat[rhsMatOffset] * vector.x
+				+ rhsMat[rhsMatOffset + 1] * vector.y
+				+ rhsMat[rhsMatOffset + 2] * vector.z,
+				y = rhsMat[rhsMatOffset + 3] * vector.x
+						+ rhsMat[rhsMatOffset + 4] * vector.y
+						+ rhsMat[rhsMatOffset + 5] * vector.z,
+				z = rhsMat[rhsMatOffset + 6] * vector.x
+						+ rhsMat[rhsMatOffset + 7] * vector.y
+						+ rhsMat[rhsMatOffset + 8] * vector.z);
+	}
+
+	public Vector3f multiplyM3V(float[] lhsMat, int lhsMatOffset,
+			Vector3f vector) {
+		return set(vector.x * lhsMat[lhsMatOffset] + vector.y
+				* lhsMat[lhsMatOffset + 3] + vector.z
+				* lhsMat[lhsMatOffset + 6], vector.x * lhsMat[lhsMatOffset + 1]
+				+ vector.y * lhsMat[lhsMatOffset + 4] + vector.z
+				* lhsMat[lhsMatOffset + 7], vector.x * lhsMat[lhsMatOffset + 2]
+				+ vector.y * lhsMat[lhsMatOffset + 5] + vector.z
+				* lhsMat[lhsMatOffset + 8]);
+	}
+
+	public Vector3f multiplyVM4(final Vector3f vector, float[] rhsMat,
+			int rhsMatOffset) {
+		return set(rhsMat[rhsMatOffset] * vector.x + rhsMat[rhsMatOffset + 1]
+				* vector.y + rhsMat[rhsMatOffset + 2] * vector.z,
+				rhsMat[rhsMatOffset + 4] * vector.x + rhsMat[rhsMatOffset + 5]
+						* vector.y + rhsMat[rhsMatOffset + 6] * vector.z,
+				rhsMat[rhsMatOffset + 8] * vector.x + rhsMat[rhsMatOffset + 9]
+						* vector.y + rhsMat[rhsMatOffset + 10] * vector.z);
+	}
+
+	public Vector3f multiplyM4V(float[] lhsMat, int lhsMatOffset,
+			Vector3f vector) {
+		return set(vector.x * lhsMat[lhsMatOffset] + vector.y
+				* lhsMat[lhsMatOffset + 4] + vector.z
+				* lhsMat[lhsMatOffset + 8], vector.x * lhsMat[lhsMatOffset + 1]
+				+ vector.y * lhsMat[lhsMatOffset + 5] + vector.z
+				* lhsMat[lhsMatOffset + 9], vector.x * lhsMat[lhsMatOffset + 2]
+				+ vector.y * lhsMat[lhsMatOffset + 6] + vector.z
+				* lhsMat[lhsMatOffset + 10]);
+	}
+
 	public Vector3f multiply(final float pX, final float pY, final float pZ) {
 		return set(x * pX, y * pY, z * pZ);
 	}
@@ -164,6 +209,19 @@ public class Vector3f {
 	 */
 	public Vector3f setCross(final Vector3f vector1, final Vector3f vector2) {
 		return setCross(vector1.x, vector1.y, vector1.z, vector2.x, vector2.y,
+				vector2.z);
+	}
+
+	public float crossSqr(final float pX1, final float pY1, final float pZ1,
+			final float pX2, final float pY2, final float pZ2) {
+		final float x = pY1 * pZ2 - pZ1 * pY2;
+		final float y = pZ1 * pX2 - pX1 * pZ2;
+		final float z = pX1 * pY2 - pY1 * pX2;
+		return x * x + y * y + z * z;
+	}
+
+	public float crossSqr(Vector3f vector1, Vector3f vector2) {
+		return crossSqr(vector1.x, vector1.y, vector1.z, vector2.x, vector2.y,
 				vector2.z);
 	}
 
@@ -225,9 +283,9 @@ public class Vector3f {
 		final float length2 = dot(this);
 		if (Math.abs(length2) > Tolerance.NULL) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
-				scale(l);
-			} else {
 				scale(l / (float) Math.sqrt(length2));
+			} else {
+				scale(l);
 			}
 		}
 		return this;
@@ -237,9 +295,9 @@ public class Vector3f {
 		final float length2 = vector.dot(vector);
 		if (length2 != 0 && Math.abs(length2) > Tolerance.NULL) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
-				return setScale(vector, l);
-			} else {
 				return setScale(vector, l / (float) Math.sqrt(length2));
+			} else {
+				return setScale(vector, l);
 			}
 		}
 		return set(vector);

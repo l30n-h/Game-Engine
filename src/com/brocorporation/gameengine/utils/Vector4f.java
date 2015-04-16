@@ -89,6 +89,43 @@ public class Vector4f extends Vector3f {
 		return subtractScaled(vector.x, vector.y, vector.z, vector.w, scalar);
 	}
 
+	public Vector4f multiplyVM(final Vector4f vector, float[] rhsMat,
+			int rhsMatOffset) {
+		return set(x = rhsMat[rhsMatOffset] * vector.x
+				+ rhsMat[rhsMatOffset + 1] * vector.y
+				+ rhsMat[rhsMatOffset + 2] * vector.z
+				+ rhsMat[rhsMatOffset + 3] * vector.w, rhsMat[rhsMatOffset + 4]
+				* vector.x + rhsMat[rhsMatOffset + 5] * vector.y
+				+ rhsMat[rhsMatOffset + 6] * vector.z
+				+ rhsMat[rhsMatOffset + 7] * vector.w, rhsMat[rhsMatOffset + 8]
+				* vector.x + rhsMat[rhsMatOffset + 9] * vector.y
+				+ rhsMat[rhsMatOffset + 10] * vector.z
+				+ rhsMat[rhsMatOffset + 11] * vector.w,
+				rhsMat[rhsMatOffset + 12] * vector.x
+						+ rhsMat[rhsMatOffset + 13] * vector.y
+						+ rhsMat[rhsMatOffset + 14] * vector.z
+						+ rhsMat[rhsMatOffset + 15] * vector.w);
+	}
+
+	public Vector4f multiplyMV(float[] lhsMat, int lhsMatOffset, Vector4f vector) {
+		return set(vector.x * lhsMat[lhsMatOffset] + vector.y
+				* lhsMat[lhsMatOffset + 4] + vector.z
+				* lhsMat[lhsMatOffset + 8] + vector.w
+				* lhsMat[lhsMatOffset + 12], vector.x
+				* lhsMat[lhsMatOffset + 1] + vector.y
+				* lhsMat[lhsMatOffset + 5] + vector.z
+				* lhsMat[lhsMatOffset + 9] + vector.w
+				* lhsMat[lhsMatOffset + 13], vector.x
+				* lhsMat[lhsMatOffset + 2] + vector.y
+				* lhsMat[lhsMatOffset + 6] + vector.z
+				* lhsMat[lhsMatOffset + 10] + vector.w
+				* lhsMat[lhsMatOffset + 14], vector.x
+				* lhsMat[lhsMatOffset + 3] + vector.y
+				* lhsMat[lhsMatOffset + 7] + vector.z
+				* lhsMat[lhsMatOffset + 11] + vector.w
+				* lhsMat[lhsMatOffset + 15]);
+	}
+
 	public Vector4f multiply(final float pX, final float pY, final float pZ,
 			final float pW) {
 		x *= pX;
@@ -159,9 +196,9 @@ public class Vector4f extends Vector3f {
 		final float length2 = dot(this);
 		if (Math.abs(length2) > Tolerance.NULL) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
-				scale(l);
-			} else {
 				scale(l / (float) Math.sqrt(length2));
+			} else {
+				scale(l);
 			}
 		}
 		return this;
@@ -171,9 +208,9 @@ public class Vector4f extends Vector3f {
 		final float length2 = vector.dot(vector);
 		if (length2 != 0 && Math.abs(length2) > Tolerance.NULL) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
-				return setScale(vector, l);
-			} else {
 				return setScale(vector, l / (float) Math.sqrt(length2));
+			} else {
+				return setScale(vector, l);
 			}
 		}
 		return set(vector);

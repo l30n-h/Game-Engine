@@ -16,6 +16,7 @@ import com.brocorporation.gameengine.elements.collision.MPR;
 import com.brocorporation.gameengine.elements.collision.Octree;
 import com.brocorporation.gameengine.elements.collision.RaycastHit;
 import com.brocorporation.gameengine.elements.collision.SpeculativeContactSolver;
+import com.brocorporation.gameengine.elements.collision.Sphere;
 import com.brocorporation.gameengine.elements.collision.Tree;
 
 public class World implements CollisionDetection.BroadphaseCallback {
@@ -36,19 +37,24 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		final IShape dynShape = dynBody.getShape();
 		if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
 			if (c.getDistance() == 0) {
-//				float dd = AABB.getDistance(c.getNormal(), stcBody.getShape().getAABB(), dynBody.getShape().getAABB());
-//				if(dd<=0){
-//					c.setDistance(dd);
-//					ElasticContactSolver.addContact(stcBody, dynBody,
-//							c.getNormal(), c.getDistance());
-//				}
+				// float dd = AABB.getDistance(c.getNormal(),
+				// stcBody.getShape().getAABB(), dynBody.getShape().getAABB());
+				// if(dd<=0){
+				// c.setDistance(dd);
+				// ElasticContactSolver.addContact(stcBody, dynBody, c);
+				// }
+				
+				// MPR.relVel.set(dynBody.getLinearVelocity());
 				if (MPR.intersects(c, stcShape, dynShape)) {
-					ElasticContactSolver.addContact(stcBody, dynBody,
-							c.getNormal(), c.getDistance());
+					if(dynShape instanceof Sphere){
+						c.getPointB().set(dynShape.getPosition()).subtractScaled(c.getNormal(), ((Sphere) dynShape).getRadius());
+						c.getPointA().setSubtractScaled(c.getPointB(), c.getNormal(), c.getDistance());
+					}
+					ElasticContactSolver.addContact(stcBody, dynBody, c);
 				}
+				
 			} else {
-				ElasticContactSolver.addContact(stcBody, dynBody,
-						c.getNormal(), c.getDistance());
+				ElasticContactSolver.addContact(stcBody, dynBody, c);
 			}
 		} else {
 			SpeculativeContactSolver.addContact(stcBody, dynBody,
@@ -56,7 +62,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		}
 		stcBody.onCollide(dynBody);
 		dynBody.onCollide(stcBody);
-	}//TODO MPR AABB.distance as input not suitable 
+	}
 
 	@Override
 	public void broadphaseCollision(final DynamicBody dynBody1,
@@ -86,12 +92,10 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			if (GJK.intersects(c, dS1, dS2, 0.02f)) {
 				if (c.getDistance() == 0) {
 					if (MPR.intersects(c, dS1, dS2)) {
-						ElasticContactSolver.addContact(dynBody1, dynBody2,
-								c.getNormal(), c.getDistance());
+						ElasticContactSolver.addContact(dynBody1, dynBody2, c);
 					}
 				} else {
-					ElasticContactSolver.addContact(dynBody1, dynBody2,
-							c.getNormal(), c.getDistance());
+					ElasticContactSolver.addContact(dynBody1, dynBody2, c);
 				}
 			} else {
 				SpeculativeContactSolver.addContact(dynBody1, dynBody2,
