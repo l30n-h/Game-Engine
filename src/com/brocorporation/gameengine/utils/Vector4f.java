@@ -89,41 +89,34 @@ public class Vector4f extends Vector3f {
 		return subtractScaled(vector.x, vector.y, vector.z, vector.w, scalar);
 	}
 
-	public Vector4f multiplyVM(final Vector4f vector, float[] rhsMat,
-			int rhsMatOffset) {
-		return set(x = rhsMat[rhsMatOffset] * vector.x
-				+ rhsMat[rhsMatOffset + 1] * vector.y
-				+ rhsMat[rhsMatOffset + 2] * vector.z
-				+ rhsMat[rhsMatOffset + 3] * vector.w, rhsMat[rhsMatOffset + 4]
-				* vector.x + rhsMat[rhsMatOffset + 5] * vector.y
-				+ rhsMat[rhsMatOffset + 6] * vector.z
-				+ rhsMat[rhsMatOffset + 7] * vector.w, rhsMat[rhsMatOffset + 8]
-				* vector.x + rhsMat[rhsMatOffset + 9] * vector.y
-				+ rhsMat[rhsMatOffset + 10] * vector.z
-				+ rhsMat[rhsMatOffset + 11] * vector.w,
-				rhsMat[rhsMatOffset + 12] * vector.x
-						+ rhsMat[rhsMatOffset + 13] * vector.y
-						+ rhsMat[rhsMatOffset + 14] * vector.z
-						+ rhsMat[rhsMatOffset + 15] * vector.w);
+	public Vector4f multiplyM4V(float[] lhsMat, int matOffset,
+			final Vector4f vector) {
+		return set(x = lhsMat[matOffset] * vector.x + lhsMat[matOffset + 1]
+				* vector.y + lhsMat[matOffset + 2] * vector.z
+				+ lhsMat[matOffset + 3] * vector.w, lhsMat[matOffset + 4]
+				* vector.x + lhsMat[matOffset + 5] * vector.y
+				+ lhsMat[matOffset + 6] * vector.z + lhsMat[matOffset + 7]
+				* vector.w, lhsMat[matOffset + 8] * vector.x
+				+ lhsMat[matOffset + 9] * vector.y + lhsMat[matOffset + 10]
+				* vector.z + lhsMat[matOffset + 11] * vector.w,
+				lhsMat[matOffset + 12] * vector.x + lhsMat[matOffset + 13]
+						* vector.y + lhsMat[matOffset + 14] * vector.z
+						+ lhsMat[matOffset + 15] * vector.w);
 	}
 
-	public Vector4f multiplyMV(float[] lhsMat, int lhsMatOffset, Vector4f vector) {
-		return set(vector.x * lhsMat[lhsMatOffset] + vector.y
-				* lhsMat[lhsMatOffset + 4] + vector.z
-				* lhsMat[lhsMatOffset + 8] + vector.w
-				* lhsMat[lhsMatOffset + 12], vector.x
-				* lhsMat[lhsMatOffset + 1] + vector.y
-				* lhsMat[lhsMatOffset + 5] + vector.z
-				* lhsMat[lhsMatOffset + 9] + vector.w
-				* lhsMat[lhsMatOffset + 13], vector.x
-				* lhsMat[lhsMatOffset + 2] + vector.y
-				* lhsMat[lhsMatOffset + 6] + vector.z
-				* lhsMat[lhsMatOffset + 10] + vector.w
-				* lhsMat[lhsMatOffset + 14], vector.x
-				* lhsMat[lhsMatOffset + 3] + vector.y
-				* lhsMat[lhsMatOffset + 7] + vector.z
-				* lhsMat[lhsMatOffset + 11] + vector.w
-				* lhsMat[lhsMatOffset + 15]);
+	public Vector4f multiplyVM4(Vector4f vector, float[] rhsMat, int matOffset) {
+		return set(vector.x * rhsMat[matOffset] + vector.y
+				* rhsMat[matOffset + 4] + vector.z * rhsMat[matOffset + 8]
+				+ vector.w * rhsMat[matOffset + 12], vector.x
+				* rhsMat[matOffset + 1] + vector.y * rhsMat[matOffset + 5]
+				+ vector.z * rhsMat[matOffset + 9] + vector.w
+				* rhsMat[matOffset + 13], vector.x * rhsMat[matOffset + 2]
+				+ vector.y * rhsMat[matOffset + 6] + vector.z
+				* rhsMat[matOffset + 10] + vector.w * rhsMat[matOffset + 14],
+				vector.x * rhsMat[matOffset + 3] + vector.y
+						* rhsMat[matOffset + 7] + vector.z
+						* rhsMat[matOffset + 11] + vector.w
+						* rhsMat[matOffset + 15]);
 	}
 
 	public Vector4f multiply(final float pX, final float pY, final float pZ,

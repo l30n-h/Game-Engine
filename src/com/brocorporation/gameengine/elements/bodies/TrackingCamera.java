@@ -27,10 +27,8 @@ public class TrackingCamera extends Camera {
 
 	public void followBody(final DynamicBody body, final float offsetX,
 			final float offsetY, final float offsetZ) {
-		if (followBody != body) {
-			followBody = body;
-			followOffset.set(offsetX, offsetY, offsetZ);
-		}
+		followBody = body;
+		followOffset.set(offsetX, offsetY, offsetZ);
 	}
 
 	@Override

@@ -322,6 +322,29 @@ public class Quaternion extends Vector4f {
 		return result;
 	}
 
+	public float[] getRotationMatrix3(final float[] result) {
+		final float x2 = x * x;
+		final float y2 = y * y;
+		final float z2 = z * z;
+		final float xy = x * y;
+		final float xz = x * z;
+		final float yz = y * z;
+		final float wx = w * x;
+		final float wy = w * y;
+		final float wz = w * z;
+
+		result[0] = 1 - 2 * (y2 + z2);
+		result[1] = 2 * (xy + wz);
+		result[2] = 2 * (xz - wy);
+		result[3] = 2 * (xy - wz);
+		result[4] = 1 - 2 * (x2 + z2);
+		result[5] = 2 * (yz + wx);
+		result[6] = 2 * (xz + wy);
+		result[7] = 2 * (yz - wx);
+		result[8] = 1 - 2 * (x2 + y2);
+		return result;
+	}
+
 	public Quaternion lookAt(final float pFromX, final float pFromY,
 			final float pFromZ, final float pToX, final float pToY,
 			final float pToZ) {

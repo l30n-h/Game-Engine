@@ -18,7 +18,7 @@ public class GJK {
 	private final static Vector3f v0 = new Vector3f();
 	private final static Vector3f p = new Vector3f();
 	private final static Vector3f w = new Vector3f();
-	private static float s, t, lastS, lastT;
+	private static float s, t;
 
 	public static float distance(Contact contact, IShape shape1, IShape shape2) {
 		simplex.clear();
@@ -42,13 +42,11 @@ public class GJK {
 				d0_2 = d_2;
 				d_2 = closestPointToOrigin(v, simplex);
 				if (d_2 >= d0_2) {
-					v.set(v0);
-					d_2 = d0_2;
+					// TODO
+					// v.set(v0);
+					// d_2 = d0_2;
 					break;
 				}
-				lastS = s;
-				if (simplex.size() == 3)
-					lastT = t;
 			} while (d_2 > EPSILON_2 && i++ < MAX_ITERATIONS
 					&& (d0_2 - 2 * v0.dot(v) + d_2) > EPSILON_2);
 		}
@@ -57,7 +55,7 @@ public class GJK {
 			contact.getNormal().set(0, 0, 0);
 			return 0;
 		}
-		getClosestPoints(contact, simplex, v);
+		getDistanceClosestPoints(contact, simplex, v);
 		d_2 = (float) Math.sqrt(d_2);
 		contact.setDistance(d_2);
 		contact.getNormal().setScale(v, -1 / d_2);
@@ -95,14 +93,12 @@ public class GJK {
 				v0.set(v);
 				d0_2 = d_2;
 				d_2 = closestPointToOrigin(v, simplex);
-				if (d_2 >= d0_2) {
-					v.set(v0);
-					d_2 = d0_2;
+				if (d_2 > d0_2) {
+					// TODO
+					// v.set(v0);
+					// d_2 = d0_2;
 					break;
 				}
-				lastS = s;
-				if (simplex.size() == 3)
-					lastT = t;
 			} while (d_2 > EPSILON_2
 					&& i++ < MAX_ITERATIONS
 					&& (checkIntersection || (d0_2 - 2 * v0.dot(v) + d_2) > EPSILON_2));
@@ -114,7 +110,7 @@ public class GJK {
 				// EPA
 				return true;
 			} else {
-				getClosestPoints(contact, simplex, v);
+				getIntersectsClosestPoints(contact, simplex, v);
 				if (simplex.size() == 3) {
 					contact.setDistance(-(r2 - (float) Math.sqrt(Distance
 							.distanceToPlane(v, simplex.getV(2),
@@ -128,10 +124,15 @@ public class GJK {
 				return true;
 			}
 		} else {
-			getClosestPoints(contact, simplex, v);
+			getDistanceClosestPoints(contact, simplex, v);
 			d_2 = (float) Math.sqrt(d_2);
 			contact.setDistance(d_2);
-			contact.getNormal().setScale(v, -1 / d_2);
+			if (d_2 == 0) {// TODO Problem sollte nicht vorkommen oder? liegt am
+							// Tetrahedron aufgefallen mit Sphere
+				contact.setDistance(-v.normLength());
+				contact.getNormal().set(v);
+			} else
+				contact.getNormal().setScale(v, -1 / d_2);
 			return false;
 		}
 	}
@@ -350,7 +351,9 @@ public class GJK {
 		float abXacZ = AB.x * AC.y - AB.y * AC.x;
 		float dO = AD.x * abXacX + AD.y * abXacY + AD.z * abXacZ;
 		if (Math.abs(dO) <= EPSILON_2) {
-			// degenerated
+			// TODO degenerated lösche nur damit contact points berechnet werden
+			// können
+			simplex.removeA();
 			return result.dot(result);
 		}
 		float dD = -A.x * abXacX - A.y * abXacY - A.z * abXacZ;
@@ -389,6 +392,8 @@ public class GJK {
 			return 0;
 		}
 		if (dOsign != Math.signum(dO - dD - dC - dB)) {
+			// TODO dOsing != dAsign remove A cause Origin lies outside BCD
+			simplex.removeA();
 			return result.dot(result);
 		}
 		byte rem = 0;
@@ -479,10 +484,11 @@ public class GJK {
 				} else {
 					final float vd = aoab * boad - boab * aoad;
 					if (vd <= 0 && aoab >= 0 && boab <= 0) {
-						s = aoab / (aoab - boab);
-						tmp.setAddScaled(A, AB, s);
+						float ss = aoab / (aoab - boab);
+						tmp.setAddScaled(A, AB, ss);
 						d = tmp.dot(tmp);
 						if (d < bestsqD) {
+							s = ss;
 							bestsqD = d;
 							result.set(tmp);
 							rem = 12;
@@ -500,10 +506,11 @@ public class GJK {
 						} else {
 							final float vb = doab * aoad - aoab * doad;
 							if (vb <= 0 && aoad >= 0 && doad <= 0) {
-								s = aoad / (aoad - doad);
-								tmp.setAddScaled(A, AD, s);
+								float ss = aoad / (aoad - doad);
+								tmp.setAddScaled(A, AD, ss);
 								d = tmp.dot(tmp);
 								if (d < bestsqD) {
+									s = ss;
 									bestsqD = d;
 									result.set(tmp);
 									rem = 6;
@@ -513,22 +520,26 @@ public class GJK {
 								final float badmbab, dabmdad;
 								if (va <= 0 && (badmbab = boad - boab) >= 0
 										&& (dabmdad = doab - doad) >= 0) {
-									s = badmbab / (badmbab + dabmdad);
+									float ss = badmbab / (badmbab + dabmdad);
 									tmp.setAddScaled(B, tmp.setSubtract(D, B),
-											s);
+											ss);
 									d = tmp.dot(tmp);
 									if (d < bestsqD) {
+										s = ss;
 										bestsqD = d;
 										result.set(tmp);
 										rem = 5;
 									}
 								} else {
 									final float denom = 1 / (va + vb + vd);
-									s = vb * denom;
-									t = vd * denom;
-									tmp.setAddScaled(A, AB, s).addScaled(AD, t);
+									float ss = vb * denom;
+									float tt = vd * denom;
+									tmp.setAddScaled(A, AB, ss).addScaled(AD,
+											tt);
 									d = tmp.dot(tmp);
 									if (d < bestsqD) {
+										s = ss;
+										t = tt;
 										bestsqD = d;
 										result.set(tmp);
 										rem = 4;
@@ -541,7 +552,7 @@ public class GJK {
 			}
 		}
 		if (!samedOdB) {// distance to ACD
-			if (aoad <= 0 && aoac <= 0) {
+			if (aoac <= 0 && aoad <= 0) {
 				d = A.dot(A);
 				if (d < bestsqD) {
 					bestsqD = d;
@@ -549,68 +560,74 @@ public class GJK {
 					rem = 14;
 				}
 			} else {
-				final float doad = -D.dot(AD);
-				final float doac = -D.dot(AC);
-				if (doad >= 0 && doac <= doad) {
-					d = D.dot(D);
+				final float coac = -C.dot(AC);
+				final float coad = -C.dot(AD);
+				if (coac >= 0 && coad <= coac) {
+					d = C.dot(C);
 					if (d < bestsqD) {
 						bestsqD = d;
-						result.set(D);
-						rem = 7;
+						result.set(C);
+						rem = 11;
 					}
 				} else {
-					final float vc = aoad * doac - doad * aoac;
-					if (vc <= 0 && aoad >= 0 && doad <= 0) {
-						s = aoad / (aoad - doad);
-						tmp.setAddScaled(A, AD, s);
+					final float vd = aoac * coad - coac * aoad;
+					if (vd <= 0 && aoac >= 0 && coac <= 0) {
+						float ss = aoac / (aoac - coac);
+						tmp.setAddScaled(A, AC, ss);
 						d = tmp.dot(tmp);
 						if (d < bestsqD) {
+							s = ss;
 							bestsqD = d;
 							result.set(tmp);
-							rem = 6;
+							rem = 10;
 						}
 					} else {
-						final float coad = -C.dot(AD);
-						final float coac = -C.dot(AC);
-						if (coac >= 0 && coad <= coac) {
-							d = C.dot(C);
+						final float doac = -D.dot(AC);
+						final float doad = -D.dot(AD);
+						if (doad >= 0 && doac <= doad) {
+							d = D.dot(D);
 							if (d < bestsqD) {
 								bestsqD = d;
-								result.set(C);
-								rem = 11;
+								result.set(D);
+								rem = 7;
 							}
 						} else {
-							final float vd = coad * aoac - aoad * coac;
-							if (vd <= 0 && aoac >= 0 && coac <= 0) {
-								s = aoac / (aoac - coac);
-								tmp.setAddScaled(A, AC, s);
+							final float vc = doac * aoad - aoac * doad;
+							if (vc <= 0 && aoad >= 0 && doad <= 0) {
+								float ss = aoad / (aoad - doad);
+								tmp.setAddScaled(A, AD, ss);
 								d = tmp.dot(tmp);
 								if (d < bestsqD) {
+									s = ss;
 									bestsqD = d;
 									result.set(tmp);
-									rem = 10;
+									rem = 6;
 								}
 							} else {
-								final float va = doad * coac - coad * doac;
-								final float dacmdad, cadmcac;
-								if (va <= 0 && (dacmdad = doac - doad) >= 0
-										&& (cadmcac = coad - coac) >= 0) {
-									s = dacmdad / (dacmdad + cadmcac);
-									tmp.setAddScaled(D, tmp.setSubtract(C, D),
-											s);
+								final float va = coac * doad - doac * coad;
+								final float cadmcac, dacmdad;
+								if (va <= 0 && (cadmcac = coad - coac) >= 0
+										&& (dacmdad = doac - doad) >= 0) {
+									float ss = cadmcac / (cadmcac + dacmdad);
+									tmp.setAddScaled(C, tmp.setSubtract(D, C),
+											ss);
 									d = tmp.dot(tmp);
 									if (d < bestsqD) {
+										s = ss;
 										bestsqD = d;
 										result.set(tmp);
 										rem = 3;
 									}
 								} else {
-									final float denom = 1 / (va + vd + vc);
-									s = vd * denom;
-									t = vc * denom;
-									tmp.setAddScaled(A, AD, s).addScaled(AC, t);
+									final float denom = 1 / (va + vc + vd);
+									float ss = vc * denom;
+									float tt = vd * denom;
+									tmp.setAddScaled(A, AC, ss).addScaled(AD,
+											tt);
 									d = tmp.dot(tmp);
 									if (d < bestsqD) {
+										s = ss;
+										t = tt;
 										bestsqD = d;
 										result.set(tmp);
 										rem = 2;
@@ -648,7 +665,7 @@ public class GJK {
 		}
 	}
 
-	public static void getClosestPoints(Contact c, Simplex simplex,
+	public static void getDistanceClosestPoints(Contact c, Simplex simplex,
 			Vector3f normal) {
 		if (simplex.size() == 1) {
 			final Element e0 = simplex.get(0);
@@ -657,25 +674,48 @@ public class GJK {
 		} else if (simplex.size() == 2) {
 			final Element eA = simplex.get(0);
 			final Element eB = simplex.get(1);
-			float r2 = 1 - lastS;
-			c.getPointA().setScale(eA.pA, lastS).addScaled(eB.pA, r2);
+			float r2 = 1 - s;
+			c.getPointA().setScale(eA.pA, s).addScaled(eB.pA, r2);
 			if (normal == null) {
-				c.getPointB().set(eA.pB.scale(lastS).addScaled(eB.pB, r2));
+				c.getPointB().set(eA.pB.scale(s).addScaled(eB.pB, r2));
 			} else
 				c.getPointB().setSubtract(c.getPointA(), normal);
 		} else if (simplex.size() == 3) {
 			final Element eA = simplex.get(0);
 			final Element eB = simplex.get(1);
 			final Element eC = simplex.get(2);
-			float r3 = 1 - lastT - lastS;
-			c.getPointA().setScale(eA.pA, lastT).addScaled(eB.pA, lastS)
+			float r3 = 1 - t - s;
+			c.getPointA().setScale(eA.pA, t).addScaled(eB.pA, s)
 					.addScaled(eC.pA, r3);
 			if (normal == null) {
-				c.getPointB().set(
-						eA.pB.scale(lastT).addScaled(eB.pB, lastS)
+				c.getPointB()
+						.set(eA.pB.scale(t).addScaled(eB.pB, s)
 								.addScaled(eC.pB, r3));
 			} else
 				c.getPointB().setSubtract(c.getPointA(), normal);
+		}
+	}
+
+	public static void getIntersectsClosestPoints(Contact c, Simplex simplex,
+			Vector3f normal) {
+		if (simplex.size() == 1) {
+			final Element e0 = simplex.get(0);
+			c.getPointA().set(e0.pA);
+			c.getPointB().set(c.getPointA());
+		} else if (simplex.size() == 2) {
+			final Element eA = simplex.get(0);
+			final Element eB = simplex.get(1);
+			float r2 = 1 - s;
+			c.getPointA().setScale(eA.pA, s).addScaled(eB.pA, r2);
+			c.getPointB().set(c.getPointA().subtractScaled(normal, 0.5f));
+		} else if (simplex.size() == 3) {
+			final Element eA = simplex.get(0);
+			final Element eB = simplex.get(1);
+			final Element eC = simplex.get(2);
+			float r3 = 1 - t - s;
+			c.getPointA().setScale(eA.pA, t).addScaled(eB.pA, s)
+					.addScaled(eC.pA, r3);
+			c.getPointB().set(c.getPointA().subtractScaled(normal, 0.5f));
 		}
 	}
 }

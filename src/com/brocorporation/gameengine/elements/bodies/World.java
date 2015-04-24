@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.brocorporation.gameengine.IUpdateInfo;
+import com.brocorporation.gameengine.MyGLSurfaceView;
 import com.brocorporation.gameengine.elements.collision.AABB;
 import com.brocorporation.gameengine.elements.collision.Collidable;
 import com.brocorporation.gameengine.elements.collision.CollisionDetection;
@@ -16,7 +17,6 @@ import com.brocorporation.gameengine.elements.collision.MPR;
 import com.brocorporation.gameengine.elements.collision.Octree;
 import com.brocorporation.gameengine.elements.collision.RaycastHit;
 import com.brocorporation.gameengine.elements.collision.SpeculativeContactSolver;
-import com.brocorporation.gameengine.elements.collision.Sphere;
 import com.brocorporation.gameengine.elements.collision.Tree;
 
 public class World implements CollisionDetection.BroadphaseCallback {
@@ -28,7 +28,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	protected final List<Constraint> constraintList = new ArrayList<Constraint>();
 	protected Camera activeCamera;
 	protected StaticLight activeLight;
-
+	
 	@Override
 	public void broadphaseCollision(final DynamicBody dynBody,
 			final StaticBody stcBody, final IUpdateInfo uInfo) {
@@ -46,15 +46,26 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				
 				// MPR.relVel.set(dynBody.getLinearVelocity());
 				if (MPR.intersects(c, stcShape, dynShape)) {
-					if(dynShape instanceof Sphere){
-						c.getPointB().set(dynShape.getPosition()).subtractScaled(c.getNormal(), ((Sphere) dynShape).getRadius());
-						c.getPointA().setSubtractScaled(c.getPointB(), c.getNormal(), c.getDistance());
-					}
+					System.out.println("=================mpr==============");
 					ElasticContactSolver.addContact(stcBody, dynBody, c);
 				}
 				
 			} else {
+				System.out.println("=================gjk==============");
 				ElasticContactSolver.addContact(stcBody, dynBody, c);
+			}	
+			if(dynBody.getMass()==80){
+				System.out.println();
+				if(dynBody instanceof RigidBody) {
+					System.out.println(((RigidBody) dynBody).getAngularVelocity());
+					System.out.println(((RigidBody) dynBody).getAngularVelocity().length());
+				}
+				System.out.println(dynShape.getPosition());
+				System.out.println(c.getPointA());
+				System.out.println(c.getNormal());
+				MyGLSurfaceView.cPSet = true;
+				MyGLSurfaceView.cPoint.getPosition().set(c.getPointA());
+				MyGLSurfaceView.cPNormal.set(c.getNormal());
 			}
 		} else {
 			SpeculativeContactSolver.addContact(stcBody, dynBody,

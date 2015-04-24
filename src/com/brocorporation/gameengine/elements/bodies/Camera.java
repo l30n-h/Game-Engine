@@ -138,8 +138,8 @@ public abstract class Camera implements AABB.IBounds {
 	public abstract void updatePosition(final IUpdateInfo uInfo);
 
 	public float[] getViewMatrix() {
-			MatrixExt.setLookAtDirM(viewMatrix, 0, position,
-					normedViewDirection, side, up);
+		MatrixExt.setLookAtDirM(viewMatrix, 0, position, normedViewDirection,
+				side, up);
 		return viewMatrix;
 	}
 

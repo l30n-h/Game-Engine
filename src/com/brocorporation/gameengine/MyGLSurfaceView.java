@@ -75,54 +75,10 @@ public class MyGLSurfaceView extends GameEngine {
 	private final List<Object> frustumList = new ArrayList<Object>();
 
 	public MyGLSurfaceView() {
-		//super(25, 80);
-
-		final Vector3f p1 = new Vector3f(0, 0f, 0);
-		final Vector3f p2 = new Vector3f(1f, 1f, 1f);
-		final Vector3f direction = new Vector3f(1, 0, 1);
-
-		Convex cB1 = new Convex(new Vector3f[] {
-				new Vector3f(-1, -1, -1).add(p1),
-				new Vector3f(-1, -1, +1).add(p1),
-				new Vector3f(-1, +1, -1).add(p1),
-				new Vector3f(-1, +1, +1).add(p1),
-				new Vector3f(+1, -1, -1).add(p1),
-				new Vector3f(+1, -1, +1).add(p1),
-				new Vector3f(+1, +1, -1).add(p1),
-				new Vector3f(+1, +1, +1).add(p1) });
-
-		Convex cB2 = new Convex(new Vector3f[] {
-				new Vector3f(-1, -1, -1).add(p2),
-				new Vector3f(-1, -1, +1).add(p2),
-				new Vector3f(-1, +1, -1).add(p2),
-				new Vector3f(-1, +1, +1).add(p2),
-				new Vector3f(+1, -1, -1).add(p2),
-				new Vector3f(+1, -1, +1).add(p2),
-				new Vector3f(+1, +1, -1).add(p2),
-				new Vector3f(+1, +1, +1).add(p2) });
-		Vector3f normal = new Vector3f();
-		System.out.println("Intersects " + MPR.intersects(cB1, cB2));
-		System.out.println("Intersects "
-				+ MPR.intersects(Contact.DEFAULT, cB1, cB2));
-		System.out.println("Distance   " + Contact.DEFAULT.getDistance()
-				+ "\tNormal     " + Contact.DEFAULT.getNormal());
-		System.out.println("Intersects " + GJK.intersects(cB1, cB2));
-		System.out.println("Distance   "
-				+ GJK.distance(Contact.DEFAULT, cB1, cB2));
-		System.out.println("\tNormal     " + Contact.DEFAULT.getNormal());
-		final RaycastHit hit = RaycastHit.DEFAULT;
-		System.out.println("StcRaycast "
-				+ GJK.rayCast(hit, normal, p1, direction, cB2));
-		System.out.println("\tPoint: " + hit.getPoint());
-		System.out.println("\tNormal: " + normal);
-		System.out.println("DynRaycast "
-				+ GJK.rayCast(hit, normal, p1, direction, cB1, cB2));
-		System.out.println("\tPoint: " + hit.getPoint());
-		System.out.println("\tNormal: " + normal);
+		super(25*4, 80);
 		
-		//System.exit(0);
 	}
-
+	
 	public void create() {
 		try {
 			Display.setDisplayMode(new DisplayMode(800, 500));
@@ -328,7 +284,12 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-1.6F, -1.75F, -24F),
 				new Vector3f(-1.6F, -1.75F, 21.8F),
 				new Vector3f(10.4F, -1.75F, 21.8F),
-				new Vector3f(10.4F, -1.75F, -24F)});
+				new Vector3f(10.4F, -1.75F, -24F)
+				,
+				new Vector3f(-1.6F, -10.75F, -24F),
+				new Vector3f(-1.6F, -10.75F, 21.8F),
+				new Vector3f(10.4F, -10.75F, 21.8F),
+				new Vector3f(10.4F, -10.75F, -24F)});
 		final Convex floorBig2 = new Convex(new Vector3f[] {
 				new Vector3f(-1.6F, 2.25F, -24F),
 				new Vector3f(-1.6F, 2.25F, 21.8F),
@@ -462,16 +423,16 @@ public class MyGLSurfaceView extends GameEngine {
 		actor2 = new Actor(new Convex(a), Actor.INFINITY_MASS);
 		actor2.setPosition(0, 0, 12);
 		actor2.setGLShape(actorShape);
-		actor2.rotate(0, 45, 0);
+		actor2.rotate(0, 45-11, 0);
 		actor2.setJumpingHeight(2);
 		actor2.isGravityEnabled(true);
 		actor2.setMaxVelocity(13);
 		world.add(actor2);
 
-		//actor = new Actor(new Convex(a), 80);
-		actor = new Actor(new Sphere(0.896F), 80);
+		actor = new Actor(new Convex(a), 80);
+		//actor = new Actor(new Sphere(0.896F/2), 80);
 		actor.setPosition(0, 0, 14);
-		actor.rotate(0, 180, 0);
+		actor.rotate(23*0, 180*0, 0);
 		actor.setGLShape(actorShape);
 		actor.setJumpingHeight(2);
 		actor.isGravityEnabled(true);
@@ -602,25 +563,25 @@ public class MyGLSurfaceView extends GameEngine {
 					final StaticLight light = world.getActiveLight();
 					light.followBody(currentActor, 0, 1.7F, -1);
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
+				else if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
 					renderbounds = !renderbounds;
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
+				else if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
 					renderSweptBounds = !renderSweptBounds;
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F3) {
+				else if (Keyboard.getEventKey() == Keyboard.KEY_F3) {
 					renderTree = !renderTree;
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F4) {
+				else if (Keyboard.getEventKey() == Keyboard.KEY_F4) {
 					renderRay = !renderRay;
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
+				else if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
 					renderRoom = !renderRoom;
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_F6) {
+				else if (Keyboard.getEventKey() == Keyboard.KEY_F6) {
 					renderDynamics = !renderDynamics;
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+				else if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					if (isPaused) {
 						resume();
 					} else
@@ -643,9 +604,17 @@ public class MyGLSurfaceView extends GameEngine {
 		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
 			currentActor.jump();
 		}
-		if (!isPaused())
-			world.update(uInfo);
+		if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+			resume();
+		}
+		if (!isPaused()){cPSet = false;
+			world.update(uInfo);}
+		pause();
 	}
+	
+	public static AABB cPoint = new AABB(0.08f,0.08f,0.08f);
+	public static Vector3f cPNormal = new Vector3f();
+	public static boolean cPSet;
 
 	boolean renderRoom = true, renderDynamics = true;
 	boolean renderbounds, renderSweptBounds, renderTree, renderRay;
@@ -712,6 +681,15 @@ public class MyGLSurfaceView extends GameEngine {
 			actorShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
 		}
 		primitiveShader.use();
+		
+		if(cPSet){
+			primitiveShape.setColor(1, 1, 0, 1);
+			primitiveShape.addAABB(cPoint);
+			Vector3f p = cPoint.getPosition();
+			primitiveShape.addLine(p.x,p.y,p.z,p.x+cPNormal.x,p.y+cPNormal.y,p.z+cPNormal.z);
+			primitiveShape.render(vpMatrix);
+		}
+		
 		if (selectedBody != null) {
 			primitiveShape.setColor(0, 1, 0, 1);
 			primitiveShape.addAABB(selectedBody.getAABB());
@@ -752,8 +730,8 @@ public class MyGLSurfaceView extends GameEngine {
 		if (renderRay) {
 			primitiveShape.setColor(0, 0, 1, 1);
 			primitiveShape.addLine(fromPoint.x, fromPoint.y, fromPoint.z,
-					fromPoint.x + dir.x * 100000, fromPoint.y + dir.y * 100000,
-					fromPoint.z + dir.z * 100000);
+					fromPoint.x + dir.x * 1000, fromPoint.y + dir.y * 100000,
+					fromPoint.z + dir.z * 1000);
 			primitiveShape.render(vpMatrix);
 		}
 		fontShader.use();

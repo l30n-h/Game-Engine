@@ -84,12 +84,13 @@ public class AABB implements IShape {
 	@Override
 	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
 			float inverseMass) {
-		final float ww = halfsize.x * halfsize.x;
-		final float hh = halfsize.y * halfsize.y;
-		final float dd = halfsize.z * halfsize.z;
+		final float ww = baseHalfsize.x * baseHalfsize.x;
+		final float hh = baseHalfsize.y * baseHalfsize.y;
+		final float dd = baseHalfsize.z * baseHalfsize.z;
 		final float s = 3 * inverseMass;
 		// inverseInertiaTensor.set(s / (hh + dd), s / (ww + dd), s / (ww +
 		// hh));
+		inverseInertiaTensor[1] = inverseInertiaTensor[2] = inverseInertiaTensor[3] = inverseInertiaTensor[5] = inverseInertiaTensor[6] = inverseInertiaTensor[7] = 0;
 		inverseInertiaTensor[0] = s / (hh + dd);
 		inverseInertiaTensor[4] = s / (ww + dd);
 		inverseInertiaTensor[8] = s / (ww + hh);

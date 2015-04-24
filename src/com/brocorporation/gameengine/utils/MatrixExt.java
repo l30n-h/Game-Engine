@@ -127,9 +127,9 @@ public class MatrixExt extends Matrix {
 	}
 
 	public static void transposeM3(final float[] result, final float[] matrix) {
-		final float tmp1 = result[1];
-		final float tmp2 = result[2];
-		final float tmp5 = result[5];
+		final float tmp1 = matrix[1];
+		final float tmp2 = matrix[2];
+		final float tmp5 = matrix[5];
 		result[0] = matrix[0];
 		result[1] = matrix[3];
 		result[2] = matrix[6];

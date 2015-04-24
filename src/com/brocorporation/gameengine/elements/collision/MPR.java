@@ -164,7 +164,7 @@ public class MPR {
 	public static Vector3f relVel = new Vector3f();
 	public static StringBuilder bu = new StringBuilder();
 	static boolean out;
-	static boolean debug = true;
+	static boolean debug = false;
 
 	protected static void findPenetration(Contact contact, IShape shape1,
 			IShape shape2) {
@@ -197,7 +197,7 @@ public class MPR {
 			// d = (float) Math.sqrt(d);
 			contact.setDistance(-d);
 			// n.norm();
-			findPos(contact.getPointA(), shape1, shape2, n);
+			findPos(contact, shape1, shape2, n);
 
 			if (debug) {
 				bu.append("n : " + n + "\t" + d + "\n");
@@ -225,7 +225,7 @@ public class MPR {
 			d = (float) Math.sqrt(d);
 			c.setDistance(-d);
 			n.norm();
-			findPos(c.getPointA(), shape1, shape2, n);
+			findPos(c, shape1, shape2, n);
 		}
 		return;
 	}
@@ -235,15 +235,17 @@ public class MPR {
 		c.setDistance(0);
 		c.getNormal().set(0, 0, 0);
 		c.getPointA().setAdd(e1.pA, e1.pB).scale(0.5f);
+		c.getPointB().set(c.getPointA());
 	}
 
 	protected static void findPenetrationSegment(Contact c) {
 		c.getPointA().setAdd(e1.pA, e1.pB).scale(0.5f);
 		c.getNormal().set(e1.v);
 		c.setDistance(-c.getNormal().normLength());
+		c.getPointB().set(c.getPointA());
 	}
 
-	protected static void findPos(Vector3f pos, IShape shape1, IShape shape2,
+	protected static void findPos(Contact c, IShape shape1, IShape shape2,
 			Vector3f normedNormal) {
 		float b0 = temp1.setCross(e1.v, e2.v).dot(e3.v);
 		float b1 = temp2.setCross(e3.v, e2.v).dot(e0.v);
@@ -251,33 +253,39 @@ public class MPR {
 		float b3 = -temp1.dot(e0.v);
 
 		float sum = b0 + b1 + b2 + b3;
-
 		if (sum <= 0) {
 			b1 = -temp2.dot(normedNormal);
 			b2 = temp3.setCross(e3.v, e1.v).dot(normedNormal);
 			b3 = temp1.dot(normedNormal);
 			sum = b1 + b2 + b3;
 			final float invHalfSum = 0.5f / sum;
-			pos.set(((e1.pA.x + e1.pB.x) * b1 + (e2.pA.x + e2.pB.x) * b2 + (e3.pA.x + e3.pB.x)
-					* b3)
-					* invHalfSum, ((e1.pA.y + e1.pB.y) * b1
-					+ (e2.pA.y + e2.pB.y) * b2 + (e3.pA.y + e3.pB.y) * b3)
-					* invHalfSum, ((e1.pA.z + e1.pB.z) * b1
-					+ (e2.pA.z + e2.pB.z) * b2 + (e3.pA.z + e3.pB.z) * b3)
-					* invHalfSum);
+			c.getPointA()
+					.set(((e1.pA.x + e1.pB.x) * b1 + (e2.pA.x + e2.pB.x) * b2 + (e3.pA.x + e3.pB.x)
+							* b3)
+							* invHalfSum,
+							((e1.pA.y + e1.pB.y) * b1 + (e2.pA.y + e2.pB.y)
+									* b2 + (e3.pA.y + e3.pB.y) * b3)
+									* invHalfSum,
+							((e1.pA.z + e1.pB.z) * b1 + (e2.pA.z + e2.pB.z)
+									* b2 + (e3.pA.z + e3.pB.z) * b3)
+									* invHalfSum);
 		} else {
 			final float invHalfSum = 0.5f / sum;
-			pos.set(((e0.pA.x + e0.pB.x) * b0 + (e1.pA.x + e1.pB.x) * b1
-					+ (e2.pA.x + e2.pB.x) * b2 + (e3.pA.x + e3.pB.x) * b3)
-					* invHalfSum,
+			c.getPointA().set(
+					((e0.pA.x + e0.pB.x) * b0 + (e1.pA.x + e1.pB.x) * b1
+							+ (e2.pA.x + e2.pB.x) * b2 + (e3.pA.x + e3.pB.x)
+							* b3)
+							* invHalfSum,
 					((e0.pA.y + e0.pB.y) * b0 + (e1.pA.y + e1.pB.y) * b1
 							+ (e2.pA.y + e2.pB.y) * b2 + (e3.pA.y + e3.pB.y)
 							* b3)
-							* invHalfSum, ((e0.pA.z + e0.pB.z) * b0
-							+ (e1.pA.z + e1.pB.z) * b1 + (e2.pA.z + e2.pB.z)
-							* b2 + (e3.pA.z + e3.pB.z) * b3)
+							* invHalfSum,
+					((e0.pA.z + e0.pB.z) * b0 + (e1.pA.z + e1.pB.z) * b1
+							+ (e2.pA.z + e2.pB.z) * b2 + (e3.pA.z + e3.pB.z)
+							* b3)
 							* invHalfSum);
 		}
+		c.getPointB().set(c.getPointA());
 	}
 
 	protected static void expandPortal(Element e) {

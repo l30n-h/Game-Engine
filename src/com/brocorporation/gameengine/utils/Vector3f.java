@@ -121,49 +121,45 @@ public class Vector3f {
 				vector2.y, vector2.z, scalar);
 	}
 
-	public Vector3f multiplyVM3(final Vector3f vector, float[] rhsMat,
-			int rhsMatOffset) {
-		return set(x = rhsMat[rhsMatOffset] * vector.x
-				+ rhsMat[rhsMatOffset + 1] * vector.y
-				+ rhsMat[rhsMatOffset + 2] * vector.z,
-				y = rhsMat[rhsMatOffset + 3] * vector.x
-						+ rhsMat[rhsMatOffset + 4] * vector.y
-						+ rhsMat[rhsMatOffset + 5] * vector.z,
-				z = rhsMat[rhsMatOffset + 6] * vector.x
-						+ rhsMat[rhsMatOffset + 7] * vector.y
-						+ rhsMat[rhsMatOffset + 8] * vector.z);
+	public Vector3f multiplyM3V(float[] lhsMat, int matoffset, Vector3f vector) {
+		return set(lhsMat[matoffset] * vector.x + lhsMat[matoffset + 1]
+				* vector.y + lhsMat[matoffset + 2] * vector.z,
+				lhsMat[matoffset + 3] * vector.x + lhsMat[matoffset + 4]
+						* vector.y + lhsMat[matoffset + 5] * vector.z,
+				lhsMat[matoffset + 6] * vector.x + lhsMat[matoffset + 7]
+						* vector.y + lhsMat[matoffset + 8] * vector.z);
 	}
 
-	public Vector3f multiplyM3V(float[] lhsMat, int lhsMatOffset,
-			Vector3f vector) {
-		return set(vector.x * lhsMat[lhsMatOffset] + vector.y
-				* lhsMat[lhsMatOffset + 3] + vector.z
-				* lhsMat[lhsMatOffset + 6], vector.x * lhsMat[lhsMatOffset + 1]
-				+ vector.y * lhsMat[lhsMatOffset + 4] + vector.z
-				* lhsMat[lhsMatOffset + 7], vector.x * lhsMat[lhsMatOffset + 2]
-				+ vector.y * lhsMat[lhsMatOffset + 5] + vector.z
-				* lhsMat[lhsMatOffset + 8]);
+	public Vector3f multiplyVM3(final Vector3f vector, float[] rhsMat,
+			int rhsMatOffset) {
+		return set(vector.x * rhsMat[rhsMatOffset] + vector.y
+				* rhsMat[rhsMatOffset + 3] + vector.z
+				* rhsMat[rhsMatOffset + 6], vector.x * rhsMat[rhsMatOffset + 1]
+				+ vector.y * rhsMat[rhsMatOffset + 4] + vector.z
+				* rhsMat[rhsMatOffset + 7], vector.x * rhsMat[rhsMatOffset + 2]
+				+ vector.y * rhsMat[rhsMatOffset + 5] + vector.z
+				* rhsMat[rhsMatOffset + 8]);
+	}
+
+	public Vector3f multiplyM4V(float[] lhsMat, int matOffset, Vector3f vector) {
+		return set(lhsMat[matOffset] * vector.x + lhsMat[matOffset + 1]
+				* vector.y + lhsMat[matOffset + 2] * vector.z,
+				lhsMat[matOffset + 4] * vector.x + lhsMat[matOffset + 5]
+						* vector.y + lhsMat[matOffset + 6] * vector.z,
+				lhsMat[matOffset + 8] * vector.x + lhsMat[matOffset + 9]
+						* vector.y + lhsMat[matOffset + 10] * vector.z);
 	}
 
 	public Vector3f multiplyVM4(final Vector3f vector, float[] rhsMat,
-			int rhsMatOffset) {
-		return set(rhsMat[rhsMatOffset] * vector.x + rhsMat[rhsMatOffset + 1]
-				* vector.y + rhsMat[rhsMatOffset + 2] * vector.z,
-				rhsMat[rhsMatOffset + 4] * vector.x + rhsMat[rhsMatOffset + 5]
-						* vector.y + rhsMat[rhsMatOffset + 6] * vector.z,
-				rhsMat[rhsMatOffset + 8] * vector.x + rhsMat[rhsMatOffset + 9]
-						* vector.y + rhsMat[rhsMatOffset + 10] * vector.z);
-	}
-
-	public Vector3f multiplyM4V(float[] lhsMat, int lhsMatOffset,
-			Vector3f vector) {
-		return set(vector.x * lhsMat[lhsMatOffset] + vector.y
-				* lhsMat[lhsMatOffset + 4] + vector.z
-				* lhsMat[lhsMatOffset + 8], vector.x * lhsMat[lhsMatOffset + 1]
-				+ vector.y * lhsMat[lhsMatOffset + 5] + vector.z
-				* lhsMat[lhsMatOffset + 9], vector.x * lhsMat[lhsMatOffset + 2]
-				+ vector.y * lhsMat[lhsMatOffset + 6] + vector.z
-				* lhsMat[lhsMatOffset + 10]);
+			int matOffset) {
+		return set(vector.x * rhsMat[matOffset] + vector.y
+				* rhsMat[matOffset + 4] + vector.z * rhsMat[matOffset + 8],
+				vector.x * rhsMat[matOffset + 1] + vector.y
+						* rhsMat[matOffset + 5] + vector.z
+						* rhsMat[matOffset + 9], vector.x
+						* rhsMat[matOffset + 2] + vector.y
+						* rhsMat[matOffset + 6] + vector.z
+						* rhsMat[matOffset + 10]);
 	}
 
 	public Vector3f multiply(final float pX, final float pY, final float pZ) {

@@ -72,7 +72,7 @@ public class RigidBody extends DynamicBody {
 	}
 
 	static Vector3f tmp = new Vector3f();
-	static float[] rot = new float[16];
+	static float[] rot = new float[9];
 	static float[] tra = new float[9];
 
 	@Override
@@ -83,34 +83,15 @@ public class RigidBody extends DynamicBody {
 			affineTransform.getOrientation().addRotationScaled(angularVelocity,
 					uInfo.getRate());
 			updateOrientation = true;
-			affineTransform.getOrientation().getRotationMatrix(rot);
-			MatrixExt.castM3(rot, rot);
+			if(mass!=80)return;
+			affineTransform.getOrientation().getRotationMatrix3(rot);
 			MatrixExt.transposeM3(tra, rot);
-
-			// MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, rot, 0, defI, 0);
-			// MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
-			// inverseInertiaTensor, 0, tra, 0);//(RxI)xT
-
-			// MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, tra, 0, defI, 0);
-			// MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
-			// inverseInertiaTensor, 0, rot, 0);//(TxI)xR
-			
-			// MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, defI, 0, tra, 0);
-			// MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, rot, 0,
-			// inverseInertiaTensor, 0);//Tx(IxR)
-			
-			// MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, defI, 0, rot, 0);
-			// MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, tra, 0,
-			// inverseInertiaTensor, 0);//Rx(IxT)
-
+			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, rot, 0, defI, 0);
+			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
+			inverseInertiaTensor, 0, tra, 0);//(RxI)xT
+			 
 			// inverseInertiaTensor.multiplyVM4(inverseInertiaTensor.multiplyM4V(rot,
-			// 0,defI), tra, 0); //Rx(IxT)
-			// inverseInertiaTensor.multiplyM4V(tra,
-			// 0,inverseInertiaTensor.multiplyM4V(rot, 0,defI)); //(RxI)xT
-			// inverseInertiaTensor.multiplyVM4(inverseInertiaTensor.multiplyM4V(tra,
-			// 0,defI), rot, 0); //(TxI)xR
-			// inverseInertiaTensor.multiplyM4V(rot,
-			// 0,inverseInertiaTensor.multiplyM4V(tra, 0,defI)); //Tx(IxR)
+			// 0,defI), tra, 0); //(RxI)xT
 		}
 	}
 }
