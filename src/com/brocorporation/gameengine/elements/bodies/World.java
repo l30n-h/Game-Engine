@@ -18,12 +18,13 @@ import com.brocorporation.gameengine.elements.collision.Octree;
 import com.brocorporation.gameengine.elements.collision.RaycastHit;
 import com.brocorporation.gameengine.elements.collision.SpeculativeContactSolver;
 import com.brocorporation.gameengine.elements.collision.Tree;
+import com.brocorporation.gameengine.utils.MatrixExt;
 
 public class World implements CollisionDetection.BroadphaseCallback {
 
 	public final static float GRAVITY = 9.81F;
 
-	protected final Tree collisionTree = new Octree(0, 0, 0, 25);
+	protected final Tree collisionTree = new Octree(0, 0, 0, 250);//TODO size
 	protected final List<DynamicBody> updateList = new ArrayList<DynamicBody>();
 	protected final List<Constraint> constraintList = new ArrayList<Constraint>();
 	protected Camera activeCamera;
@@ -59,6 +60,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				if(dynBody instanceof RigidBody) {
 					System.out.println(((RigidBody) dynBody).getAngularVelocity());
 					System.out.println(((RigidBody) dynBody).getAngularVelocity().length());
+					MatrixExt.logM("inertia", ((RigidBody) dynBody).getInverseInertiaTensor());
 				}
 				System.out.println(dynShape.getPosition());
 				System.out.println(c.getPointA());
@@ -66,10 +68,11 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				MyGLSurfaceView.cPSet = true;
 				MyGLSurfaceView.cPoint.getPosition().set(c.getPointA());
 				MyGLSurfaceView.cPNormal.set(c.getNormal());
+				System.out.println("elastic");
 			}
-		} else {
-			SpeculativeContactSolver.addContact(stcBody, dynBody,
-					c.getNormal(), c.getDistance());
+		} else {System.out.println("=================spc==============");
+			//SpeculativeContactSolver.addContact(stcBody, dynBody,
+			//		c.getNormal(), c.getDistance());
 		}
 		stcBody.onCollide(dynBody);
 		dynBody.onCollide(stcBody);

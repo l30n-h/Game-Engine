@@ -14,17 +14,15 @@ import com.brocorporation.gameengine.elements.bodies.Camera;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.Item;
 import com.brocorporation.gameengine.elements.bodies.Plane;
+import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.elements.bodies.StaticLight;
 import com.brocorporation.gameengine.elements.bodies.TrackingCamera;
 import com.brocorporation.gameengine.elements.bodies.World;
 import com.brocorporation.gameengine.elements.collision.AABB;
 import com.brocorporation.gameengine.elements.collision.Collidable;
-import com.brocorporation.gameengine.elements.collision.Contact;
 import com.brocorporation.gameengine.elements.collision.Convex;
 import com.brocorporation.gameengine.elements.collision.Frustum;
-import com.brocorporation.gameengine.elements.collision.GJK;
-import com.brocorporation.gameengine.elements.collision.MPR;
 import com.brocorporation.gameengine.elements.collision.Material;
 import com.brocorporation.gameengine.elements.collision.Octree;
 import com.brocorporation.gameengine.elements.collision.RaycastHit;
@@ -47,6 +45,7 @@ public class MyGLSurfaceView extends GameEngine {
 	private MainShape roomShape;
 	private MainShape actorShape;
 	private MainShape coinShape;
+	private MainShape sphereShape;
 
 	private World world;
 	private Actor currentActor;
@@ -75,10 +74,10 @@ public class MyGLSurfaceView extends GameEngine {
 	private final List<Object> frustumList = new ArrayList<Object>();
 
 	public MyGLSurfaceView() {
-		super(25*4, 80);
-		
+		super(60, 80);
+
 	}
-	
+
 	public void create() {
 		try {
 			Display.setDisplayMode(new DisplayMode(800, 500));
@@ -110,6 +109,9 @@ public class MyGLSurfaceView extends GameEngine {
 			final WavefrontParser actorParser = new WavefrontParser(
 					"assets/Human3.obj", "assets/Human3.mtl", glTexture);
 			actorParser.parse(false);
+			final WavefrontParser sphereParser = new WavefrontParser(
+					"assets/ball.obj", "assets/ball.mtl", glTexture);
+			sphereParser.parse(false);
 
 			final WavefrontParser coinParser = new WavefrontParser(
 					"assets/Coin.obj", "assets/Coin.mtl", glTexture);
@@ -119,6 +121,8 @@ public class MyGLSurfaceView extends GameEngine {
 					roomParser.get());
 			actorShape = new MainShape(blinnPhongShader, glTexture,
 					actorParser.get());
+			sphereShape = new MainShape(blinnPhongShader, glTexture,
+					sphereParser.get());
 			coinShape = new MainShape(blinnPhongShader, glTexture,
 					coinParser.get());
 			glTexture.loadTexture("font_texture.png");
@@ -284,12 +288,11 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-1.6F, -1.75F, -24F),
 				new Vector3f(-1.6F, -1.75F, 21.8F),
 				new Vector3f(10.4F, -1.75F, 21.8F),
-				new Vector3f(10.4F, -1.75F, -24F)
-				,
+				new Vector3f(10.4F, -1.75F, -24F),
 				new Vector3f(-1.6F, -10.75F, -24F),
 				new Vector3f(-1.6F, -10.75F, 21.8F),
 				new Vector3f(10.4F, -10.75F, 21.8F),
-				new Vector3f(10.4F, -10.75F, -24F)});
+				new Vector3f(10.4F, -10.75F, -24F) });
 		final Convex floorBig2 = new Convex(new Vector3f[] {
 				new Vector3f(-1.6F, 2.25F, -24F),
 				new Vector3f(-1.6F, 2.25F, 21.8F),
@@ -366,6 +369,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(10.4F, 9.75F, 21.8F),
 				new Vector3f(10.4F, 9.75F, 18.6F) });
 		world.add(new Plane(normalUp, floorBig1));
+		//world.add(new RigidBody(floorBig1, 0));
 		world.add(new Plane(normalUp, floorBig2));
 		world.add(new Plane(normalUp, floorBig3));
 		world.add(new Plane(normalDown, ceilingBig1));
@@ -404,39 +408,53 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-0.2f, +0.85f, -0.2f),
 				new Vector3f(-0.2f, -0.85f, +0.2f),
 				new Vector3f(-0.2f, -0.85f, -0.2f) };
-//		 final int bodyCount = 10;
-//		 final int hCount = bodyCount/2;
-//		 for(int i = 0;i<bodyCount;i++){
-//		
-//		 final RigidBody b = new RigidBody(new Convex(a),(i*20+20)*0+10);
-//		 if(i<hCount){
-//		 b.setPosition(0, -0.9f, 10-i*0.4f);
-//		 } else{
-//		 b.setPosition(0, -0.9f+1.75f, 10-(i-hCount)*0.4f);
-//		 }
-//		 b.setGLShape(actorShape);
-//		 //b.rotate(0, 30*i, 0);
-//		 b.isGravityEnabled(true);
-//		 world.add(b);
-//		 }
+
+		Vector3f[] a2 = new Vector3f[] { new Vector3f(+0.5f, +0.85f, +0.5f),
+				new Vector3f(+0.5f, +0.5f, -0.5f),
+				new Vector3f(+0.5f, -0.5f, +0.5f),
+				new Vector3f(+0.5f, -0.5f, -0.5f),
+				new Vector3f(-0.5f, +0.5f, +0.5f),
+				new Vector3f(-0.5f, +0.5f, -0.5f),
+				new Vector3f(-0.5f, -0.5f, +0.5f),
+				new Vector3f(-0.5f, -0.5f, -0.5f) };
+
+		// final int bodyCount = 10;
+		// final int hCount = bodyCount / 2;
+		// for (int i = 0; i < bodyCount; i++) {
+		//
+		// final com.brocorporation.gameengine.elements.bodies.RigidBody b = new
+		// com.brocorporation.gameengine.elements.bodies.RigidBody(
+		// new Convex(a), (i * 20 + 20) * 0 + 10);
+		// if (i < hCount) {
+		// b.setPosition(0, -0.9f, 10 - i * 0.4f);
+		// } else {
+		// b.setPosition(0, -0.9f + 1.75f, 10 - (i - hCount) * 0.4f);
+		// }
+		// b.setGLShape(actorShape);
+		// // b.rotate(0, 30*i, 0);
+		// b.isGravityEnabled(true);
+		// world.add(b);
+		// }
 
 		actor2 = new Actor(new Convex(a), Actor.INFINITY_MASS);
 		actor2.setPosition(0, 0, 12);
 		actor2.setGLShape(actorShape);
-		actor2.rotate(0, 45-11, 0);
+		actor2.rotate(0, 45 - 11, 0);
 		actor2.setJumpingHeight(2);
 		actor2.isGravityEnabled(true);
 		actor2.setMaxVelocity(13);
 		world.add(actor2);
 
-		actor = new Actor(new Convex(a), 80);
-		//actor = new Actor(new Sphere(0.896F/2), 80);
+		//actor = new Actor(new Convex(a2), 80);
+		 actor = new Actor(new Sphere(0.75f), 80);
 		actor.setPosition(0, 0, 14);
-		actor.rotate(23*0, 180*0, 0);
-		actor.setGLShape(actorShape);
+		// actor.setPosition(6, 8, -21);
+		actor.rotate(23 * 0, 180 * 0, 0);
+		//actor.setGLShape(actorShape);
+		actor.setGLShape(sphereShape);
 		actor.setJumpingHeight(2);
 		actor.isGravityEnabled(true);
-		//actor.setMaterial(new Material(0.5f, 1F, 0.9F));
+		actor.setMaterial(new Material(0.5f*0, 1F, 0.9F));
 		world.add(actor);
 
 		final TrackingCamera camera = new TrackingCamera();
@@ -455,6 +473,7 @@ public class MyGLSurfaceView extends GameEngine {
 		blinnPhongLight.initLight();
 		roomShape.initBuffer();
 		actorShape.initBuffer();
+		sphereShape.initBuffer();
 		coinShape.initBuffer();
 		fontShape.initBuffer();
 		fontShape.setTexture("font_texture.png", 15, 5, 25, 40, 25, 11, 512);
@@ -562,26 +581,19 @@ public class MyGLSurfaceView extends GameEngine {
 					camera.lookAtBody(currentActor.getPosition(), 0, 1.6F, 0);
 					final StaticLight light = world.getActiveLight();
 					light.followBody(currentActor, 0, 1.7F, -1);
-				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_F1) {
 					renderbounds = !renderbounds;
-				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_F2) {
 					renderSweptBounds = !renderSweptBounds;
-				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_F3) {
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_F3) {
 					renderTree = !renderTree;
-				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_F4) {
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_F4) {
 					renderRay = !renderRay;
-				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_F5) {
 					renderRoom = !renderRoom;
-				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_F6) {
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_F6) {
 					renderDynamics = !renderDynamics;
-				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					if (isPaused) {
 						resume();
 					} else
@@ -607,12 +619,14 @@ public class MyGLSurfaceView extends GameEngine {
 		if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
 			resume();
 		}
-		if (!isPaused()){cPSet = false;
-			world.update(uInfo);}
+		if (!isPaused()) {
+			cPSet = false;
+			world.update(uInfo);
+		}
 		pause();
 	}
-	
-	public static AABB cPoint = new AABB(0.08f,0.08f,0.08f);
+
+	public static AABB cPoint = new AABB(0.08f, 0.08f, 0.08f);
 	public static Vector3f cPNormal = new Vector3f();
 	public static boolean cPSet;
 
@@ -679,17 +693,19 @@ public class MyGLSurfaceView extends GameEngine {
 			}
 			coinShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
 			actorShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
+			sphereShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
 		}
 		primitiveShader.use();
-		
-		if(cPSet){
+
+		if (cPSet) {
 			primitiveShape.setColor(1, 1, 0, 1);
 			primitiveShape.addAABB(cPoint);
 			Vector3f p = cPoint.getPosition();
-			primitiveShape.addLine(p.x,p.y,p.z,p.x+cPNormal.x,p.y+cPNormal.y,p.z+cPNormal.z);
+			primitiveShape.addLine(p.x, p.y, p.z, p.x + cPNormal.x, p.y
+					+ cPNormal.y, p.z + cPNormal.z);
 			primitiveShape.render(vpMatrix);
 		}
-		
+
 		if (selectedBody != null) {
 			primitiveShape.setColor(0, 1, 0, 1);
 			primitiveShape.addAABB(selectedBody.getAABB());

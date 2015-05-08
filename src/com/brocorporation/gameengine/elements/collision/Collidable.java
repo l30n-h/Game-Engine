@@ -33,6 +33,14 @@ public class Collidable {
 	public boolean canPassiveCollide() {
 		return !collisionMask.isEmpty();
 	}
+	
+	public boolean canActiveCollide(Collidable c) {
+		return collisionGroups.intersects(c.collisionMask);
+	}
+
+	public boolean canPassiveCollide(Collidable c) {
+		return collisionMask.intersects(c.collisionGroups);
+	}
 
 	public boolean canCollide(Collidable c) {
 		return collisionGroups.intersects(c.collisionMask)

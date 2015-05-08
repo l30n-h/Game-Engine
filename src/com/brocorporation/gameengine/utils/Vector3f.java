@@ -223,8 +223,16 @@ public class Vector3f {
 
 	public Vector3f setDoubleCross(final float pX1, final float pY1,
 			final float pZ1, final float pX2, final float pY2, final float pZ2) {
-		final float dot = pX1 * pX1 + pY1 * pY1 + pZ1 * pZ1;
-		return set(pX2 * dot, pY2 * dot, pZ2 * dot);
+		final float dot11 = pX1 * pX1 + pY1 * pY1 + pZ1 * pZ1;
+		final float dot12 = pX1 * pX2 + pY1 * pY2 + pZ1 * pZ2;
+		return set(pX2 * dot11 - pX1 * dot12, pY2 * dot11 - pY1 * dot12, pZ2
+				* dot11 - pZ1 * dot12);
+	}
+
+	public Vector3f setDoubleCross(final Vector3f vector1,
+			final Vector3f vector2) {
+		return setDoubleCross(vector1, vector2, vector1.dot(vector1),
+				vector1.dot(vector2));
 	}
 
 	public Vector3f setCross(final float pX1, final float pY1, final float pZ1,
@@ -237,11 +245,24 @@ public class Vector3f {
 				* pX3);
 	}
 
+	/**
+	 * (AxB)xC = -Cx(AxB)
+	 * Ax(BxC) = (A.C)*B-(A.B)+C
+	*/
 	public Vector3f setCross(final Vector3f vector1, final Vector3f vector2,
-			final float v1dotv2) {
-		final float ca = vector1.dot(vector1);
-		return set(vector2.x * ca - vector1.x * v1dotv2, vector2.y * ca
-				- vector1.y * v1dotv2, vector2.z * ca - vector1.z * v1dotv2);
+			final Vector3f vector3) {
+		return setCross(vector1.x, vector1.y, vector1.z, vector2.x, vector2.y,
+				vector2.z, vector3.x, vector3.y, vector3.z);
+	}
+
+	/**
+	 * (AxB)xA = Ax(BxA) = (A.A)*B-(A.B)*A
+	 */
+	public Vector3f setDoubleCross(final Vector3f vector1,
+			final Vector3f vector2, final float v1dotv1, final float v1dotv2) {
+		return set(vector2.x * v1dotv1 - vector1.x * v1dotv2, vector2.y
+				* v1dotv1 - vector1.y * v1dotv2, vector2.z * v1dotv1
+				- vector1.z * v1dotv2);
 	}
 
 	public float norm1() {

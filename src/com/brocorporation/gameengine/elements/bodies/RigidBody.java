@@ -11,7 +11,8 @@ public class RigidBody extends DynamicBody {
 	protected final Vector3f angularVelocity = new Vector3f();
 	protected final Vector3f angularMomentum = new Vector3f();
 	protected final float[] inverseInertiaTensor = new float[9];
-	protected final float[] defI = new float[9];
+	protected final float[] defI = new float[9];// TODO replace by Vector after
+												// rotation matrix
 
 	protected boolean updateAngularMomantum = false;
 
@@ -56,16 +57,12 @@ public class RigidBody extends DynamicBody {
 	}
 
 	@Override
-	protected void applyMomenta() {
+	protected void applyMomenta() {// TODO eigentlich müsste *0,5 sein
 		if (updateLinearMomentum) {
 			linearVelocity.addScaled(linearMomentum, inverseMass);
 			if (updateAngularMomantum) {
-				// angularVelocity.add(angularMomentum.x *
-				// inverseInertiaTensor.x,
-				// angularMomentum.y * inverseInertiaTensor.y,
-				// angularMomentum.z * inverseInertiaTensor.z);
-				angularVelocity.add(tmp.multiplyVM3(angularMomentum,
-						inverseInertiaTensor, 0));
+				angularVelocity.add(tmp.multiplyM3V(inverseInertiaTensor, 0,
+						angularMomentum));
 			}
 			clearMomenta();
 		}
@@ -79,19 +76,17 @@ public class RigidBody extends DynamicBody {
 	public void updatePosition(final IUpdateInfo uInfo) {
 		super.updatePosition(uInfo);
 		if (angularVelocity.x != 0 || angularVelocity.y != 0
-				|| angularVelocity.z == 0) {
+				|| angularVelocity.z != 0) {
 			affineTransform.getOrientation().addRotationScaled(angularVelocity,
 					uInfo.getRate());
 			updateOrientation = true;
-			if(mass!=80)return;
+		}
+		if (updateOrientation) {// TODO only if inertia is needed (Coins not)
 			affineTransform.getOrientation().getRotationMatrix3(rot);
 			MatrixExt.transposeM3(tra, rot);
 			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, rot, 0, defI, 0);
 			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
-			inverseInertiaTensor, 0, tra, 0);//(RxI)xT
-			 
-			// inverseInertiaTensor.multiplyVM4(inverseInertiaTensor.multiplyM4V(rot,
-			// 0,defI), tra, 0); //(RxI)xT
+					inverseInertiaTensor, 0, tra, 0);// (RxI)xT
 		}
 	}
 }

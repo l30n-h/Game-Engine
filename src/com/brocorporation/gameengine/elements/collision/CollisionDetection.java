@@ -26,7 +26,7 @@ public class CollisionDetection {
 					if (dynBody1 != o) {
 						if (o instanceof DynamicBody) {
 							final DynamicBody dynBody2 = (DynamicBody) o;
-							if (dynBody2.canPassiveCollide()
+							if (dynBody2.canPassiveCollide(dynBody1)
 									&& CollisionFilter.canCollide(class1,
 											dynBody2.getClass())
 									&& dyn1SweptAABB.intersects(dynBody2
@@ -36,7 +36,7 @@ public class CollisionDetection {
 							}
 						} else if (o instanceof StaticBody) {
 							final StaticBody stcBody = (StaticBody) o;
-							if (stcBody.canPassiveCollide()
+							if (stcBody.canPassiveCollide(dynBody1)
 									&& CollisionFilter.canCollide(class1,
 											stcBody.getClass())
 									&& dyn1SweptAABB.intersects(stcBody

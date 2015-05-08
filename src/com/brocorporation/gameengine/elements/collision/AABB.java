@@ -9,7 +9,6 @@ public class AABB implements IShape {
 	protected final static Vector3f temp = new Vector3f();
 
 	protected final Vector3f baseHalfsize = new Vector3f();
-
 	protected final Vector3f position = new Vector3f();
 	protected final Vector3f halfsize = new Vector3f();
 	protected boolean hasChanged;
@@ -84,16 +83,16 @@ public class AABB implements IShape {
 	@Override
 	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
 			float inverseMass) {
-		final float ww = baseHalfsize.x * baseHalfsize.x;
-		final float hh = baseHalfsize.y * baseHalfsize.y;
-		final float dd = baseHalfsize.z * baseHalfsize.z;
+		final float xx = baseHalfsize.x * baseHalfsize.x;
+		final float yy = baseHalfsize.y * baseHalfsize.y;
+		final float zz = baseHalfsize.z * baseHalfsize.z;
 		final float s = 3 * inverseMass;
-		// inverseInertiaTensor.set(s / (hh + dd), s / (ww + dd), s / (ww +
-		// hh));
+		// inverseInertiaTensor.set(s / (yy + zz), s / (xx + zz), s / (xx +
+		// yy));
 		inverseInertiaTensor[1] = inverseInertiaTensor[2] = inverseInertiaTensor[3] = inverseInertiaTensor[5] = inverseInertiaTensor[6] = inverseInertiaTensor[7] = 0;
-		inverseInertiaTensor[0] = s / (hh + dd);
-		inverseInertiaTensor[4] = s / (ww + dd);
-		inverseInertiaTensor[8] = s / (ww + hh);
+		inverseInertiaTensor[0] = s / (yy + zz);
+		inverseInertiaTensor[4] = s / (xx + zz);
+		inverseInertiaTensor[8] = s / (xx + yy);
 	}
 
 	public Vector3f getBaseHalfsize() {

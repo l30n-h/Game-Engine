@@ -33,6 +33,7 @@ public class DynamicBody extends StaticBody {
 			inverseMass = 1F / mass;
 		} else {
 			inverseMass = INFINITY_MASS;
+			canActiveCollide(false);
 		}
 	}
 
