@@ -1,5 +1,6 @@
 package com.brocorporation.gameengine.elements.collision;
 
+import com.brocorporation.gameengine.utils.MatrixExt;
 import com.brocorporation.gameengine.utils.Vector3f;
 import com.brocorporation.gameengine.utils.Vector4f;
 
@@ -18,7 +19,7 @@ public class Frustum {
 
 	protected final Vector4f[] planes = { new Vector4f(), new Vector4f(),
 			new Vector4f(), new Vector4f(), new Vector4f(), new Vector4f() };
-	protected float m12, m13, m14, m15;
+	protected float m12, m13, m14;
 	protected boolean hasChanged;
 	protected final static Vector3f temp = new Vector3f();
 	protected float[] lastFrustum = new float[16];
@@ -27,13 +28,14 @@ public class Frustum {
 	}
 
 	public void setFrustum(final float[] frustumM) {
-		hasChanged = m12 != frustumM[12] || m13 != frustumM[13]
-				|| m14 != frustumM[14] || m15 != frustumM[15];
+		//hasChanged = m12 != frustumM[12] || m13 != frustumM[13]
+		//		|| m14 != frustumM[14];
+		hasChanged = !MatrixExt.equalsM(lastFrustum, frustumM);//TODO besser schon von Camera überprüfen
 		if (hasChanged) {
-			m12 = frustumM[12];
-			m13 = frustumM[13];
-			m14 = frustumM[14];
-			m15 = frustumM[15];
+			MatrixExt.setM4(lastFrustum, frustumM);
+//			m12 = frustumM[12];
+//			m13 = frustumM[13];
+//			m14 = frustumM[14];
 			planes[FRONT].x = frustumM[3] + frustumM[2];
 			planes[FRONT].y = frustumM[7] + frustumM[6];
 			planes[FRONT].z = frustumM[11] + frustumM[10];

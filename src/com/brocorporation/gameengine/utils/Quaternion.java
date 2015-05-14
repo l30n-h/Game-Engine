@@ -38,6 +38,10 @@ public class Quaternion extends Vector4f {
 
 	public Quaternion multiply(final float pX, final float pY, final float pZ,
 			final float pW) {
+//		 return set(w*pX + x*pW + y*pZ - z*pY,
+//		 w*pY + y*pW + z*pY - x*pZ,
+//		 w*pZ + z*pW + x*pY - y*pX,
+//		 w*pW - x*pX - y*pY - z*pZ);
 		final float t5 = (z + x) * (pX + pY);
 		final float t6 = (w + y) * (pW - pZ);
 		final float t7 = (w - y) * (pW + pZ);
@@ -51,27 +55,47 @@ public class Quaternion extends Vector4f {
 	public Quaternion multiply(final Quaternion quaternion) {
 		return multiply(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
 	}
+	
+	public Quaternion setMultiply(final float pX1, final float pY1, final float pZ1,
+			final float pW1,final float pX2, final float pY2, final float pZ2,
+			final float pW2) {
+//		 return set(pW1*pX2 + pX1*pW2 + pY1*pZ2 - pZ1*pY2,
+//		 pW1*pY2 + pY1*pW2 + pZ1*pY2 - pX1*pZ2,
+//		 pW1*pZ2 + pZ1*pW2 + pX1*pY2 - pY1*pX2,
+//		 pW1*pW2 - pX1*pX2 - pY1*pY2 - pZ1*pZ2);
+		final float t5 = (pZ1 + pX1) * (pX2 + pY2);
+		final float t6 = (pW1 + pY1) * (pW2 - pZ2);
+		final float t7 = (pW1 - pY1) * (pW2 + pZ2);
+		final float t8 = t5 + t6 + t7;
+		final float t9 = ((pZ1 - pX1) * (pX2 - pY2) + t8) * 0.5f;
+		return set((pW1 + pX1) * (pW2 + pX2) + t9 - t8,
+				(pW1 - pX1) * (pY2 + pZ2) + t9 - t7, (pZ1 + pY1) * (pW2 - pX2) + t9 - t6,
+				(pZ1 - pY1) * (pY2 - pZ2) + t9 - t5);
+	}
+	
+	public Quaternion setMultiply(final Quaternion q1,final Quaternion q2) {
+		return setMultiply(q1.x, q1.y, q1.z, q1.w,q2.x, q2.y, q2.z, q2.w);
+	}
 
-	public Quaternion addEulerRotation(final float pX, final float pY,
+	public Quaternion integrateEulerRotation(final float pX, final float pY,
 			final float pZ) {
-		return addRotationScaled(pX, pY, pZ, PIOVER180);
+		return integrateRotationScaled(pX, pY, pZ, PIOVER180);
 	}
 
-	public Quaternion addEulerRotation(final Vector3f vector) {
-		return addEulerRotation(vector.x, vector.y, vector.z);
+	public Quaternion integrateEulerRotation(final Vector3f vector) {
+		return integrateEulerRotation(vector.x, vector.y, vector.z);
 	}
 
-	public Quaternion addEulerRotationScaled(final float pX, final float pY,
+	public Quaternion integrateEulerRotationScaled(final float pX, final float pY,
 			final float pZ, final float scalar) {
-		return addRotationScaled(pX, pY, pZ, scalar * PIOVER360);
+		return integrateRotationScaled(pX, pY, pZ, scalar * PIOVER180);
 	}
 
-	public Quaternion addEulerRotationScaled(final Vector3f vector,
+	public Quaternion integrateEulerRotationScaled(final Vector3f vector,
 			final float scalar) {
-		return addRotationScaled(vector.x, vector.y, vector.z, scalar);
+		return integrateRotationScaled(vector.x, vector.y, vector.z, scalar);
 	}
-
-	public Quaternion addRotation(final float wx, final float wy, final float wz) {
+	public Quaternion integrateRotation(final float wx, final float wy, final float wz) {
 		final float sq = wx * wx + wy * wy + wz * wz;
 		float qw;
 		float s;
@@ -84,24 +108,30 @@ public class Quaternion extends Vector4f {
 			qw = (float) Math.cos(halfthetaMag);
 			s = (float) Math.sin(halfthetaMag) / thetaMag;
 		}
-		float qx = wx * s;
-		float qy = wy * s;
-		float qz = wz * s;
-		return multiply(qx, qy, qz, qw);
+		setMultiply(wx * s, wy * s, wz * s, qw, x, y, z, w);
+//		wx*=0.5f;
+//		wy*=0.5f;
+//		wz*=0.5f;
+//		set(x+ wx*w + wy*z - wz*y,
+//				 y + wy*w + wz*y - wx*z,
+//				 z + wz*w + wx*y - wy*x,
+//				 w - wx*x - wy*y - wz*z);
+//		norm();
+		return this;
 	}
 
-	public Quaternion addRotation(final Vector3f vector) {
-		return addRotation(vector.x, vector.y, vector.z);
+	public Quaternion integrateRotation(final Vector3f vector) {
+		return integrateRotation(vector.x, vector.y, vector.z);
 	}
 
-	public Quaternion addRotationScaled(final Vector3f vector,
+	public Quaternion integrateRotationScaled(final Vector3f vector,
 			final float scalar) {
-		return addRotationScaled(vector.x, vector.y, vector.z, scalar);
+		return integrateRotationScaled(vector.x, vector.y, vector.z, scalar);
 	}
 
-	public Quaternion addRotationScaled(final float wx, final float wy,
+	public Quaternion integrateRotationScaled(final float wx, final float wy,
 			final float wz, final float scalar) {
-		return addRotation(wx * scalar, wy * scalar, wz * scalar);
+		return integrateRotation(wx * scalar, wy * scalar, wz * scalar);
 	}
 
 	public Vector3f rotateV(final Vector3f vector) {

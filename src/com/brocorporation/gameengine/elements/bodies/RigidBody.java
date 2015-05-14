@@ -70,23 +70,22 @@ public class RigidBody extends DynamicBody {
 
 	static Vector3f tmp = new Vector3f();
 	static float[] rot = new float[9];
-	static float[] tra = new float[9];
 
 	@Override
 	public void updatePosition(final IUpdateInfo uInfo) {
 		super.updatePosition(uInfo);
 		if (angularVelocity.x != 0 || angularVelocity.y != 0
 				|| angularVelocity.z != 0) {
-			affineTransform.getOrientation().addRotationScaled(angularVelocity,
+			affineTransform.getOrientation().integrateRotationScaled(angularVelocity,
 					uInfo.getRate());
 			updateOrientation = true;
 		}
 		if (updateOrientation) {// TODO only if inertia is needed (Coins not)
 			affineTransform.getOrientation().getRotationMatrix3(rot);
-			MatrixExt.transposeM3(tra, rot);
 			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, rot, 0, defI, 0);
+			MatrixExt.transposeM3(rot, rot);
 			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
-					inverseInertiaTensor, 0, tra, 0);// (RxI)xT
+					inverseInertiaTensor, 0, rot, 0);// (RxI)xT
 		}
 	}
 }

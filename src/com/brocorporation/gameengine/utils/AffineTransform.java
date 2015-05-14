@@ -34,11 +34,11 @@ public class AffineTransform {
 	}
 
 	public void rotate(float x, float y, float z) {
-		orientation.addEulerRotation(x, y, z);
+		orientation.integrateEulerRotation(x, y, z);//TODO
 	}
 
 	public void rotate(Vector3f pRotation) {
-		orientation.addEulerRotation(pRotation);
+		orientation.integrateEulerRotation(pRotation);//TODO
 	}
 
 	public Vector3f getTranslation() {

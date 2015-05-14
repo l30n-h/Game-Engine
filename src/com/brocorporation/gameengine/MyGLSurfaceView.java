@@ -14,7 +14,6 @@ import com.brocorporation.gameengine.elements.bodies.Camera;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.Item;
 import com.brocorporation.gameengine.elements.bodies.Plane;
-import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.elements.bodies.StaticLight;
 import com.brocorporation.gameengine.elements.bodies.TrackingCamera;
@@ -445,16 +444,17 @@ public class MyGLSurfaceView extends GameEngine {
 		actor2.setMaxVelocity(13);
 		world.add(actor2);
 
-		//actor = new Actor(new Convex(a2), 80);
+//		actor = new Actor(new Convex(a), 80);
+//		actor.setGLShape(actorShape);
 		 actor = new Actor(new Sphere(0.75f), 80);
-		actor.setPosition(0, 0, 14);
-		// actor.setPosition(6, 8, -21);
-		actor.rotate(23 * 0, 180 * 0, 0);
-		//actor.setGLShape(actorShape);
-		actor.setGLShape(sphereShape);
+		 actor.setGLShape(sphereShape);
+		actor.setPosition(0, 0, 14-5);
+		//actor.setPosition(6, 8, -21);
+		//actor.rotate(23 * 0+90, 180 * 0+90, 0);
+		//System.exit(0);
 		actor.setJumpingHeight(2);
 		actor.isGravityEnabled(true);
-		actor.setMaterial(new Material(0.5f*0, 1F, 0.9F));
+		actor.setMaterial(new Material(0.5f*0, 1F, 0.6F));
 		world.add(actor);
 
 		final TrackingCamera camera = new TrackingCamera();

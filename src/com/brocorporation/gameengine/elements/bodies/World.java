@@ -30,6 +30,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	protected Camera activeCamera;
 	protected StaticLight activeLight;
 	
+	static boolean debug = true;
+	
 	@Override
 	public void broadphaseCollision(final DynamicBody dynBody,
 			final StaticBody stcBody, final IUpdateInfo uInfo) {
@@ -47,20 +49,22 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				
 				// MPR.relVel.set(dynBody.getLinearVelocity());
 				if (MPR.intersects(c, stcShape, dynShape)) {
-					System.out.println("=================mpr==============");
+					if(debug) System.out.println("=================mpr==============");
 					ElasticContactSolver.addContact(stcBody, dynBody, c);
 				}
 				
 			} else {
-				System.out.println("=================gjk==============");
+				if(debug) System.out.println("=================gjk==============");
 				ElasticContactSolver.addContact(stcBody, dynBody, c);
 			}	
-			if(dynBody.getMass()==80){
+			if(debug && dynBody.getMass()==80){
 				System.out.println();
 				if(dynBody instanceof RigidBody) {
 					System.out.println(((RigidBody) dynBody).getAngularVelocity());
 					System.out.println(((RigidBody) dynBody).getAngularVelocity().length());
 					MatrixExt.logM("inertia", ((RigidBody) dynBody).getInverseInertiaTensor());
+					System.out.println(dynBody.getLinearVelocity());
+					System.out.println(dynBody.getLinearVelocity().length());
 				}
 				System.out.println(dynShape.getPosition());
 				System.out.println(c.getPointA());
@@ -70,7 +74,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				MyGLSurfaceView.cPNormal.set(c.getNormal());
 				System.out.println("elastic");
 			}
-		} else {System.out.println("=================spc==============");
+		} else {
+			//if(debug) System.out.println("=================spc==============");
 			//SpeculativeContactSolver.addContact(stcBody, dynBody,
 			//		c.getNormal(), c.getDistance());
 		}
@@ -130,7 +135,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				collisionTree.hasMoved(shape.getAABB());
 			}
 			dynBody.prepareUpdatePosition(uInfo);
-			dynBody.generateSweptBounds(uInfo);
+			dynBody.generateSweptBounds(uInfo);	
 		}
 		for (final Constraint contraint : constraintList) {
 			contraint.solve(uInfo);
