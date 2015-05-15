@@ -37,6 +37,7 @@ import com.brocorporation.gameengine.elements.opengl.PrimitiveShader;
 import com.brocorporation.gameengine.elements.opengl.PrimitiveShape;
 import com.brocorporation.gameengine.parser.WavefrontParser;
 import com.brocorporation.gameengine.utils.Matrix;
+import com.brocorporation.gameengine.utils.Quaternion;
 import com.brocorporation.gameengine.utils.Vector3f;
 
 public class MyGLSurfaceView extends GameEngine {
@@ -444,14 +445,15 @@ public class MyGLSurfaceView extends GameEngine {
 		actor2.setMaxVelocity(13);
 		world.add(actor2);
 
-//		actor = new Actor(new Convex(a), 80);
-//		actor.setGLShape(actorShape);
-		 actor = new Actor(new Sphere(0.75f), 80);
-		 actor.setGLShape(sphereShape);
+		actor = new Actor(new Convex(a), 80);
+		actor.setGLShape(actorShape);
+//		 actor = new Actor(new Sphere(0.75f), 80);
+//		 actor.setGLShape(sphereShape);
 		actor.setPosition(0, 0, 14-5);
-		//actor.setPosition(6, 8, -21);
-		//actor.rotate(23 * 0+90, 180 * 0+90, 0);
-		//System.exit(0);
+//		actor.setPosition(6, 8, -21);
+//		actor.setRotation(90, 90, 0);//= rot x than rot y than rot z
+		//dddactor.rotate(90, 90, 0);
+		actor.isGravityEnabled(false);
 		actor.setJumpingHeight(2);
 		actor.isGravityEnabled(true);
 		actor.setMaterial(new Material(0.5f*0, 1F, 0.6F));
