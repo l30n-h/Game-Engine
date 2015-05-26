@@ -21,15 +21,14 @@ public class MatrixExt extends Matrix {
 		int c = 0;
 		final int colums = (int) Math.sqrt(matrix.length);
 		for (int i = 0; i < matrix.length; i++) {
-			builder.append(matrix[i] + "_");
+			builder.append(matrix[i] + "\t");
 			c++;
 			if (c == colums) {
-				System.out.println(name + "__" + new String(builder));
+				System.out.println(name + "\t" + builder.toString());
 				builder.setLength(0);
 				c = 0;
 			}
 		}
-		System.out.println();
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class MatrixExt extends Matrix {
 		result[resultOffset + 8] = r6 * l2 + r7 * l5 + r8 * l8;
 	}
 
-	public static void setM4(final float[] result, final float[] matrix) {
+	public static void setM(final float[] result, final float[] matrix) {
 		System.arraycopy(matrix, 0, result, 0, matrix.length);
 	}
 
@@ -104,9 +103,9 @@ public class MatrixExt extends Matrix {
 		final float m7 = matrix[7];
 		final float m8 = matrix[8];
 
-		final float m4x8subm7x5 = m4 * m8 - m7 * m5;
-		final float m7x2submm1x8 = m7 * m2 - m1 * m8;
-		final float m1x5submm4x2 = m1 * m5 - m4 * m2;
+		final float m4x8subm7x5 = m4 * m8 - m5 * m7;
+		final float m7x2submm1x8 = m2 * m7 - m1 * m8;
+		final float m1x5submm4x2 = m1 * m5 - m2 * m4;
 
 		float det = (m0 * (m4x8subm7x5) + m3 * (m7x2submm1x8) + m6
 				* (m1x5submm4x2));
@@ -117,28 +116,54 @@ public class MatrixExt extends Matrix {
 		result[0] = (m4x8subm7x5) * det;
 		result[1] = (m7x2submm1x8) * det;
 		result[2] = (m1x5submm4x2) * det;
-		result[3] = (m6 * m5 - m3 * m8) * det;
-		result[4] = (m0 * m8 - m6 * m2) * det;
-		result[5] = (m3 * m2 - m0 * m5) * det;
-		result[6] = (m3 * m7 - m6 * m4) * det;
-		result[7] = (m6 * m1 - m0 * m7) * det;
-		result[8] = (m0 * m4 - m3 * m1) * det;
+		result[3] = (m5 * m6 - m3 * m8) * det;
+		result[4] = (m0 * m8 - m2 * m6) * det;
+		result[5] = (m2 * m3 - m0 * m5) * det;
+		result[6] = (m3 * m7 - m4 * m6) * det;
+		result[7] = (m1 * m6 - m0 * m7) * det;
+		result[8] = (m0 * m4 - m1 * m3) * det;
 		return true;
 	}
 
 	public static void transposeM3(final float[] result, final float[] matrix) {
-		final float tmp1 = matrix[1];
-		final float tmp2 = matrix[2];
-		final float tmp5 = matrix[5];
 		result[0] = matrix[0];
-		result[1] = matrix[3];
-		result[2] = matrix[6];
-		result[3] = tmp1;
 		result[4] = matrix[4];
-		result[5] = matrix[7];
-		result[6] = tmp2;
-		result[7] = tmp5;
 		result[8] = matrix[8];
+		float tmp = matrix[1];
+		result[1] = matrix[3];
+		result[3] = tmp;
+		tmp = matrix[2];
+		result[2] = matrix[6];
+		result[6] = tmp;
+		tmp = matrix[5];
+		result[5] = matrix[7];
+		result[7] = tmp;
+
+	}
+
+	public static void transposeM4(final float[] result, final float[] matrix) {
+		result[0] = matrix[0];
+		result[5] = matrix[5];
+		result[10] = matrix[10];
+		result[15] = matrix[15];
+		float tmp = matrix[1];
+		result[1] = matrix[4];
+		result[4] = tmp;
+		tmp = matrix[2];
+		result[2] = matrix[8];
+		result[8] = tmp;
+		tmp = matrix[3];
+		result[3] = matrix[12];
+		result[12] = tmp;
+		tmp = matrix[6];
+		result[6] = matrix[9];
+		result[9] = tmp;
+		tmp = matrix[7];
+		result[7] = matrix[13];
+		result[13] = tmp;
+		tmp = matrix[11];
+		result[11] = matrix[14];
+		result[14] = tmp;
 	}
 
 	public static void setIdentityM3(float[] result) {

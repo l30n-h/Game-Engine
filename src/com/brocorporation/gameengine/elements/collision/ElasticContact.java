@@ -2,13 +2,14 @@ package com.brocorporation.gameengine.elements.collision;
 
 import com.brocorporation.gameengine.IUpdateInfo;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
+import com.brocorporation.gameengine.elements.bodies.Plane;
 import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.utils.Vector3f;
 
 public class ElasticContact extends Constraint {
 
-	protected final static Vector3f tangentFrictionImpulse = new Vector3f();
+	protected final static Vector3f tangent = new Vector3f();
 	protected final static Vector3f rV = new Vector3f();
 
 	protected final static float percent = 0.8f;
@@ -83,20 +84,22 @@ public class ElasticContact extends Constraint {
 		}
 	}// http://en.wikipedia.org/wiki/Collision_response
 
+	static boolean frictional = false;// TODO
+
 	private void staticContact(final IUpdateInfo uInfo) {
+		final Vector3f dynBlV = dynB.getLinearVelocity();
+		boolean isRigidB = dynB instanceof RigidBody;
+		Vector3f relVel = isRigidB ? rV.setAdd(dynBlV,
+				rV.setCross(((RigidBody) dynB).getAngularVelocity(), pointB))
+				: dynBlV;
+		float velAlongNormal = relVel.dot(normal);
+		if (velAlongNormal >= 0) {
+			return;
+		}
 		if (distance > 0) {
 			distance = 0;
 		} else if ((distance += slop) < 0) {
 			dynB.getPositionCorrection().addScaled(normal, percent * distance);
-		}
-		final Vector3f dynBlV = dynB.getLinearVelocity();
-		boolean isRigidB = dynB instanceof RigidBody;
-		final Vector3f relVel = isRigidB? rV.setAdd(dynBlV,
-				rV.setCross(((RigidBody) dynB).getAngularVelocity(), pointB))
-				: dynBlV;
-		final float velAlongNormal = relVel.dot(normal);
-		if (velAlongNormal >= 0) {
-			return;
 		}
 		final Material mA = stcA.getMaterial();
 		final Material mB = dynB.getMaterial();
@@ -107,53 +110,59 @@ public class ElasticContact extends Constraint {
 			tmp11.setCross(tmp2, pointB);
 			jn = (-(1 + Math.max(mA.getRestitution(), mB.getRestitution())) * velAlongNormal)
 					/ (dynB.getInverseMass() + tmp11.dot(normal));
-			tmp21.setScale(normal, jn);
-			if (velAlongNormal != 0 && false) {
-				tangentFrictionImpulse.setSubtractScaled(rV, normal,
-						velAlongNormal).norm();
-				float jt = -rV.dot(tangentFrictionImpulse);
+			dynBlV.addScaled(normal, dynB.getInverseMass() * jn);
+			((RigidBody) dynB).getAngularVelocity().addScaled(tmp2, jn);
+			System.out.println(dynBlV);
+			System.out.println(((RigidBody) dynB).getAngularVelocity());
+			System.out.println();
+			if (frictional) {
+				relVel = rV.setAdd(dynBlV, rV.setCross(
+						((RigidBody) dynB).getAngularVelocity(), pointB));
+				velAlongNormal = relVel.dot(normal);
+				tangent.setSubtractScaled(relVel, normal, velAlongNormal)
+						.norm();
+				tmp2.multiplyM3V(itB, 0, tmp2.setCross(pointB, tangent));
+				tmp11.setCross(tmp2, pointB);
+				float jt = -relVel.dot(tangent);
 				if (jt != 0) {
-					jt /= (dynB.getInverseMass() + tmp11
-							.dot(tangentFrictionImpulse));
+					jt /= (dynB.getInverseMass() + tmp11.dot(tangent));
 					if (Math.abs(jt) < jn
 							* clamp(mA.getStaticFriction(),
 									mB.getStaticFriction())) {
-						tmp21.addScaled(tangentFrictionImpulse, jt);
+						tmp21.setScale(tangent, jt);
 					} else {
-						tmp21.addScaled(
-								tangentFrictionImpulse,
+						tmp21.setScale(
+								tangent,
 								-clamp(mA.getDynamicFriction(),
 										mB.getDynamicFriction())
 										* jn);
 					}
 					tmp2.multiplyM3V(itB, 0, tmp2.setCross(pointB, tmp21));
-				} else {
-					tmp2.scale(jn);
+					dynBlV.addScaled(tmp21, dynB.getInverseMass());
+					((RigidBody) dynB).getAngularVelocity().add(tmp2);
 				}
-			} else {
-				tmp2.scale(jn);
 			}
-			dynBlV.addScaled(tmp21, dynB.getInverseMass());
-			((RigidBody) dynB).getAngularVelocity().add(tmp2);
 		} else {
 			jn = -(1 + Math.max(mA.getRestitution(), mB.getRestitution()))
 					* velAlongNormal;
 			dynBlV.addScaled(normal, jn);
-			if (velAlongNormal != 0) {
-				tangentFrictionImpulse.setSubtractScaled(relVel, normal,
-						relVel.dot(normal)).norm();
-				final float jt = -dynBlV.dot(tangentFrictionImpulse);
+			if (frictional) {
+				relVel = dynBlV;
+				velAlongNormal = relVel.dot(normal);
+				tangent.setSubtractScaled(relVel, normal, velAlongNormal)
+						.norm();
+				final float jt = -relVel.dot(tangent);
 				if (jt != 0) {
-					final float clampedStaticFriction = clamp(
-							mA.getStaticFriction(), mB.getStaticFriction());
-					if (Math.abs(jt) < jn * clampedStaticFriction) {
-						dynBlV.addScaled(tangentFrictionImpulse, jt);
+					if (Math.abs(jt) < jn
+							* clamp(mA.getStaticFriction(),
+									mB.getStaticFriction())) {
+						dynBlV.addScaled(tangent, jt);
 					} else {
-						final float clampedDynamicFriction = -clamp(
-								mA.getDynamicFriction(),
-								mB.getDynamicFriction());
-						dynBlV.addScaled(tangentFrictionImpulse, jn
-								* clampedDynamicFriction);
+						dynBlV.addScaled(
+								tangent,
+								-clamp(mA.getDynamicFriction(),
+										mB.getDynamicFriction())
+										* jn);
 					}
 				}
 			}
@@ -161,6 +170,13 @@ public class ElasticContact extends Constraint {
 	}
 
 	private void dynamicContact(final IUpdateInfo uInfo) {
+		final Vector3f dynAlV = dynA.getLinearVelocity();
+		final Vector3f dynBlV = dynB.getLinearVelocity();
+		rV.setSubtract(dynBlV, dynAlV);
+		final float velAlongNormal = rV.dot(normal);
+		if (velAlongNormal >= 0) {
+			return;
+		}
 		if (distance > 0) {
 			distance = 0;
 		} else if ((distance += slop) < 0) {
@@ -172,13 +188,6 @@ public class ElasticContact extends Constraint {
 			dynA.getPositionCorrection().subtractScaled(rV,
 					dynA.getInverseMass());
 			dynB.getPositionCorrection().addScaled(rV, dynB.getInverseMass());
-		}
-		final Vector3f dynAlV = dynA.getLinearVelocity();
-		final Vector3f dynBlV = dynB.getLinearVelocity();
-		rV.setSubtract(dynBlV, dynAlV);
-		final float velAlongNormal = rV.dot(normal);
-		if (velAlongNormal >= 0) {
-			return;
 		}
 		final float inverseInverseMassSum = 1F / (dynA.getInverseMass() + dynB
 				.getInverseMass());
@@ -191,45 +200,28 @@ public class ElasticContact extends Constraint {
 		dynBlV.addScaled(normal, jn * dynB.getInverseMass());
 		if (velAlongNormal != 0) {
 			rV.setSubtract(dynBlV, dynAlV);
-			tangentFrictionImpulse
-					.setSubtractScaled(rV, normal, rV.dot(normal)).norm();
+			tangent.setSubtractScaled(rV, normal, rV.dot(normal)).norm();
 
-			float jt = rV.dot(tangentFrictionImpulse);
+			float jt = rV.dot(tangent);
 			if (jt != 0) {
 				jt *= inverseInverseMassSum;
 				final float clampedStaticFriction = clamp(
 						mA.getStaticFriction(), mB.getStaticFriction());
 				if (jt < jn * clampedStaticFriction) {
-					dynAlV.addScaled(tangentFrictionImpulse,
-							jt * dynA.getInverseMass());
-					dynBlV.subtractScaled(tangentFrictionImpulse,
-							jt * dynB.getInverseMass());
+					dynAlV.addScaled(tangent, jt * dynA.getInverseMass());
+					dynBlV.subtractScaled(tangent, jt * dynB.getInverseMass());
 				} else {
 					final float fs = clamp(mA.getDynamicFriction(),
 							mB.getDynamicFriction())
 							* jn;
-					dynAlV.addScaled(tangentFrictionImpulse,
-							fs * dynA.getInverseMass());
-					dynBlV.subtractScaled(tangentFrictionImpulse,
-							fs * dynB.getInverseMass());
+					dynAlV.addScaled(tangent, fs * dynA.getInverseMass());
+					dynBlV.subtractScaled(tangent, fs * dynB.getInverseMass());
 				}
 			}
 		}
 	}
 
 	private void rigidContact(final IUpdateInfo uInfo) {
-		if (distance > 0) {
-			distance = 0;
-		} else if ((distance += slop) < 0) {
-			rV.setScale(
-					normal,
-					percent
-							* (distance / (dynA.getInverseMass() + dynB
-									.getInverseMass())));
-			dynA.getPositionCorrection().subtractScaled(rV,
-					dynA.getInverseMass());
-			dynB.getPositionCorrection().addScaled(rV, dynB.getInverseMass());
-		}
 		final Vector3f dynAlV = dynA.getLinearVelocity();
 		final Vector3f dynBlV = dynB.getLinearVelocity();
 		boolean isRigidA = dynA instanceof RigidBody;
@@ -241,9 +233,22 @@ public class ElasticContact extends Constraint {
 				isRigidA ? tmp1.setAdd(dynAlV, tmp1.setCross(
 						((RigidBody) dynA).getAngularVelocity(), pointA))
 						: dynAlV);
-		final float velAlongNormal = rV.dot(normal);
+		float velAlongNormal = rV.dot(normal);
 		if (velAlongNormal >= 0) {
 			return;
+		}
+		if (distance > 0) {
+			distance = 0;
+		} else if ((distance += slop) < 0) {
+			tmp11.setScale(
+					normal,
+					percent
+							* (distance / (dynA.getInverseMass() + dynB
+									.getInverseMass())));
+			dynA.getPositionCorrection().subtractScaled(tmp11,
+					dynA.getInverseMass());
+			dynB.getPositionCorrection()
+					.addScaled(tmp11, dynB.getInverseMass());
 		}
 		final Material mA = dynA.getMaterial();
 		final Material mB = dynB.getMaterial();
@@ -264,50 +269,68 @@ public class ElasticContact extends Constraint {
 		float jn = (-(1 + Math.max(mA.getRestitution(), mB.getRestitution())) * velAlongNormal)
 				/ (dynA.getInverseMass() + dynB.getInverseMass() + tmp11
 						.dot(normal));
-		tmp21.setScale(normal, jn);
-		if (velAlongNormal != 0) {
-			tangentFrictionImpulse
-					.setSubtractScaled(rV, normal, velAlongNormal).norm();
-			float jt = -rV.dot(tangentFrictionImpulse);
+		dynAlV.subtractScaled(normal, dynA.getInverseMass() * jn);
+		dynBlV.addScaled(normal, dynB.getInverseMass() * jn);
+		if (isRigidA)
+			((RigidBody) dynA).getAngularVelocity().subtractScaled(tmp1, jn);
+		if (isRigidB)
+			((RigidBody) dynB).getAngularVelocity().addScaled(tmp2, jn);
+
+		if (frictional) {
+			rV.setSubtract(
+					isRigidB ? tmp2.setAdd(dynBlV, tmp2.setCross(
+							((RigidBody) dynB).getAngularVelocity(), pointB))
+							: dynBlV,
+					isRigidA ? tmp1.setAdd(dynAlV, tmp1.setCross(
+							((RigidBody) dynA).getAngularVelocity(), pointA))
+							: dynAlV);
+			velAlongNormal = rV.dot(normal);
+			tangent.setSubtractScaled(rV, normal, velAlongNormal).norm();
+			float jt = -rV.dot(tangent);
 			if (jt != 0) {
+				if (isRigidA) {
+					tmp1.multiplyM3V(
+							((RigidBody) dynA).getInverseInertiaTensor(), 0,
+							tmp1.setCross(pointA, tangent));
+					tmp11.setCross(tmp1, pointA);
+				} else {
+					tmp11.set(0, 0, 0);
+				}
+				if (isRigidB) {
+					tmp2.multiplyM3V(
+							((RigidBody) dynB).getInverseInertiaTensor(), 0,
+							tmp2.setCross(pointB, tangent));
+					tmp21.setCross(tmp2, pointB);
+					tmp11.add(tmp21);
+				}
 				jt /= (dynA.getInverseMass() + dynB.getInverseMass() + tmp11
-						.dot(tangentFrictionImpulse));
+						.dot(tangent));
 				if (Math.abs(jt) < jn
 						* clamp(mA.getStaticFriction(), mB.getStaticFriction())) {
-					tmp21.addScaled(tangentFrictionImpulse, jt);
+					tmp21.setScale(tangent, jt);
 				} else {
-					tmp21.addScaled(
-							tangentFrictionImpulse,
+					tmp21.setScale(
+							tangent,
 							-clamp(mA.getDynamicFriction(),
 									mB.getDynamicFriction())
 									* jn);
 				}
-				if (isRigidA)
+				dynAlV.subtractScaled(tmp21, dynA.getInverseMass());
+				dynBlV.addScaled(tmp21, dynB.getInverseMass());
+				if (isRigidA) {
 					tmp1.multiplyM3V(
 							((RigidBody) dynA).getInverseInertiaTensor(), 0,
 							tmp1.setCross(pointA, tmp21));
-				if (isRigidB)
+					((RigidBody) dynA).getAngularVelocity().subtract(tmp1);
+				}
+				if (isRigidB) {
 					tmp2.multiplyM3V(
 							((RigidBody) dynB).getInverseInertiaTensor(), 0,
 							tmp2.setCross(pointB, tmp21));
-			} else {
-				if (isRigidA)
-					tmp1.scale(jn);
-				if (isRigidB)
-					tmp2.scale(jn);
+					((RigidBody) dynB).getAngularVelocity().add(tmp2);
+				}
 			}
-		} else {
-			if (isRigidA)
-				tmp1.scale(jn);
-			if (isRigidB)
-				tmp2.scale(jn);
 		}
-		dynAlV.subtractScaled(tmp21, dynA.getInverseMass());
-		dynBlV.addScaled(tmp21, dynB.getInverseMass());
-		if (isRigidA)
-			((RigidBody) dynA).getAngularVelocity().subtract(tmp1);
-		if (isRigidB)
-			((RigidBody) dynB).getAngularVelocity().add(tmp2);
 	}
 
 	protected static float clamp(final float frictionA, final float frictionB) {

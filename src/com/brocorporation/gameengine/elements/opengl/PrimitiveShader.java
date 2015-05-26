@@ -26,7 +26,7 @@ public class PrimitiveShader extends GLShader {
 		if (!MatrixExt.equalsM(vpMatrix, lastVPMatrix)) {
 			GL20.glUniformMatrix4(uHandle[u_MVPMatrix], false,
 					MatrixExt.getMatrix(vpMatrix));
-			MatrixExt.setM4(lastVPMatrix, vpMatrix);
+			MatrixExt.setM(lastVPMatrix, vpMatrix);
 		}
 	}
 

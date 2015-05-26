@@ -34,6 +34,7 @@ public class Vector4f extends Vector3f {
 		x = Math.abs(x);
 		y = Math.abs(y);
 		z = Math.abs(z);
+		w = Math.abs(w);
 		return this;
 	}
 
@@ -91,7 +92,7 @@ public class Vector4f extends Vector3f {
 
 	public Vector4f multiplyM4V(float[] lhsMat, int matOffset,
 			final Vector4f vector) {
-		return set(x = lhsMat[matOffset] * vector.x + lhsMat[matOffset + 1]
+		return set(lhsMat[matOffset] * vector.x + lhsMat[matOffset + 1]
 				* vector.y + lhsMat[matOffset + 2] * vector.z
 				+ lhsMat[matOffset + 3] * vector.w, lhsMat[matOffset + 4]
 				* vector.x + lhsMat[matOffset + 5] * vector.y
@@ -168,7 +169,7 @@ public class Vector4f extends Vector3f {
 
 	public float normLength() {
 		float length2 = dot(this);
-		if (length2 <= Tolerance.NULL)
+		if (length2 == 0)
 			return 0;
 		if (Math.abs(length2 - 1) <= Tolerance.NULL)
 			return 1;
@@ -187,7 +188,7 @@ public class Vector4f extends Vector3f {
 
 	public Vector4f norm(float l) {
 		final float length2 = dot(this);
-		if (Math.abs(length2) > Tolerance.NULL) {
+		if (length2 != 0) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
 				scale(l / (float) Math.sqrt(length2));
 			} else {
@@ -199,7 +200,7 @@ public class Vector4f extends Vector3f {
 
 	public Vector4f setNorm(Vector4f vector, float l) {
 		final float length2 = vector.dot(vector);
-		if (length2 != 0 && Math.abs(length2) > Tolerance.NULL) {
+		if (length2 != 0) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
 				return setScale(vector, l / (float) Math.sqrt(length2));
 			} else {
@@ -211,8 +212,7 @@ public class Vector4f extends Vector3f {
 
 	public float length() {
 		final float length2 = dot(this);
-		if (Math.abs(length2) > Tolerance.NULL
-				&& Math.abs(length2 - 1) > Tolerance.NULL) {
+		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return (float) Math.sqrt(length2);
 		}
 		return length2;
@@ -221,8 +221,7 @@ public class Vector4f extends Vector3f {
 	public static float length(final float x, final float y, final float z,
 			final float w) {
 		final float length2 = x * x + y * y + z * z + w * w;
-		if (Math.abs(length2) > Tolerance.NULL
-				&& Math.abs(length2 - 1) > Tolerance.NULL) {
+		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return (float) Math.sqrt(length2);
 		}
 		return length2;

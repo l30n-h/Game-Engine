@@ -202,6 +202,8 @@ public class Vector3f {
 	 * V dot A <= 0<br />
 	 * <br />
 	 * Ax(BxA) = (AxB)xA
+	 * <br />
+	 * AxB+AxC = Ax(B+C)
 	 */
 	public Vector3f setCross(final Vector3f vector1, final Vector3f vector2) {
 		return setCross(vector1.x, vector1.y, vector1.z, vector2.x, vector2.y,
@@ -246,9 +248,8 @@ public class Vector3f {
 	}
 
 	/**
-	 * (AxB)xC = -Cx(AxB)
-	 * Ax(BxC) = (A.C)*B-(A.B)+C
-	*/
+	 * (AxB)xC = -Cx(AxB) Ax(BxC) = (A.C)*B-(A.B)+C
+	 */
 	public Vector3f setCross(final Vector3f vector1, final Vector3f vector2,
 			final Vector3f vector3) {
 		return setCross(vector1.x, vector1.y, vector1.z, vector2.x, vector2.y,
@@ -279,7 +280,7 @@ public class Vector3f {
 
 	public float normLength() {
 		float length2 = dot(this);
-		if (length2 <= Tolerance.NULL)
+		if (length2 == 0)
 			return 0;
 		if (Math.abs(length2 - 1) <= Tolerance.NULL)
 			return 1;
@@ -298,7 +299,7 @@ public class Vector3f {
 
 	public Vector3f norm(float l) {
 		final float length2 = dot(this);
-		if (Math.abs(length2) > Tolerance.NULL) {
+		if (length2 != 0) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
 				scale(l / (float) Math.sqrt(length2));
 			} else {
@@ -310,7 +311,7 @@ public class Vector3f {
 
 	public Vector3f setNorm(Vector3f vector, float l) {
 		final float length2 = vector.dot(vector);
-		if (length2 != 0 && Math.abs(length2) > Tolerance.NULL) {
+		if (length2 != 0) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
 				return setScale(vector, l / (float) Math.sqrt(length2));
 			} else {
@@ -322,8 +323,7 @@ public class Vector3f {
 
 	public float length() {
 		final float length2 = dot(this);
-		if (Math.abs(length2) > Tolerance.NULL
-				&& Math.abs(length2 - 1) > Tolerance.NULL) {
+		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return (float) Math.sqrt(length2);
 		}
 		return length2;
@@ -331,8 +331,7 @@ public class Vector3f {
 
 	public static float length(final float x, final float y, final float z) {
 		final float length2 = x * x + y * y + z * z;
-		if (Math.abs(length2) > Tolerance.NULL
-				&& Math.abs(length2 - 1) > Tolerance.NULL) {
+		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return (float) Math.sqrt(length2);
 		}
 		return length2;

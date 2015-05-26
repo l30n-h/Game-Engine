@@ -19,6 +19,7 @@ import com.brocorporation.gameengine.elements.collision.RaycastHit;
 import com.brocorporation.gameengine.elements.collision.SpeculativeContactSolver;
 import com.brocorporation.gameengine.elements.collision.Tree;
 import com.brocorporation.gameengine.utils.MatrixExt;
+import com.brocorporation.gameengine.utils.Vector3f;
 
 public class World implements CollisionDetection.BroadphaseCallback {
 
@@ -38,8 +39,9 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		final Contact c = Contact.DEFAULT;
 		final IShape stcShape = stcBody.getShape();
 		final IShape dynShape = dynBody.getShape();
-		if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
-			if (c.getDistance() == 0) {
+		if(GJK.distance(c, stcShape, dynShape)==0){
+		//if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
+			if (c.getDistance() == 0 || true) {
 				// float dd = AABB.getDistance(c.getNormal(),
 				// stcBody.getShape().getAABB(), dynBody.getShape().getAABB());
 				// if(dd<=0){
@@ -48,36 +50,46 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				// }
 				
 				// MPR.relVel.set(dynBody.getLinearVelocity());
-				if (MPR.intersects(c, stcShape, dynShape)) {
+				if (MPR.intersects(c, stcShape, dynShape) || true) {
 					if(debug) System.out.println("=================mpr==============");
-					ElasticContactSolver.addContact(stcBody, dynBody, c);
+					if(stcBody instanceof Plane){
+						c.getNormal().set(((Plane) stcBody).getNormal());
+						dynShape.getMinAlongDirection(c.getPointB(), c.getNormal());
+						c.setDistance(((Plane) stcBody).getDistance(c.getPointB()));
+						c.getPointA().set(c.getPointB());
+						if(c.getDistance() <= 0){
+							ElasticContactSolver.addContact(stcBody, dynBody, c);
+						}
+					}
+					else ElasticContactSolver.addContact(stcBody, dynBody, c);
+					
 				}
-				
 			} else {
 				if(debug) System.out.println("=================gjk==============");
 				ElasticContactSolver.addContact(stcBody, dynBody, c);
 			}	
-			if(debug && dynBody.getMass()==80){
-				System.out.println();
-				if(dynBody instanceof RigidBody) {
-					System.out.println(((RigidBody) dynBody).getAngularVelocity());
-					System.out.println(((RigidBody) dynBody).getAngularVelocity().length());
-					MatrixExt.logM("inertia", ((RigidBody) dynBody).getInverseInertiaTensor());
-					System.out.println(dynBody.getLinearVelocity());
-					System.out.println(dynBody.getLinearVelocity().length());
-				}
-				System.out.println(dynShape.getPosition());
-				System.out.println(c.getPointA());
-				System.out.println(c.getNormal());
-				MyGLSurfaceView.cPSet = true;
-				MyGLSurfaceView.cPoint.getPosition().set(c.getPointA());
-				MyGLSurfaceView.cPNormal.set(c.getNormal());
-				System.out.println("elastic");
-			}
 		} else {
-			//if(debug) System.out.println("=================spc==============");
-			//SpeculativeContactSolver.addContact(stcBody, dynBody,
-			//		c.getNormal(), c.getDistance());
+			if(debug) System.out.println("=================spc==============");
+//			SpeculativeContactSolver.addContact(stcBody, dynBody,
+//					c.getNormal(), c.getDistance());
+		}
+		if(debug && dynBody.getMass()==80){
+			System.out.println(stcBody);
+			if(dynBody instanceof RigidBody) {
+				System.out.println("ang:\t"+((RigidBody) dynBody).getAngularVelocity());
+				System.out.println("ang:\t"+((RigidBody) dynBody).getAngularVelocity().length());
+				MatrixExt.logM("inertia", ((RigidBody) dynBody).getInverseInertiaTensor());
+				System.out.println("lin:\t"+dynBody.getLinearVelocity());
+				System.out.println("lin:\t"+dynBody.getLinearVelocity().length());
+			}
+			System.out.println("pos:\t"+dynShape.getPosition());
+			System.out.println("p A:\t"+c.getPointA());
+			System.out.println("nor:\t"+c.getNormal());
+			System.out.println("dis:\t"+c.getDistance());
+			MyGLSurfaceView.cPSet = true;
+			MyGLSurfaceView.cPoint.getPosition().set(c.getPointA());
+			MyGLSurfaceView.cPNormal.set(c.getNormal());
+			System.out.println("elastic");
 		}
 		stcBody.onCollide(dynBody);
 		dynBody.onCollide(stcBody);

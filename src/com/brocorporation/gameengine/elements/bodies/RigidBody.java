@@ -19,7 +19,7 @@ public class RigidBody extends DynamicBody {
 	public RigidBody(final IShape shape, final float pMass) {
 		super(shape, pMass);
 		shape.getInverseInertiaTensor(inverseInertiaTensor, inverseMass);
-		MatrixExt.setM4(defI, inverseInertiaTensor);
+		MatrixExt.setM(defI, inverseInertiaTensor);
 	}
 
 	public void setAngularVelocity(final float degreeX, final float degreeY,
@@ -53,11 +53,12 @@ public class RigidBody extends DynamicBody {
 	@Override
 	public void clearMomenta() {
 		super.clearMomenta();
+		angularMomentum.set(0, 0, 0);
 		updateAngularMomantum = false;
 	}
 
 	@Override
-	protected void applyMomenta() {// TODO eigentlich müsste *0,5 sein
+	protected void applyMomenta() {
 		if (updateLinearMomentum) {
 			linearVelocity.addScaled(linearMomentum, inverseMass);
 			if (updateAngularMomantum) {
@@ -82,10 +83,17 @@ public class RigidBody extends DynamicBody {
 		}
 		if (updateOrientation) {// TODO only if inertia is needed (Coins not)
 			affineTransform.getOrientation().getRotationMatrix3(rot);
+			
 			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, rot, 0, defI, 0);
 			MatrixExt.transposeM3(rot, rot);
 			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
-					inverseInertiaTensor, 0, rot, 0);// (RxI)xT
+					inverseInertiaTensor, 0, rot, 0);// RxIxT <-> TxIxR
+			
+
+//			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, defI, 0, rot, 0);//vml nicht das richtige
+//			MatrixExt.transposeM3(rot, rot);
+//			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
+//					rot, 0, inverseInertiaTensor, 0);// TxIxR <-> RxIxT
 		}
 	}
 }

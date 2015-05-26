@@ -26,22 +26,20 @@ public class Quaternion extends Vector4f {
 		return this;
 	}
 
-	public Quaternion konjugateQ(final float pX, final float pY,
-			final float pZ, final float pW) {
-		return set(-pX, -pY, -pZ, pW);
+	public Quaternion konjugate() {
+		return set(-x, -y, -z, w);
 	}
 
-	public Quaternion konjugateQ(final Quaternion quaternion) {
-		return konjugateQ(quaternion.x, quaternion.y, quaternion.z,
-				quaternion.w);
+	public Quaternion setKonjugate(final Quaternion quaternion) {
+		return set(-quaternion.x, -quaternion.y, -quaternion.z, quaternion.w);
 	}
 
 	public Quaternion multiply(final float pX, final float pY, final float pZ,
 			final float pW) {
-//		 return set(w*pX + x*pW + y*pZ - z*pY,
-//		 w*pY + y*pW + z*pY - x*pZ,
-//		 w*pZ + z*pW + x*pY - y*pX,
-//		 w*pW - x*pX - y*pY - z*pZ);
+		// return set(w*pX + x*pW + y*pZ - z*pY,
+		// w*pY + y*pW + z*pX - x*pZ,
+		// w*pZ + z*pW + x*pY - y*pX,
+		// w*pW - x*pX - y*pY - z*pZ);
 		final float t5 = (z + x) * (pX + pY);
 		final float t6 = (w + y) * (pW - pZ);
 		final float t7 = (w - y) * (pW + pZ);
@@ -55,26 +53,26 @@ public class Quaternion extends Vector4f {
 	public Quaternion multiply(final Quaternion quaternion) {
 		return multiply(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
 	}
-	
-	public Quaternion setMultiply(final float pX1, final float pY1, final float pZ1,
-			final float pW1,final float pX2, final float pY2, final float pZ2,
-			final float pW2) {
-//		return set(pW1*pX2 + pX1*pW2 + pY1*pZ2 - pZ1*pY2,
-//				   pW1*pY2 + pY1*pW2 + pZ1*pX2 - pX1*pZ2,
-//				   pW1*pZ2 + pZ1*pW2 + pX1*pY2 - pY1*pX2,
-//				   pW1*pW2 - pX1*pX2 - pY1*pY2 - pZ1*pZ2);	 
+
+	public Quaternion setMultiply(final float pX1, final float pY1,
+			final float pZ1, final float pW1, final float pX2, final float pY2,
+			final float pZ2, final float pW2) {
+//		 return set(pW1*pX2 + pX1*pW2 + pY1*pZ2 - pZ1*pY2,
+//		 pW1*pY2 + pY1*pW2 + pZ1*pX2 - pX1*pZ2,
+//		 pW1*pZ2 + pZ1*pW2 + pX1*pY2 - pY1*pX2,
+//		 pW1*pW2 - pX1*pX2 - pY1*pY2 - pZ1*pZ2);
 		final float t5 = (pZ1 + pX1) * (pX2 + pY2);
 		final float t6 = (pW1 + pY1) * (pW2 - pZ2);
 		final float t7 = (pW1 - pY1) * (pW2 + pZ2);
 		final float t8 = t5 + t6 + t7;
 		final float t9 = ((pZ1 - pX1) * (pX2 - pY2) + t8) * 0.5f;
-		return set((pW1 + pX1) * (pW2 + pX2) + t9 - t8,
-				(pW1 - pX1) * (pY2 + pZ2) + t9 - t7, (pZ1 + pY1) * (pW2 - pX2) + t9 - t6,
+		return set((pW1 + pX1) * (pW2 + pX2) + t9 - t8, (pW1 - pX1)
+				* (pY2 + pZ2) + t9 - t7, (pZ1 + pY1) * (pW2 - pX2) + t9 - t6,
 				(pZ1 - pY1) * (pY2 - pZ2) + t9 - t5);
 	}
-	
-	public Quaternion setMultiply(final Quaternion q1,final Quaternion q2) {
-		return setMultiply(q1.x, q1.y, q1.z, q1.w,q2.x, q2.y, q2.z, q2.w);
+
+	public Quaternion setMultiply(final Quaternion q1, final Quaternion q2) {
+		return setMultiply(q1.x, q1.y, q1.z, q1.w, q2.x, q2.y, q2.z, q2.w);
 	}
 
 	public Quaternion integrateRotationEuler(final float pX, final float pY,
@@ -86,121 +84,14 @@ public class Quaternion extends Vector4f {
 		return integrateRotationEuler(vector.x, vector.y, vector.z);
 	}
 
-	public Quaternion integrateRotationScaledEuler(final float pX, final float pY,
-			final float pZ, final float scalar) {
+	public Quaternion integrateRotationScaledEuler(final float pX,
+			final float pY, final float pZ, final float scalar) {
 		return integrateRotationScaled(pX, pY, pZ, scalar * PIOVER180);
 	}
 
 	public Quaternion integrateRotationScaledEuler(final Vector3f vector,
 			final float scalar) {
 		return integrateRotationScaled(vector.x, vector.y, vector.z, scalar);
-	}
-	
-	public Quaternion addRotationEuler(final Vector3f vector) {
-		return addRotationEuler(vector.x, vector.y, vector.z);
-	}
-	
-	public Quaternion addRotationEuler(final float wx, final float wy, final float wz){
-		return addRotation(wx*PIOVER180,wy*PIOVER180,wz*PIOVER180);
-	}
-	
-	public Quaternion addRotation(final Vector3f vector) {
-		return addRotation(vector.x, vector.y, vector.z);
-	}
-
-	public Quaternion addRotationScaled(final Vector3f vector,
-			final float scalar) {
-		return addRotationScaled(vector.x, vector.y, vector.z, scalar);
-	}
-
-	public Quaternion addRotationScaled(final float wx, final float wy,
-			final float wz, final float scalar) {
-		return addRotation(wx * scalar, wy * scalar, wz * scalar);
-	}
-	
-	public Quaternion addRotation(final float wx, final float wy, final float wz){//24
-		float sq = wx * wx;
-		float qw1;
-		float s;
-		if (sq < 0.6f) {
-			qw1 = 1 - sq * 0.125f;
-			s = 0.5f - sq * 0.02083333333f;
-		} else {
-			final float halfthetaMag = wx * 0.5f;
-			qw1 = (float) Math.cos(halfthetaMag);
-			s = (float) Math.sin(halfthetaMag) / wx;
-		}
-		final float wx1 = wx*s;
-		
-		float x1 = qw1*x + wx1*w;
-		float y1 = qw1*y - wx1*z;
-		float z1 = qw1*z + wx1*y;
-		float w1 = qw1*w - wx1*x;
-		
-		float qw2;
-		sq = wy * wy;
-		if (sq < 0.6f) {
-			qw2 = 1 - sq * 0.125f;
-			s = 0.5f - sq * 0.02083333333f;
-		} else {
-			final float halfthetaMag = wy * 0.5f;
-			qw2 = (float) Math.cos(halfthetaMag);
-			s = (float) Math.sin(halfthetaMag) / wy;
-		}
-		final float wy1 = wy*s;
-		
-		float x2 = qw2*x1 + wy1*z1;
-		float y2 = qw2*y1 + wy1*w1;
-		float z2 = qw2*z1 - wy1*x1;
-		float w2 = qw2*w1 - wy1*y1;
-		
-		float qw3;
-		sq = wz * wz;
-		if (sq < 0.6f) {
-			qw3 = 1 - sq * 0.125f;
-			s = 0.5f - sq * 0.02083333333f;
-		} else {
-			final float halfthetaMag = wz * 0.5f;
-			qw3 = (float) Math.cos(halfthetaMag);
-			s = (float) Math.sin(halfthetaMag) / wz;
-		}
-		final float wz1 = wz*s;
-		
-		
-		float x3 = qw3*x2 - wz1*y2;
-		float y3 = qw3*y2 + wz1*x2;
-		float z3 = qw3*z2 + wz1*w2;
-		float w3 = qw3*w2 - wz1*z2;
-		
-//		float x3 = qw3*qw2*qw1*x + qw3*qw2*wx1*w + qw3*wy1*qw1*z + qw3*wy1*wx1*y - wz1*qw2*qw1*y + wz1*qw2*wx1*z - wz1*wy1*qw1*w + wz1*wy1*wx1*x;
-//		float y3 = qw3*qw2*qw1*y - qw3*qw2*wx1*z + qw3*wy1*qw1*w - qw3*wy1*wx1*x + wz1*qw2*qw1*x + wz1*qw2*wx1*w + wz1*wy1*qw1*z + wz1*wy1*wx1*y;
-//		float z3 = qw3*qw2*qw1*z + qw3*qw2*wx1*y - qw3*wy1*qw1*x - qw3*wy1*wx1*w + wz1*qw2*qw1*w - wz1*qw2*wx1*x - wz1*wy1*qw1*y + wz1*wy1*wx1*z;
-//		float w3 = qw3*qw2*qw1*w - qw3*qw2*wx1*x - qw3*wy1*qw1*y + qw3*wy1*wx1*z - wz1*qw2*qw1*z - wz1*qw2*wx1*y + wz1*wy1*qw1*x + wz1*wy1*wx1*w;
-		
-		set(x3,y3,z3,w3);
-		return this;
-	}
-	
-	public Quaternion integrateRotation(final float wx, final float wy, final float wz) {
-		final float sq = wx * wx + wy * wy + wz * wz;
-		float qw;
-		float s;
-		if (sq < 0.6f) {
-			qw = 1 - sq * 0.125f;
-			s = 0.5f - sq * 0.02083333333f;
-		} else {
-			final float thetaMag = (float) Math.sqrt(sq);
-			final float halfthetaMag = thetaMag * 0.5f;
-			qw = (float) Math.cos(halfthetaMag);
-			s = (float) Math.sin(halfthetaMag) / thetaMag;
-		}
-		setMultiply(wx * s, wy * s, wz * s, qw, x, y, z, w);
-//		wx*=0.5f;
-//		wy*=0.5f;
-//		wz*=0.5f;
-//		add(wx*q);
-//		norm();
-		return this;
 	}
 
 	public Quaternion integrateRotation(final Vector3f vector) {
@@ -217,11 +108,130 @@ public class Quaternion extends Vector4f {
 		return integrateRotation(wx * scalar, wy * scalar, wz * scalar);
 	}
 
+	public Quaternion addRotationEuler(final Vector3f vector) {
+		return addRotationEuler(vector.x, vector.y, vector.z);
+	}
+
+	public Quaternion addRotationEuler(final float wx, final float wy,
+			final float wz) {
+		return addRotation(wx * PIOVER180, wy * PIOVER180, wz * PIOVER180);
+	}
+
+	public Quaternion addRotation(final Vector3f vector) {
+		return addRotation(vector.x, vector.y, vector.z);
+	}
+
+	public Quaternion addRotationScaled(final Vector3f vector,
+			final float scalar) {
+		return addRotationScaled(vector.x, vector.y, vector.z, scalar);
+	}
+
+	public Quaternion addRotationScaled(final float wx, final float wy,
+			final float wz, final float scalar) {
+		return addRotation(wx * scalar, wy * scalar, wz * scalar);
+	}
+
+	public Quaternion addRotation(final float wx, final float wy, final float wz) {
+		float sq = wx * wx;
+		float qw1;
+		float s;
+		if (sq < 0.001691455f) {
+			qw1 = 1 - sq * 0.125f;
+			s = 0.5f - sq * 0.02083333333f;
+		} else {
+			final float halfthetaMag = wx * 0.5f;
+			qw1 = (float) Math.cos(halfthetaMag);
+			s = (float) Math.sin(halfthetaMag) / wx;
+		}
+		final float wx1 = wx * s;
+
+		float x1 = qw1 * x + wx1 * w;
+		float y1 = qw1 * y - wx1 * z;
+		float z1 = qw1 * z + wx1 * y;
+		float w1 = qw1 * w - wx1 * x;
+
+		float qw2;
+		sq = wy * wy;
+		if (sq < 0.001691455f) {
+			qw2 = 1 - sq * 0.125f;
+			s = 0.5f - sq * 0.02083333333f;
+		} else {
+			final float halfthetaMag = wy * 0.5f;
+			qw2 = (float) Math.cos(halfthetaMag);
+			s = (float) Math.sin(halfthetaMag) / wy;
+		}
+		final float wy1 = wy * s;
+
+		float x2 = qw2 * x1 + wy1 * z1;
+		float y2 = qw2 * y1 + wy1 * w1;
+		float z2 = qw2 * z1 - wy1 * x1;
+		float w2 = qw2 * w1 - wy1 * y1;
+
+		float qw3;
+		sq = wz * wz;
+		if (sq < 0.001691455f) {
+			qw3 = 1 - sq * 0.125f;
+			s = 0.5f - sq * 0.02083333333f;
+		} else {
+			final float halfthetaMag = wz * 0.5f;
+			qw3 = (float) Math.cos(halfthetaMag);
+			s = (float) Math.sin(halfthetaMag) / wz;
+		}
+		final float wz1 = wz * s;
+
+		float x3 = qw3 * x2 - wz1 * y2;
+		float y3 = qw3 * y2 + wz1 * x2;
+		float z3 = qw3 * z2 + wz1 * w2;
+		float w3 = qw3 * w2 - wz1 * z2;
+
+		// float x3 = qw3*qw2*qw1*x + qw3*qw2*wx1*w + qw3*wy1*qw1*z +
+		// qw3*wy1*wx1*y - wz1*qw2*qw1*y + wz1*qw2*wx1*z - wz1*wy1*qw1*w +
+		// wz1*wy1*wx1*x;
+		// float y3 = qw3*qw2*qw1*y - qw3*qw2*wx1*z + qw3*wy1*qw1*w -
+		// qw3*wy1*wx1*x + wz1*qw2*qw1*x + wz1*qw2*wx1*w + wz1*wy1*qw1*z +
+		// wz1*wy1*wx1*y;
+		// float z3 = qw3*qw2*qw1*z + qw3*qw2*wx1*y - qw3*wy1*qw1*x -
+		// qw3*wy1*wx1*w + wz1*qw2*qw1*w - wz1*qw2*wx1*x - wz1*wy1*qw1*y +
+		// wz1*wy1*wx1*z;
+		// float w3 = qw3*qw2*qw1*w - qw3*qw2*wx1*x - qw3*wy1*qw1*y +
+		// qw3*wy1*wx1*z - wz1*qw2*qw1*z - wz1*qw2*wx1*y + wz1*wy1*qw1*x +
+		// wz1*wy1*wx1*w;
+
+		set(x3, y3, z3, w3);
+		return this;
+	}
+	public Quaternion integrateRotation(final float wx, final float wy,
+			final float wz) {
+//		 tmp.setMultiply(wx*0.5f,wy*0.5f,wz*0.5f,0, x,y,z,w);
+//		 add(tmp);
+//		 norm();
+		final float sq = wx * wx + wy * wy + wz * wz;
+		float qw;
+		float s;
+		if (sq < 0.001691455f) {//TODO sq*sq/27 < eps   60fps vs free
+			qw = 1 - sq * 0.125f;
+			s = 0.5f - sq * 0.02083333333f;
+		} else {
+			final float thetaMag = (float) Math.sqrt(sq);
+			final float halfthetaMag = thetaMag * 0.5f;
+			qw = (float) Math.cos(halfthetaMag);
+			s = (float) Math.sin(halfthetaMag) / thetaMag;
+		}
+		setMultiply(wx * s, wy * s, wz * s, qw, x, y, z, w);
+		return this;
+	}
+
 	public Vector3f rotateV(final Vector3f vector) {
 		return rotateV(vector, vector);
 	}
 
 	public Vector3f rotateV(final Vector3f result, final Vector3f vector) {
+		// qk.setKonjugate(this);
+		// qp.set(vector);qp.w=0;
+		// qp.setMultiply(this, qp);
+		// qp.setMultiply(qp, qk);
+		// result.set(qp);
+		// return result;
 		final float tx = y * vector.z - z * vector.y;
 		final float ty = z * vector.x - x * vector.z;
 		final float tz = x * vector.y - y * vector.x;
@@ -303,7 +313,7 @@ public class Quaternion extends Vector4f {
 		return this;
 	}
 
-	public void multiplyQM(float[] result, int resultOffset, float[] rhs,
+	public void multiplyMQ(float[] result, int resultOffset, float[] rhs,
 			int rhsOffset) {
 		final float x2 = x * x;
 		final float y2 = y * y;
@@ -354,7 +364,7 @@ public class Quaternion extends Vector4f {
 		result[resultOffset + 15] = rhs[rhsOffset + 15];
 	}
 
-	public void multiplyMQ(float[] result, int resultOffset, float[] lhs,
+	public void multiplyQM(float[] result, int resultOffset, float[] lhs,
 			int lhsOffset) {
 		final float x2 = x * x;
 		final float y2 = y * y;

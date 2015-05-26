@@ -53,7 +53,7 @@ public class AffineTransform {
 		Matrix.setIdentityM(result, 0);
 		Matrix.translateM(result, 0, translation.x, translation.y,
 				translation.z);
-		orientation.multiplyMQ(result, 0, result, 0);
+		orientation.multiplyQM(result, 0, result, 0);
 		return result;
 	}
 

@@ -39,6 +39,7 @@ public class MainShape extends GLShape {
 	protected static GLMaterial lastMaterial;
 
 	protected final BlinnPhongShader shader;
+	protected int drawMode = GL11.GL_TRIANGLES;
 
 	protected final List<AffineTransform> transformableList = new ArrayList<AffineTransform>();
 
@@ -70,6 +71,10 @@ public class MainShape extends GLShape {
 
 	public void setFrustum(Frustum pF) {
 		f = pF;
+	}
+	
+	public void drawWireframe(boolean t){
+		drawMode = t?GL11.GL_LINES:GL11.GL_TRIANGLES;
 	}
 
 	public void render(final AffineTransform b) {
@@ -170,7 +175,7 @@ public class MainShape extends GLShape {
 				if (lastMaterial != material) {
 					lastMaterial = material;
 					if (draw) {
-						GL11.glDrawElements(GL11.GL_TRIANGLES, indiceslength,
+						GL11.glDrawElements(drawMode, indiceslength,
 								GL11.GL_UNSIGNED_SHORT, offset
 										* BYTES_PER_SHORT);
 						offset += indiceslength;
@@ -195,7 +200,7 @@ public class MainShape extends GLShape {
 				draw = true;
 			} else {
 				if (draw) {
-					GL11.glDrawElements(GL11.GL_TRIANGLES, indiceslength,
+					GL11.glDrawElements(drawMode, indiceslength,
 							GL11.GL_UNSIGNED_SHORT, offset * BYTES_PER_SHORT);
 					offset += indiceslength;
 					indiceslength = 0;
@@ -205,7 +210,7 @@ public class MainShape extends GLShape {
 			indiceslength += mesh.getIndicesLength();
 		}
 		if (draw) {
-			GL11.glDrawElements(GL11.GL_TRIANGLES, indiceslength,
+			GL11.glDrawElements(drawMode, indiceslength,
 					GL11.GL_UNSIGNED_SHORT, offset * BYTES_PER_SHORT);
 		}
 	}

@@ -32,7 +32,7 @@ public class Frustum {
 		//		|| m14 != frustumM[14];
 		hasChanged = !MatrixExt.equalsM(lastFrustum, frustumM);//TODO besser schon von Camera überprüfen
 		if (hasChanged) {
-			MatrixExt.setM4(lastFrustum, frustumM);
+			MatrixExt.setM(lastFrustum, frustumM);
 //			m12 = frustumM[12];
 //			m13 = frustumM[13];
 //			m14 = frustumM[14];
