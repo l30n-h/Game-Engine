@@ -12,6 +12,7 @@ import com.brocorporation.gameengine.utils.Vector3f;
 public class StaticBody extends Collidable implements
 		AffineTransform.IAffineTransform {
 
+	public final static byte INFINITY_MASS = 0;
 	protected final AffineTransform affineTransform = new AffineTransform();
 	protected boolean updateTranslation;
 	protected boolean updateOrientation;
@@ -29,6 +30,18 @@ public class StaticBody extends Collidable implements
 
 	public StaticBody(final IShape shape) {
 		super(shape);
+	}
+
+	public float getMass() {
+		return INFINITY_MASS;
+	}
+
+	public float getInverseMass() {
+		return INFINITY_MASS;
+	}
+
+	public boolean isStatic() {
+		return getInverseMass() == INFINITY_MASS;
 	}
 
 	public void setMaterial(final Material m) {

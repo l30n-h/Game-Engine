@@ -47,7 +47,7 @@ public class Convex implements IShape {
 	public Vector3f getMaxAlongDirection(Vector3f result, Vector3f dir) {
 		Vector3f max = vertices[0];
 		float dotmaxdir = max.dot(dir);
-		for (int i = vertices.length - 1; i >= 0; i--) {
+		for (int i = vertices.length - 1; i > 0; i--) {
 			final float dotshapedir = vertices[i].dot(dir);
 			if (dotshapedir > dotmaxdir) {
 				max = vertices[i];
@@ -61,7 +61,7 @@ public class Convex implements IShape {
 	public Vector3f getMinAlongDirection(Vector3f result, Vector3f dir) {
 		Vector3f min = vertices[0];
 		float dotmindir = min.dot(dir);
-		for (int i = vertices.length - 1; i >= 0; i--) {
+		for (int i = vertices.length - 1; i > 0; i--) {
 			final float dotshapedir = vertices[i].dot(dir);
 			if (dotshapedir < dotmindir) {
 				min = vertices[i];
@@ -69,6 +69,70 @@ public class Convex implements IShape {
 			}
 		}
 		return result.set(min);
+	}
+	
+
+	@Override
+	public Vector3f[] getAllMaxAlongDirection(Vector3f[] result, Vector3f dir,
+			int count, float eps) {
+		if(count > 0){
+			eps /=dir.length();
+			float dotmaxdir = vertices[0].dot(dir);
+			result[0].set(vertices[0]);
+			int j = 1;
+			for (int i = vertices.length - 1; i > 0; i--) {
+				final float dotshapedir = vertices[i].dot(dir);
+				if (dotshapedir>=dotmaxdir) {
+					if(dotshapedir>=dotmaxdir+eps){
+						result[0].set(vertices[i]);
+						j=1;
+					}else if(j<count){
+						result[j].set(vertices[i]);
+						j++;
+					}
+					dotmaxdir = dotshapedir;
+				}else if(j<count && dotshapedir+eps>=dotmaxdir){
+					result[j].set(vertices[i]);
+					j++;
+				}
+			}
+			for(;j<count;j++){
+				result[j].set(0,0,0);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Vector3f[] getAllMinAlongDirection(Vector3f[] result, Vector3f dir,
+			int count, float eps) {
+		if(count > 0){
+			eps /=dir.length();
+			float dotmindir = vertices[0].dot(dir);
+			result[0].set(vertices[0]);
+			int j = 1;
+			System.out.println(dotmindir+"__"+dotmindir);		
+			for (int i = vertices.length - 1; i > 0; i--) {
+				final float dotshapedir = vertices[i].dot(dir);System.out.println(dotshapedir+"__"+dotmindir);		
+				if (dotshapedir<=dotmindir) {
+					if(dotshapedir<=dotmindir-eps){
+						result[0].set(vertices[i]);
+						j=1;
+					}else if(j<count){
+						result[j].set(vertices[i]);
+						j++;
+					}
+					dotmindir = dotshapedir;
+				}else if(j<count && dotshapedir-eps<=dotmindir){
+					result[j].set(vertices[i]);
+					j++;
+				}
+			}//TODO check old values
+			for(;j<count;j++){
+				result[j].set(0,0,0);
+			}
+		}
+		return result;
 	}
 
 	@Override

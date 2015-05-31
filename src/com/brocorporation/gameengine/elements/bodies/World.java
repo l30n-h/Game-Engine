@@ -1,6 +1,7 @@
 package com.brocorporation.gameengine.elements.bodies;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.brocorporation.gameengine.IUpdateInfo;
@@ -10,6 +11,7 @@ import com.brocorporation.gameengine.elements.collision.Collidable;
 import com.brocorporation.gameengine.elements.collision.CollisionDetection;
 import com.brocorporation.gameengine.elements.collision.Constraint;
 import com.brocorporation.gameengine.elements.collision.Contact;
+import com.brocorporation.gameengine.elements.collision.ElasticContact;
 import com.brocorporation.gameengine.elements.collision.ElasticContactSolver;
 import com.brocorporation.gameengine.elements.collision.GJK;
 import com.brocorporation.gameengine.elements.collision.IShape;
@@ -30,9 +32,10 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	protected final List<Constraint> constraintList = new ArrayList<Constraint>();
 	protected Camera activeCamera;
 	protected StaticLight activeLight;
+	protected HashSet<ElasticContact> elasticContacts = new HashSet<ElasticContact>();//TODO
 	
 	static boolean debug = true;
-	
+	Vector3f[] reAr = {new Vector3f(),new Vector3f(),new Vector3f(),new Vector3f()};
 	@Override
 	public void broadphaseCollision(final DynamicBody dynBody,
 			final StaticBody stcBody, final IUpdateInfo uInfo) {
@@ -89,6 +92,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			MyGLSurfaceView.cPSet = true;
 			MyGLSurfaceView.cPoint.getPosition().set(c.getPointA());
 			MyGLSurfaceView.cPNormal.set(c.getNormal());
+			dynShape.getAllMinAlongDirection(reAr, c.getNormal(), reAr.length,0.03f);
+			for(Vector3f v : reAr) System.out.println("All:\t"+v);
 			System.out.println("elastic");
 		}
 		stcBody.onCollide(dynBody);
@@ -170,7 +175,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			activeLight.updatePosition(uInfo);
 		}
 	}
-
+	
 	public void add(final DynamicBody body) {
 		updateList.add(body);
 		collisionTree.add(body.getShape().getAABB(), body);

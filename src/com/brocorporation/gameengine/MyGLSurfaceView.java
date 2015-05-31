@@ -403,9 +403,9 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-0.2f, +0.85f, -0.2f),
 				new Vector3f(-0.2f, -0.85f, +0.2f),
 				new Vector3f(-0.2f, -0.85f, -0.2f) };
-float a_x=0.2f,
-	  a_y=0.85f,
-	  a_z=0.2f;
+float a_x=0.5f,
+	  a_y=0.5f,
+	  a_z=0.5f;
 		Vector3f[] a2 = new Vector3f[] { 
 				new Vector3f(+a_x, +a_y, +a_z),
 				new Vector3f(+a_x, +a_y, -a_z),
@@ -418,19 +418,20 @@ float a_x=0.2f,
 
 //		 final int bodyCount = 10;
 //		 final int hCount = bodyCount / 2;
+//		 final Material m = new Material(1,1.0f,0.9f);
 //		 for (int i = 0; i < bodyCount; i++) {
-//		
-//		 final com.brocorporation.gameengine.elements.bodies.RigidBody b = new
-//		 com.brocorporation.gameengine.elements.bodies.RigidBody(
-//		 new Convex(a2), (i * 20 + 20) * 0 + 10);
+////		 final RigidBody b = new RigidBody(new Sphere(0.75f),  (i * 20 + 20) * 0 + 10);
+////		 b.setGLShape(sphereShape);
+//		 final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 + 10);
 //		 b.setGLShape(actorShape);
+//		 b.setMaterial(m);
 //		 b.isGravityEnabled(true);
 //		 world.add(b);
 //		
 //		 if (i < hCount) {
-//		 b.setPosition(0, -0.9f, 10 - i * 0.4f);
+//		 b.setPosition(0, -1.75f+a_y, 10 - i * 2*a_z);
 //		 } else {
-//		 b.setPosition(0, -0.9f + 1.75f, 10 - (i - hCount) * 0.4f);
+//		 b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*a_z);
 //		 }
 //		 }
 
@@ -443,7 +444,7 @@ float a_x=0.2f,
 		actor2.setMaxVelocity(13);
 		world.add(actor2);
 
-		actor = new Actor(new Convex(a2), 80);
+		actor = new Actor(new Convex(a), 80);
 		actor.setGLShape(actorShape);
 //		 actor = new Actor(new Sphere(0.75f), 80);
 //		 actor.setGLShape(sphereShape);
@@ -452,7 +453,7 @@ float a_x=0.2f,
 		//actor.setRotation(45, -90, 0);//= rot x than rot y than rot z
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
-		actor.setMaterial(new Material(0f, 1F, 0.5f));
+		//actor.setMaterial(new Material(0f, 1F, 0.5f));
 		world.add(actor);
 		currentActor = actor2;
 		

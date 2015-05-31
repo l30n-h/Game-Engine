@@ -26,29 +26,32 @@ public class DistanceConstraint extends Constraint {
 
 	@Override
 	public void solve(final IUpdateInfo uInfo) {
-		if (stcA != null) {
+		final DynamicBody bodyB = (DynamicBody) this.bodyB;
+		if (bodyA.isStatic()) {
 			final Vector3f dV = VectorPool.getVectorV3(false);
-			dV.setSubtract(dynB.getPosition(), stcA.getPosition());
+			dV.setSubtract(bodyB.getPosition(), bodyA.getPosition());
 			final float currentDistance = dV.length();
 			dV.scale(1F / currentDistance);
-			final float relVel = dynB.getLinearVelocity().dot(dV);
+			final float relVel = bodyB.getLinearVelocity().dot(dV);
 			final float relDist = currentDistance - distance;
 			final float remove = relVel + relDist * uInfo.getInverseRate();
-			dynB.getLinearVelocity().subtractScaled(dV, remove);
+			bodyB.getLinearVelocity().subtractScaled(dV, remove);
 			VectorPool.release(dV);
 		} else {
+			final DynamicBody bodyA = (DynamicBody) this.bodyA;
 			final Vector3f dV = VectorPool.getVectorV3(false);
 			final Vector3f vV = VectorPool.getVectorV3(false);
-			dV.setSubtract(dynB.getPosition(), dynA.getPosition());
+			dV.setSubtract(bodyB.getPosition(), bodyA.getPosition());
 			final float currentDistance = dV.length();
 			dV.scale(1F / currentDistance);
-			vV.setSubtract(dynB.getLinearVelocity(), dynA.getLinearVelocity());
+			vV.setSubtract(bodyB.getLinearVelocity(), bodyA.getLinearVelocity());
 			final float relVel = vV.dot(dV);
 			final float relDist = currentDistance - distance;
 			final float remove = relVel + relDist * uInfo.getInverseRate();
-			dV.scale(remove / (dynA.getInverseMass() + dynB.getInverseMass()));
-			dynB.getLinearVelocity().subtractScaled(dV, dynB.getInverseMass());
-			dynA.getLinearVelocity().addScaled(dV, dynA.getInverseMass());
+			dV.scale(remove / (bodyA.getInverseMass() + bodyB.getInverseMass()));
+			bodyB.getLinearVelocity()
+					.subtractScaled(dV, bodyB.getInverseMass());
+			bodyA.getLinearVelocity().addScaled(dV, bodyA.getInverseMass());
 			VectorPool.release(dV);
 			VectorPool.release(vV);
 		}

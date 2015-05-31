@@ -7,7 +7,6 @@ import com.brocorporation.gameengine.utils.Vector3f;
 
 public class DynamicBody extends StaticBody {
 
-	public final static byte INFINITY_MASS = 0;
 	protected final static float MIN_VELOCITY2 = 0.001F;
 
 	protected final float mass;
@@ -37,10 +36,12 @@ public class DynamicBody extends StaticBody {
 		}
 	}
 
+	@Override
 	public float getMass() {
 		return mass;
 	}
 
+	@Override
 	public float getInverseMass() {
 		return inverseMass;
 	}

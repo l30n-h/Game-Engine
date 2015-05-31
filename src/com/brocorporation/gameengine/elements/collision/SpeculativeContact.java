@@ -22,38 +22,19 @@ public class SpeculativeContact extends Constraint {
 		reset(a, b, pNormal, pDistance);
 	}
 
-	@Override
-	public void setBodies(final DynamicBody a, final DynamicBody b)
-			throws Exception {
-		super.setBodies(a, b);
-		if (stcA == null) {
-			inverseInverseMassSum = 1F / (dynA.getInverseMass() + dynB
-					.getInverseMass());
-			if (normal.y < -0.9f) {
-				dynA.isOnGround(true);
-			}
-		}
-		if (normal.y > 0.9f) {
-			dynB.isOnGround(true);
-		}
-	}
-
-	@Override
-	public void setBodies(final StaticBody a, final DynamicBody b)
-			throws Exception {
-		if (a instanceof DynamicBody) {
-			setBodies((DynamicBody) a, b);
-		} else {
-			super.setBodies(a, b);
-		}
-		if (normal.y > 0.9f) {
-			dynB.isOnGround(true);
-		}
-	}
-
 	public void reset(final StaticBody a, final DynamicBody b,
 			final Vector3f pNormal, final float pDistance) throws Exception {
 		setBodies(a, b);
+		if (a instanceof DynamicBody) {
+			inverseInverseMassSum = 1F / bodyA.getInverseMass()
+					+ bodyB.getInverseMass();
+			if (normal.y < -0.9f) {
+				((DynamicBody) a).isOnGround(true);
+			}
+		}
+		if (normal.y > 0.9f) {
+			((DynamicBody) bodyB).isOnGround(true);
+		}
 		normal.set(pNormal);
 		distance = pDistance;
 		impulse = 0;
@@ -73,8 +54,10 @@ public class SpeculativeContact extends Constraint {
 
 	@Override
 	public void solve(final IUpdateInfo uInfo) {
-		if (stcA != null) {
-			staticContact(uInfo);
+		if (bodyA.isStatic()) {
+			if (!bodyB.isStatic()) {
+				staticContact(uInfo);
+			}
 		} else {
 			dynamicContact(uInfo);
 		}
@@ -83,7 +66,8 @@ public class SpeculativeContact extends Constraint {
 	private void staticContact(final IUpdateInfo uInfo) {
 		if (distance < 0)
 			return;
-		final Vector3f dynBlV = dynB.getLinearVelocity();
+		DynamicBody bodyB = (DynamicBody) this.bodyB;
+		final Vector3f dynBlV = bodyB.getLinearVelocity();
 		final float remove = dynBlV.dot(normal) + distance
 				* uInfo.getInverseRate();
 		final float newImpulse = Math.min(remove + impulse, 0);
@@ -96,16 +80,16 @@ public class SpeculativeContact extends Constraint {
 			final float jt = dynBlV.dot(tangentFrictionImpulse);
 			if (jt != 0) {
 				if (clampedStaticFriction < 0) {
-					clampedStaticFriction = clamp(stcA.getMaterial()
-							.getStaticFriction(), dynB.getMaterial()
+					clampedStaticFriction = clamp(bodyA.getMaterial()
+							.getStaticFriction(), bodyB.getMaterial()
 							.getStaticFriction());
 				}
 				if (jt < jn * clampedStaticFriction) {
 					dynBlV.subtractScaled(tangentFrictionImpulse, jt);
 				} else {
 					if (clampedDynamicFriction < 0) {
-						clampedDynamicFriction = clamp(stcA.getMaterial()
-								.getDynamicFriction(), dynB.getMaterial()
+						clampedDynamicFriction = clamp(bodyA.getMaterial()
+								.getDynamicFriction(), bodyB.getMaterial()
 								.getDynamicFriction());
 					}
 					dynBlV.subtractScaled(tangentFrictionImpulse, jn
@@ -118,8 +102,10 @@ public class SpeculativeContact extends Constraint {
 	private void dynamicContact(final IUpdateInfo uInfo) {
 		if (distance < 0)
 			return;
-		final Vector3f dynAlV = dynA.getLinearVelocity();
-		final Vector3f dynBlV = dynB.getLinearVelocity();
+		final DynamicBody bodyA = (DynamicBody) this.bodyA;
+		final DynamicBody bodyB = (DynamicBody) this.bodyB;
+		final Vector3f dynAlV = bodyA.getLinearVelocity();
+		final Vector3f dynBlV = bodyB.getLinearVelocity();
 		rV.setSubtract(dynBlV, dynAlV);
 		final float remove = rV.dot(normal) + distance * uInfo.getInverseRate();
 		final float newImpulse = Math.min((remove * inverseInverseMassSum)
@@ -127,8 +113,8 @@ public class SpeculativeContact extends Constraint {
 		final float jn = impulse - newImpulse;
 		impulse = newImpulse;
 		if (jn != 0) {
-			dynAlV.subtractScaled(normal, jn * dynA.getInverseMass());
-			dynBlV.addScaled(normal, jn * dynB.getInverseMass());
+			dynAlV.subtractScaled(normal, jn * bodyA.getInverseMass());
+			dynBlV.addScaled(normal, jn * bodyB.getInverseMass());
 
 			rV.setSubtract(dynBlV, dynAlV);
 			tangentFrictionImpulse
@@ -137,27 +123,27 @@ public class SpeculativeContact extends Constraint {
 			if (jt != 0) {
 				jt *= inverseInverseMassSum;
 				if (clampedStaticFriction < 0) {
-					clampedStaticFriction = clamp(dynA.getMaterial()
-							.getStaticFriction(), dynB.getMaterial()
+					clampedStaticFriction = clamp(bodyA.getMaterial()
+							.getStaticFriction(), bodyB.getMaterial()
 							.getStaticFriction());
 				}
 				if (jt < jn * clampedStaticFriction) {
 					dynAlV.addScaled(tangentFrictionImpulse,
-							jt * dynA.getInverseMass());
+							jt * bodyA.getInverseMass());
 					dynBlV.subtractScaled(tangentFrictionImpulse,
-							jt * dynB.getInverseMass());
+							jt * bodyB.getInverseMass());
 				} else {
 					if (clampedDynamicFriction < 0) {
-						final Material mA = dynA.getMaterial();
-						final Material mB = dynB.getMaterial();
+						final Material mA = bodyA.getMaterial();
+						final Material mB = bodyB.getMaterial();
 						clampedDynamicFriction = clamp(mA.getDynamicFriction(),
 								mB.getDynamicFriction());
 					}
 					final float fs = clampedDynamicFriction * jn;
 					dynAlV.addScaled(tangentFrictionImpulse,
-							fs * dynA.getInverseMass());
+							fs * bodyA.getInverseMass());
 					dynBlV.subtractScaled(tangentFrictionImpulse,
-							fs * dynB.getInverseMass());
+							fs * bodyB.getInverseMass());
 					tangentFrictionImpulse.scale(jn * clampedDynamicFriction);
 				}
 			}
@@ -172,19 +158,14 @@ public class SpeculativeContact extends Constraint {
 	public boolean equals(Object o) {
 		if (o instanceof SpeculativeContact) {
 			final SpeculativeContact c = (SpeculativeContact) o;
-			if (stcA != null) {
-				return (stcA == c.stcA && dynB == c.dynB);
-			} else {
-				return (dynA == c.dynA && dynB == c.dynB)
-						|| (dynA == c.dynB && dynB == c.dynA);
-			}
+			return (bodyA == c.bodyA && bodyB == c.bodyB)
+					|| (bodyA == c.bodyB && bodyB == c.bodyA);
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return Math.abs((stcA != null ? stcA.hashCode() : dynA.hashCode())
-				- dynB.hashCode());
+		return Math.abs(bodyA.hashCode() - bodyB.hashCode());
 	}
 }

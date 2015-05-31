@@ -31,19 +31,109 @@ public class AABB implements IShape {
 			final Vector3f dir) {
 		final Vector3f h1 = getHalfsize();
 		final Vector3f p1 = getPosition();
-		return result.set(dir.x >= 0 ? p1.x + h1.x : p1.x - h1.x,
-				dir.y >= 0 ? p1.y + h1.y : p1.y - h1.y, dir.z >= 0 ? p1.z
-						+ h1.z : p1.z - h1.z);
+		return result.set(dir.x > 0 ? p1.x + h1.x : p1.x - h1.x,
+				dir.y > 0 ? p1.y + h1.y : p1.y - h1.y, dir.z > 0 ? p1.z + h1.z
+						: p1.z - h1.z);
 	}
 
 	@Override
 	public Vector3f getMinAlongDirection(final Vector3f result,
 			final Vector3f dir) {
-		final Vector3f h1 = getHalfsize();
-		final Vector3f p1 = getPosition();
-		return result.set(dir.x < 0 ? p1.x + h1.x : p1.x - h1.x,
-				dir.y < 0 ? p1.y + h1.y : p1.y - h1.y, dir.z < 0 ? p1.z + h1.z
-						: p1.z - h1.z);
+		return getMaxAlongDirection(result, temp.setInvert(dir));
+	}
+
+	@Override
+	public Vector3f[] getAllMaxAlongDirection(Vector3f[] result, Vector3f dir,
+			int count, float eps) {
+		if (count > 0) {
+			final Vector3f h1 = getHalfsize();
+			final Vector3f p1 = getPosition();
+			eps *= eps;
+			final boolean yNull = dir.y * dir.y <= eps;
+			final boolean zNull = dir.z * dir.z <= eps;
+			for (int i = 0; i < count; i++) {
+				result[i].set(0, 0, 0);
+			}
+			if (dir.x * dir.x <= eps) {
+				if (yNull) {
+					if (zNull) {
+						return result;
+					} else {
+						final float z = dir.z > 0 ? p1.z + h1.z : p1.z - h1.z;
+						result[0].set(p1.x + h1.x, p1.y + h1.y, z);
+						if (count > 1) {
+							result[1].set(p1.x + h1.x, p1.y - h1.y, z);
+							if (count > 2) {
+								result[2].set(p1.x - h1.x, p1.y + h1.y, z);
+								if (count > 3) {
+									result[3].set(p1.x - h1.x, p1.y - h1.y, z);
+								}
+							}
+						}
+					}
+				} else {
+					final float y = dir.y > 0 ? p1.y + h1.y : p1.y - h1.y;
+					if (zNull) {
+						result[0].set(p1.x + h1.x, y, p1.z + h1.z);
+						if (count > 1) {
+							result[1].set(p1.x + h1.x, y, p1.z - h1.z);
+							if (count > 2) {
+								result[2].set(p1.x - h1.x, y, p1.z + h1.z);
+								if (count > 3) {
+									result[3].set(p1.x - h1.x, y, p1.z - h1.z);
+								}
+							}
+						}
+					} else {
+						final float z = dir.z > 0 ? p1.z + h1.z : p1.z - h1.z;
+						result[0].set(p1.x + h1.x, y, z);
+						if (count > 1) {
+							result[1].set(p1.x - h1.x, y, z);
+						}
+					}
+				}
+			} else {
+				final float x = dir.x > 0 ? p1.x + h1.x : p1.x - h1.x;
+				if (yNull) {
+					if (zNull) {
+						result[0].set(x, p1.y + h1.y, p1.z + h1.z);
+						if (count > 1) {
+							result[1].set(x, p1.y + h1.y, p1.z - h1.z);
+							if (count > 2) {
+								result[2].set(x, p1.y - h1.y, p1.z + h1.z);
+								if (count > 3) {
+									result[3].set(x, p1.y - h1.y, p1.z - h1.z);
+								}
+							}
+						}
+					} else {
+						final float z = dir.z > 0 ? p1.z + h1.z : p1.z - h1.z;
+						result[0].set(x, p1.y + h1.y, z);
+						if (count > 1) {
+							result[1].set(x, p1.y - h1.y, z);
+						}
+					}
+				} else {
+					final float y = dir.y > 0 ? p1.y + h1.y : p1.y - h1.y;
+					if (zNull) {
+						result[0].set(x, y, p1.z + h1.z);
+						if (count > 1) {
+							result[1].set(x, y, p1.z - h1.z);
+						}
+					} else {
+						result[0].set(x, y, dir.z > 0 ? p1.z + h1.z : p1.z
+								- h1.z);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Vector3f[] getAllMinAlongDirection(Vector3f[] result, Vector3f dir,
+			int count, float eps) {
+		return getAllMaxAlongDirection(result, temp.setInvert(dir), count, eps);
 	}
 
 	@Override

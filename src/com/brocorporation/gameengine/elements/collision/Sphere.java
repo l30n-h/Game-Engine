@@ -42,6 +42,30 @@ public class Sphere implements IShape {
 	}
 
 	@Override
+	public Vector3f[] getAllMaxAlongDirection(Vector3f[] result, Vector3f dir,
+			int count, float eps) {
+		if (count > 0) {
+			getMaxAlongDirection(result[0], dir);
+			for (int j = 1; j < count; j++) {
+				result[j].set(0, 0, 0);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Vector3f[] getAllMinAlongDirection(Vector3f[] result, Vector3f dir,
+			int count, float eps) {
+		if (count > 0) {
+			getMinAlongDirection(result[0], dir);
+			for (int j = 1; j < count; j++) {
+				result[j].set(0, 0, 0);
+			}
+		}
+		return result;
+	}
+
+	@Override
 	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
 			float inverseMass) {
 		inverseInertiaTensor[1] = inverseInertiaTensor[2] = inverseInertiaTensor[3] = inverseInertiaTensor[5] = inverseInertiaTensor[6] = inverseInertiaTensor[7] = 0;

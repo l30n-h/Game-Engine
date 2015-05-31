@@ -11,6 +11,10 @@ public interface IShape {
 
 	public Vector3f getMinAlongDirection(Vector3f result, Vector3f dir);
 
+	public Vector3f[] getAllMaxAlongDirection(Vector3f[] result, Vector3f dir, int count, float eps);
+
+	public Vector3f[] getAllMinAlongDirection(Vector3f[] result, Vector3f dir, int count, float eps);
+
 	public AABB getAABB();
 
 	public void setFrustumType(byte type);

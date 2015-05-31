@@ -108,6 +108,18 @@ public class Simplex {
 		ref = null;
 	}
 
+	public String printElements() {
+		StringBuilder b = new StringBuilder();
+		char a = (char) ('A' + size() - 1);
+		for (int q = size() - 1; q >= 0; q--) {
+			final Element e = get(q);
+			b.append((char) (a - q)).append("\t").append(e.getV()).append("\t")
+					.append(e.getPointA()).append("\t").append(e.getPointB())
+					.append("\n");
+		}
+		return b.toString();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();

@@ -26,19 +26,19 @@ public class FollowConstraint extends Constraint {
 
 	@Override
 	public void solve(final IUpdateInfo uInfo) {
-		final Vector3f posA = ((stcA != null) ? stcA : dynA).getPosition();
-		final Vector3f posB = dynB.getPosition();
+		final Vector3f posA = bodyA.getPosition();
+		final Vector3f posB = bodyB.getPosition();
 		final float x = posA.x - posB.x;
 		final float y = posA.y - posB.y;
 		final float z = posA.z - posB.z;
 		final float length = Vector3f.length(x, y, z);
 		if (length > distance) {
 			final float s = (length - distance) * uInfo.getInverseRate();
-			dynB.getLinearVelocity().addScaled(x, y, z, s);
+			((DynamicBody) bodyB).getLinearVelocity().addScaled(x, y, z, s);
 			stop = true;
 		} else {
 			if (stop) {
-				dynB.getLinearVelocity().set(0, 0, 0);
+				((DynamicBody) bodyB).getLinearVelocity().set(0, 0, 0);
 				stop = false;
 			}
 		}
