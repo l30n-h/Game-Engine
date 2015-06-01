@@ -110,10 +110,9 @@ public class Convex implements IShape {
 			eps /=dir.length();
 			float dotmindir = vertices[0].dot(dir);
 			result[0].set(vertices[0]);
-			int j = 1;
-			System.out.println(dotmindir+"__"+dotmindir);		
+			int j = 1;		
 			for (int i = vertices.length - 1; i > 0; i--) {
-				final float dotshapedir = vertices[i].dot(dir);System.out.println(dotshapedir+"__"+dotmindir);		
+				final float dotshapedir = vertices[i].dot(dir);	
 				if (dotshapedir<=dotmindir) {
 					if(dotshapedir<=dotmindir-eps){
 						result[0].set(vertices[i]);

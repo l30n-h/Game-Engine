@@ -43,7 +43,7 @@ import com.brocorporation.gameengine.utils.Vector3f;
 public class MyGLSurfaceView extends GameEngine {
 
 	private MainShape roomShape;
-	private MainShape actorShape;
+	private MainShape boxShape;
 	private MainShape coinShape;
 	private MainShape sphereShape;
 
@@ -75,7 +75,6 @@ public class MyGLSurfaceView extends GameEngine {
 
 	public MyGLSurfaceView() {
 		super(60, 80);
-
 	}
 
 	public void create() {
@@ -106,9 +105,9 @@ public class MyGLSurfaceView extends GameEngine {
 					glTexture);
 			roomParser.parse(true);
 
-			final WavefrontParser actorParser = new WavefrontParser(
+			final WavefrontParser boxParser = new WavefrontParser(
 					"assets/Human3.obj", "assets/Human3.mtl", glTexture);
-			actorParser.parse(false);
+			boxParser.parse(false);
 			final WavefrontParser sphereParser = new WavefrontParser(
 					"assets/ball.obj", "assets/ball.mtl", glTexture);
 			sphereParser.parse(false);
@@ -119,8 +118,8 @@ public class MyGLSurfaceView extends GameEngine {
 
 			roomShape = new MainShape(blinnPhongShader, glTexture,
 					roomParser.get());
-			actorShape = new MainShape(blinnPhongShader, glTexture,
-					actorParser.get());
+			boxShape = new MainShape(blinnPhongShader, glTexture,
+					boxParser.get());
 			sphereShape = new MainShape(blinnPhongShader, glTexture,
 					sphereParser.get());
 			coinShape = new MainShape(blinnPhongShader, glTexture,
@@ -437,7 +436,7 @@ float a_x=0.5f,
 
 		actor2 = new Actor(new Convex(a), Actor.INFINITY_MASS);
 		actor2.setPosition(0, 0-0.9f, 12);
-		actor2.setGLShape(actorShape);
+		actor2.setGLShape(boxShape);
 		actor2.rotate(0, 140, 0);
 		actor2.setJumpingHeight(2);
 		actor2.isGravityEnabled(true);
@@ -445,15 +444,15 @@ float a_x=0.5f,
 		world.add(actor2);
 
 		actor = new Actor(new Convex(a), 80);
-		actor.setGLShape(actorShape);
+		actor.setGLShape(boxShape);
 //		 actor = new Actor(new Sphere(0.75f), 80);
 //		 actor.setGLShape(sphereShape);
 		actor.setPosition(0, 0-0.9f*0, 14-5);
 //		actor.setPosition(7, 8, -21.25f);
-		//actor.setRotation(45, -90, 0);//= rot x than rot y than rot z
+//		actor.setRotation(45, -90, 0);//= rot x than rot y than rot z
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
-		//actor.setMaterial(new Material(0f, 1F, 0.5f));
+//		actor.setMaterial(new Material(0.8f*0, 1f, 0.5f));
 		world.add(actor);
 		currentActor = actor2;
 		
@@ -472,7 +471,7 @@ float a_x=0.5f,
 		blinnPhongLight.setConstantAttenuation(0.8F);
 		blinnPhongLight.initLight();
 		roomShape.initBuffer();
-		actorShape.initBuffer();
+		boxShape.initBuffer();
 		sphereShape.initBuffer();
 		coinShape.initBuffer();
 		fontShape.initBuffer();
@@ -595,7 +594,7 @@ float a_x=0.5f,
 				} else if(Keyboard.getEventKey() == Keyboard.KEY_F7){
 					wireframed = !wireframed;
 					roomShape.drawWireframe(wireframed);
-					actorShape.drawWireframe(wireframed);
+					boxShape.drawWireframe(wireframed);
 					sphereShape.drawWireframe(wireframed);
 					coinShape.drawWireframe(wireframed);
 				} else if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
@@ -699,7 +698,7 @@ float a_x=0.5f,
 				}
 			}
 			coinShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
-			actorShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
+			boxShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
 			sphereShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);
 		}
 		primitiveShader.use();

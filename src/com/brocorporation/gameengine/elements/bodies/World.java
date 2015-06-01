@@ -53,7 +53,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				// }
 				
 				// MPR.relVel.set(dynBody.getLinearVelocity());
-				if (MPR.intersects(c, stcShape, dynShape) || true) {
+				if (MPR.intersects(c, stcShape, dynShape)) {
 					if(debug) System.out.println("=================mpr==============");
 					if(stcBody instanceof Plane){
 						c.getNormal().set(((Plane) stcBody).getNormal());
@@ -61,11 +61,12 @@ public class World implements CollisionDetection.BroadphaseCallback {
 						c.setDistance(((Plane) stcBody).getDistance(c.getPointB()));
 						c.getPointA().set(c.getPointB());
 						if(c.getDistance() <= 0){
-							ElasticContactSolver.addContact(stcBody, dynBody, c);
+							//ElasticContactSolver.addContact(stcBody, dynBody, c);
+							SpeculativeContactSolver.addContact(stcBody, dynBody,
+									c);
 						}
 					}
-					else ElasticContactSolver.addContact(stcBody, dynBody, c);
-					
+					//else ElasticContactSolver.addContact(stcBody, dynBody, c);
 				}
 			} else {
 				if(debug) System.out.println("=================gjk==============");
@@ -73,8 +74,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			}	
 		} else {
 			if(debug) System.out.println("=================spc==============");
-//			SpeculativeContactSolver.addContact(stcBody, dynBody,
-//					c.getNormal(), c.getDistance());
+			SpeculativeContactSolver.addContact(stcBody, dynBody,
+					c);
 		}
 		if(debug && dynBody.getMass()==80){
 			System.out.println(stcBody);
@@ -135,7 +136,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				}
 			} else {
 				SpeculativeContactSolver.addContact(dynBody1, dynBody2,
-						c.getNormal(), c.getDistance());
+						c);
 			}
 			dynBody1.onCollide(dynBody2);
 			dynBody2.onCollide(dynBody1);

@@ -5,7 +5,6 @@ import java.util.Stack;
 import com.brocorporation.gameengine.IUpdateInfo;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
-import com.brocorporation.gameengine.utils.Vector3f;
 
 public class SpeculativeContactSolver {
 
@@ -14,15 +13,14 @@ public class SpeculativeContactSolver {
 	private static int iterations = 2;
 
 	public static void addContact(final StaticBody stcBody,
-			final DynamicBody dynBody, final Vector3f pNormal,
-			final float pDistance) {
+			final DynamicBody dynBody, final Contact contact) {
 		try {
 			final SpeculativeContact c;
 			if (unusedStack.isEmpty()) {
-				c = new SpeculativeContact(stcBody, dynBody, pNormal, pDistance);
+				c = new SpeculativeContact(stcBody, dynBody, contact);
 			} else {
 				c = unusedStack.pop();
-				c.reset(stcBody, dynBody, pNormal, pDistance);
+				c.reset(stcBody, dynBody, contact);
 			}
 			useStack.push(c);
 		} catch (Exception e) {
