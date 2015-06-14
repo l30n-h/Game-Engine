@@ -357,7 +357,7 @@ public class Vector3f {
 	public boolean equals(Object o) {
 		if (o == this)
 			return true;
-		if (o != null && o instanceof Vector3f) {
+		if (o instanceof Vector3f) {
 			final Vector3f v = (Vector3f) o;
 			return x == v.x && y == v.y && z == v.z;
 		}

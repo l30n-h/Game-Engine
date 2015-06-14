@@ -13,8 +13,8 @@ public class ElasticContact extends Constraint {
 
 	protected final static float percent = 0.8f;
 	protected final static float slop = 0.05f;
-	// protected final static float percent = 1.0f;
-	// protected final static float slop = 0.0f;
+//	 protected final static float percent = 1.0f;
+//	 protected final static float slop = 0.0f;
 
 	protected final Vector3f pointA = new Vector3f();
 	protected final Vector3f pointB = new Vector3f();
@@ -66,6 +66,21 @@ public class ElasticContact extends Constraint {
 
 	static boolean frictional = true;// TODO
 
+//	ContactPoint
+//	bodyA
+//	bodyB
+//	Vector pointA
+//	Vector pointB
+//	Vector localA
+//	Vector localB
+//	Vector I(pointxnormal)
+//	float impulse
+//--------------------------
+//	ContactSet
+//	Vector normal
+//	float stcFriction
+//	float dynFriction
+	
 	private void staticContact(final IUpdateInfo uInfo) {
 		DynamicBody bodyB = (DynamicBody) this.bodyB;
 		final Vector3f dynBlV = bodyB.getLinearVelocity();
@@ -91,9 +106,6 @@ public class ElasticContact extends Constraint {
 					/ (bodyB.getInverseMass() + tmp11.dot(normal));
 			dynBlV.addScaled(normal, bodyB.getInverseMass() * jn);
 			((RigidBody) bodyB).getAngularVelocity().addScaled(tmp2, jn);
-			System.out.println(dynBlV);
-			System.out.println(((RigidBody) bodyB).getAngularVelocity());
-			System.out.println();
 			if (frictional) {
 				relVel = rV.setAdd(dynBlV, rV.setCross(
 						((RigidBody) bodyB).getAngularVelocity(), pointB));

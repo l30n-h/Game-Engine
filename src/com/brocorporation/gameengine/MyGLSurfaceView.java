@@ -1,6 +1,7 @@
 package com.brocorporation.gameengine;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
@@ -14,7 +15,6 @@ import com.brocorporation.gameengine.elements.bodies.Camera;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.Item;
 import com.brocorporation.gameengine.elements.bodies.Plane;
-import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.elements.bodies.StaticLight;
 import com.brocorporation.gameengine.elements.bodies.TrackingCamera;
@@ -23,6 +23,8 @@ import com.brocorporation.gameengine.elements.collision.AABB;
 import com.brocorporation.gameengine.elements.collision.Collidable;
 import com.brocorporation.gameengine.elements.collision.Convex;
 import com.brocorporation.gameengine.elements.collision.Frustum;
+import com.brocorporation.gameengine.elements.collision.Manifold;
+import com.brocorporation.gameengine.elements.collision.Manifold.ManifoldContact;
 import com.brocorporation.gameengine.elements.collision.Material;
 import com.brocorporation.gameengine.elements.collision.Octree;
 import com.brocorporation.gameengine.elements.collision.RaycastHit;
@@ -156,7 +158,7 @@ public class MyGLSurfaceView extends GameEngine {
 					new Vector3f(4.04F, -1.75F + height, -22.32F),
 					new Vector3f(4.04F, -1.75F + height, -20.28F),
 					new Vector3f(7.64F, 0.25F + height, -20.28F),
-					new Vector3f(7.64F, 0.25F + height, -22.32F)});
+					new Vector3f(7.64F, 0.25F + height, -22.32F) });
 			final Convex stairsBigCeiling = new Convex(new Vector3f[] {
 					new Vector3f(4.4F, -2.25F + height, -22.32F),
 					new Vector3f(4.4F, -2.25F + height, -20.28F),
@@ -295,7 +297,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-1.6F, 6.25F, -24F),
 				new Vector3f(-1.6F, 6.25F, 21.8F),
 				new Vector3f(4.7592F, 6.25F, 21.8F),
-				new Vector3f(4.7592F, 6.25F, -24F)});
+				new Vector3f(4.7592F, 6.25F, -24F) });
 		final Convex ceilingBig1 = new Convex(new Vector3f[] {
 				new Vector3f(-1.6F, 1.75F, -24F),
 				new Vector3f(-1.6F, 1.75F, 21.8F),
@@ -340,7 +342,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-1.6F, -1.75F, -24F),
 				new Vector3f(10.4F, -1.75F, -24F),
 				new Vector3f(10.4F, 9.75F, -24F),
-				new Vector3f(-1.6F, 9.75F, -24F)});
+				new Vector3f(-1.6F, 9.75F, -24F) });
 		final Convex wallFront2 = new Convex(new Vector3f[] {
 				new Vector3f(1.1F, -1.75F, -18.6F),
 				new Vector3f(10.4F, -1.75F, -18.6F),
@@ -362,7 +364,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(10.4F, 9.75F, 21.8F),
 				new Vector3f(10.4F, 9.75F, 18.6F) });
 		world.add(new Plane(normalUp, floorBig1));
-		//world.add(new RigidBody(floorBig1, 0));
+		// world.add(new RigidBody(floorBig1, 0));
 		world.add(new Plane(normalUp, floorBig2));
 		world.add(new Plane(normalUp, floorBig3));
 		world.add(new Plane(normalDown, ceilingBig1));
@@ -393,8 +395,7 @@ public class MyGLSurfaceView extends GameEngine {
 			coin.setGLShape(coinShape);
 			world.add(coin);
 		}
-		Vector3f[] a = new Vector3f[] { 
-				new Vector3f(+0.2f, +0.85f, +0.2f),
+		Vector3f[] a = new Vector3f[] { new Vector3f(+0.2f, +0.85f, +0.2f),
 				new Vector3f(+0.2f, +0.85f, -0.2f),
 				new Vector3f(+0.2f, -0.85f, +0.2f),
 				new Vector3f(+0.2f, -0.85f, -0.2f),
@@ -402,40 +403,36 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-0.2f, +0.85f, -0.2f),
 				new Vector3f(-0.2f, -0.85f, +0.2f),
 				new Vector3f(-0.2f, -0.85f, -0.2f) };
-float a_x=0.5f,
-	  a_y=0.5f,
-	  a_z=0.5f;
-		Vector3f[] a2 = new Vector3f[] { 
-				new Vector3f(+a_x, +a_y, +a_z),
-				new Vector3f(+a_x, +a_y, -a_z),
-				new Vector3f(+a_x, -a_y, +a_z),
-				new Vector3f(+a_x, -a_y, -a_z),
-				new Vector3f(-a_x, +a_y, +a_z),
-				new Vector3f(-a_x, +a_y, -a_z),
-				new Vector3f(-a_x, -a_y, +a_z),
+		float a_x = 0.5f, a_y = 0.5f, a_z = 0.5f;
+		Vector3f[] a2 = new Vector3f[] { new Vector3f(+a_x, +a_y, +a_z),
+				new Vector3f(+a_x, +a_y, -a_z), new Vector3f(+a_x, -a_y, +a_z),
+				new Vector3f(+a_x, -a_y, -a_z), new Vector3f(-a_x, +a_y, +a_z),
+				new Vector3f(-a_x, +a_y, -a_z), new Vector3f(-a_x, -a_y, +a_z),
 				new Vector3f(-a_x, -a_y, -a_z) };
 
-//		 final int bodyCount = 10;
-//		 final int hCount = bodyCount / 2;
-//		 final Material m = new Material(1,1.0f,0.9f);
-//		 for (int i = 0; i < bodyCount; i++) {
-////		 final RigidBody b = new RigidBody(new Sphere(0.75f),  (i * 20 + 20) * 0 + 10);
-////		 b.setGLShape(sphereShape);
-//		 final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 + 10);
-//		 b.setGLShape(actorShape);
-//		 b.setMaterial(m);
-//		 b.isGravityEnabled(true);
-//		 world.add(b);
-//		
-//		 if (i < hCount) {
-//		 b.setPosition(0, -1.75f+a_y, 10 - i * 2*a_z);
-//		 } else {
-//		 b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*a_z);
-//		 }
-//		 }
+		// final int bodyCount = 10;
+		// final int hCount = bodyCount / 2;
+		// final Material m = new Material(1,1.0f,0.9f);
+		// for (int i = 0; i < bodyCount; i++) {
+		// // final RigidBody b = new RigidBody(new Sphere(0.75f), (i * 20 + 20)
+		// * 0 + 10);
+		// // b.setGLShape(sphereShape);
+		// final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 +
+		// 10);
+		// b.setGLShape(actorShape);
+		// b.setMaterial(m);
+		// b.isGravityEnabled(true);
+		// world.add(b);
+		//
+		// if (i < hCount) {
+		// b.setPosition(0, -1.75f+a_y, 10 - i * 2*a_z);
+		// } else {
+		// b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*a_z);
+		// }
+		// }
 
 		actor2 = new Actor(new Convex(a), Actor.INFINITY_MASS);
-		actor2.setPosition(0, 0-0.9f, 12);
+		actor2.setPosition(0, 0 - 0.9f, 12);
 		actor2.setGLShape(boxShape);
 		actor2.rotate(0, 140, 0);
 		actor2.setJumpingHeight(2);
@@ -445,17 +442,17 @@ float a_x=0.5f,
 
 		actor = new Actor(new Convex(a), 80);
 		actor.setGLShape(boxShape);
-//		 actor = new Actor(new Sphere(0.75f), 80);
-//		 actor.setGLShape(sphereShape);
-		actor.setPosition(0, 0-0.9f*0, 14-5);
-//		actor.setPosition(7, 8, -21.25f);
-//		actor.setRotation(45, -90, 0);//= rot x than rot y than rot z
+		// actor = new Actor(new Sphere(0.75f), 80);
+		// actor.setGLShape(sphereShape);
+		actor.setPosition(0, 0 - 0.9f * 0, 14 - 5);
+		// actor.setPosition(7, 8, -21.25f);
+		// actor.setRotation(45, -90, 0);//= rot x than rot y than rot z
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
-//		actor.setMaterial(new Material(0.8f*0, 1f, 0.5f));
+		actor.setMaterial(new Material(0.8f *0, 1f, 0.5f));
 		world.add(actor);
 		currentActor = actor2;
-		
+
 		final TrackingCamera camera = new TrackingCamera();
 		camera.followBody(currentActor, 0, 1.6f, -3.5F);
 		camera.lookAtBody(currentActor.getPosition(), 0, 1.6F, 0);
@@ -506,8 +503,9 @@ float a_x=0.5f,
 			float mouseX, float mouseY, float screenWidth, float screenHeight) {
 		final float x = (mouseX / screenWidth - 0.5F) * 2;
 		final float y = (mouseY / screenHeight - 0.5F) * 2;
-		//Matrix.multiplyMM(mvpTempMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
-		//Matrix.invertM(mvpTempMatrix, 0, mvpTempMatrix, 0);
+		// Matrix.multiplyMM(mvpTempMatrix, 0, projectionMatrix, 0, viewMatrix,
+		// 0);
+		// Matrix.invertM(mvpTempMatrix, 0, mvpTempMatrix, 0);
 		Matrix.invertM(mvpTempMatrix, 0, vpMatrix, 0);
 		final float v0 = x * mvpTempMatrix[0] + y * mvpTempMatrix[4]
 				+ mvpTempMatrix[12];
@@ -591,7 +589,7 @@ float a_x=0.5f,
 					renderRoom = !renderRoom;
 				} else if (Keyboard.getEventKey() == Keyboard.KEY_F6) {
 					renderDynamics = !renderDynamics;
-				} else if(Keyboard.getEventKey() == Keyboard.KEY_F7){
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_F7) {
 					wireframed = !wireframed;
 					roomShape.drawWireframe(wireframed);
 					boxShape.drawWireframe(wireframed);
@@ -624,13 +622,15 @@ float a_x=0.5f,
 			resume();
 		}
 		if (!isPaused()) {
-			cPSet = false;updates++;
+			cPSet = false;
+			updates++;
 			world.update(uInfo);
 		}
 		pause();
 	}
 
 	public static AABB cPoint = new AABB(0.08f, 0.08f, 0.08f);
+	public static AABB cPoint2 = new AABB(0.08f, 0.08f, 0.08f);
 	public static Vector3f cPNormal = new Vector3f();
 	public static boolean cPSet;
 
@@ -645,12 +645,12 @@ float a_x=0.5f,
 		frames++;
 		long time = System.currentTimeMillis();
 		if (time > lastTime + 1000) {
-			fontShape.setText(Long.toString((time - lastTime) / 1000 * frames),//+" F: "+Integer.toString(updates),
+			fontShape.setText(Long.toString((time - lastTime) / 1000 * frames),// +" F: "+Integer.toString(updates),
 					4);
 			lastTime = time;
 			frames = 0;
 		}
-		
+
 	}
 
 	@Override
@@ -687,11 +687,11 @@ float a_x=0.5f,
 		world.getTree().retrieve(frustumList, frustum);
 		if (renderDynamics) {
 			for (final Object bounds : frustumList) {
-				if (bounds != null && bounds instanceof StaticBody) {
+				if (bounds instanceof StaticBody) {
 					final StaticBody body = (StaticBody) bounds;
 					// /if (transformable.isVisible()) {TODO
 					final GLShape shape = body.getGLShape();
-					if (shape != null && shape instanceof MainShape) {
+					if (shape instanceof MainShape) {
 						((MainShape) shape).render(body.getAffineTransform());
 					}
 					// }
@@ -711,6 +711,20 @@ float a_x=0.5f,
 					+ cPNormal.y, p.z + cPNormal.z);
 			primitiveShape.render(vpMatrix);
 		}
+		Collection<Manifold> manifolds = Manifold.manifolds.values();
+		for (Manifold m : manifolds) {
+			for (int i = 0; i < m.size(); i++) {
+				ManifoldContact c = m.getContact(i);
+				primitiveShape.setColor(1, 1f, 0, 1);
+				cPoint2.setPosition(c.point);
+				primitiveShape.addAABB(cPoint2);
+				Vector3f p = cPoint2.getPosition();
+				Vector3f normal = m.getNormal();
+				primitiveShape.addLine(p.x, p.y, p.z, p.x + normal.x, p.y
+						+ normal.y, p.z + normal.z);
+				primitiveShape.render(vpMatrix);
+			}
+		}
 
 		if (selectedBody != null) {
 			primitiveShape.setColor(0, 1, 0, 1);
@@ -720,7 +734,7 @@ float a_x=0.5f,
 		if (renderbounds) {
 			primitiveShape.setColor(1, 0, 0, 1);
 			for (final Object o : frustumList) {
-				if (o != null && o instanceof Collidable) {
+				if (o instanceof Collidable) {
 					primitiveShape.addAABB(((Collidable) o).getShape()
 							.getAABB());
 				}
@@ -731,7 +745,7 @@ float a_x=0.5f,
 		if (renderSweptBounds) {
 			primitiveShape.setColor(1, 0, 1, 1);
 			for (final Object o : frustumList) {
-				if (o != null && o instanceof DynamicBody) {
+				if (o instanceof DynamicBody) {
 					primitiveShape.addAABB(((DynamicBody) o).getSweptAABB());
 				}
 			}

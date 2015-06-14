@@ -57,10 +57,10 @@ public class Quaternion extends Vector4f {
 	public Quaternion setMultiply(final float pX1, final float pY1,
 			final float pZ1, final float pW1, final float pX2, final float pY2,
 			final float pZ2, final float pW2) {
-//		 return set(pW1*pX2 + pX1*pW2 + pY1*pZ2 - pZ1*pY2,
-//		 pW1*pY2 + pY1*pW2 + pZ1*pX2 - pX1*pZ2,
-//		 pW1*pZ2 + pZ1*pW2 + pX1*pY2 - pY1*pX2,
-//		 pW1*pW2 - pX1*pX2 - pY1*pY2 - pZ1*pZ2);
+		// return set(pW1*pX2 + pX1*pW2 + pY1*pZ2 - pZ1*pY2,
+		// pW1*pY2 + pY1*pW2 + pZ1*pX2 - pX1*pZ2,
+		// pW1*pZ2 + pZ1*pW2 + pX1*pY2 - pY1*pX2,
+		// pW1*pW2 - pX1*pX2 - pY1*pY2 - pZ1*pZ2);
 		final float t5 = (pZ1 + pX1) * (pX2 + pY2);
 		final float t6 = (pW1 + pY1) * (pW2 - pZ2);
 		final float t7 = (pW1 - pY1) * (pW2 + pZ2);
@@ -200,15 +200,16 @@ public class Quaternion extends Vector4f {
 		set(x3, y3, z3, w3);
 		return this;
 	}
+
 	public Quaternion integrateRotation(final float wx, final float wy,
 			final float wz) {
-//		 tmp.setMultiply(wx*0.5f,wy*0.5f,wz*0.5f,0, x,y,z,w);
-//		 add(tmp);
-//		 norm();
+		// tmp.setMultiply(wx*0.5f,wy*0.5f,wz*0.5f,0, x,y,z,w);
+		// add(tmp);
+		// norm();
 		final float sq = wx * wx + wy * wy + wz * wz;
 		float qw;
 		float s;
-		if (sq < 0.001691455f) {//TODO sq*sq/27 < eps   60fps vs free
+		if (sq < 0.001691455f) {// TODO sq*sq/27 < eps 60fps vs free
 			qw = 1 - sq * 0.125f;
 			s = 0.5f - sq * 0.02083333333f;
 		} else {
@@ -238,6 +239,22 @@ public class Quaternion extends Vector4f {
 		return result.setAdd(vector.x, vector.y, vector.z, (w * tx + y * tz - z
 				* ty) * 2, (w * ty + z * tx - x * tz) * 2, (w * tz + x * ty - y
 				* tx) * 2);
+	}
+
+	public Vector3f rotateInverseV(final Vector3f result, final Vector3f vector) {
+		// qk.setKonjugate(this);
+		// qp.set(vector);qp.w=0;
+		// qp.setMultiply(qp, qk);
+		// qp.setMultiply(this, qp);
+		// result.set(qp);
+		// return result;
+		final float tx = y * vector.z - z * vector.y;
+		final float ty = z * vector.x - x * vector.z;
+		final float tz = x * vector.y - y * vector.x;
+		return result.setAdd(vector.x, vector.y, vector.z,
+				(-w * tx + y * tz - z * ty) * 2,
+				(-w * ty + z * tx - x * tz) * 2,
+				(-w * tz + x * ty - y * tx) * 2);
 	}
 
 	public Vector3f rotateHalfsize(final Vector3f result, final Vector3f vector) {

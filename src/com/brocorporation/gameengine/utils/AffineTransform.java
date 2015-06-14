@@ -49,6 +49,15 @@ public class AffineTransform {
 		return orientation;
 	}
 
+	public Vector3f toWorld(Vector3f result, Vector3f vector) {
+		return orientation.rotateV(result, vector).add(translation);
+	}
+
+	public Vector3f toLocal(Vector3f result, Vector3f vector) {
+		return orientation.rotateInverseV(result,
+				result.setSubtract(vector, translation));
+	}
+
 	public float[] getTransformationMatrix(float[] result) {
 		Matrix.setIdentityM(result, 0);
 		Matrix.translateM(result, 0, translation.x, translation.y,

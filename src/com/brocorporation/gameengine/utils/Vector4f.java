@@ -241,7 +241,7 @@ public class Vector4f extends Vector3f {
 	public boolean equals(Object o) {
 		if (o == this)
 			return true;
-		if (o != null && o instanceof Vector4f) {
+		if (o instanceof Vector4f) {
 			final Vector4f v = (Vector4f) o;
 			return x == v.x && y == v.y && z == v.z && w == v.w;
 		}
