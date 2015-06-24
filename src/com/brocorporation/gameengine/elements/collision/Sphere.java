@@ -66,10 +66,9 @@ public class Sphere implements IShape {
 	}
 
 	@Override
-	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
+	public void getInverseInertiaTensor(Vector3f diagInverseInertiaTensor,
 			float inverseMass) {
-		inverseInertiaTensor[1] = inverseInertiaTensor[2] = inverseInertiaTensor[3] = inverseInertiaTensor[5] = inverseInertiaTensor[6] = inverseInertiaTensor[7] = 0;
-		inverseInertiaTensor[8] = inverseInertiaTensor[4] = inverseInertiaTensor[0] = inverseMass
+		diagInverseInertiaTensor.x = diagInverseInertiaTensor.y = diagInverseInertiaTensor.z = inverseMass
 				/ (radius * radius * 4);
 	}
 

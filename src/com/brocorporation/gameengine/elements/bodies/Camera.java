@@ -2,7 +2,6 @@ package com.brocorporation.gameengine.elements.bodies;
 
 import com.brocorporation.gameengine.IUpdateInfo;
 import com.brocorporation.gameengine.elements.collision.AABB;
-import com.brocorporation.gameengine.utils.Matrix;
 import com.brocorporation.gameengine.utils.MatrixExt;
 import com.brocorporation.gameengine.utils.Quaternion;
 import com.brocorporation.gameengine.utils.Vector3f;
@@ -145,7 +144,7 @@ public abstract class Camera implements AABB.IBounds {
 
 	public float[] getProjectionMatrix() {
 		if (updateFrustumMatrix) {
-			Matrix.frustumM(projectionMatrix, 0, left, right, bottom, top,
+			MatrixExt.frustumM(projectionMatrix, 0, left, right, bottom, top,
 					near, far);
 			updateFrustumMatrix = false;
 		}

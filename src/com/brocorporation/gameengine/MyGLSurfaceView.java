@@ -39,7 +39,7 @@ import com.brocorporation.gameengine.elements.opengl.MainShape;
 import com.brocorporation.gameengine.elements.opengl.PrimitiveShader;
 import com.brocorporation.gameengine.elements.opengl.PrimitiveShape;
 import com.brocorporation.gameengine.parser.WavefrontParser;
-import com.brocorporation.gameengine.utils.Matrix;
+import com.brocorporation.gameengine.utils.MatrixExt;
 import com.brocorporation.gameengine.utils.Vector3f;
 
 public class MyGLSurfaceView extends GameEngine {
@@ -76,7 +76,7 @@ public class MyGLSurfaceView extends GameEngine {
 	private final List<Object> frustumList = new ArrayList<Object>();
 
 	public MyGLSurfaceView() {
-		super(60, 80);
+		//super(60, 80);
 	}
 
 	public void create() {
@@ -403,7 +403,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-0.2f, +0.85f, -0.2f),
 				new Vector3f(-0.2f, -0.85f, +0.2f),
 				new Vector3f(-0.2f, -0.85f, -0.2f) };
-		float a_x = 0.5f, a_y = 0.5f, a_z = 0.5f;
+		float a_x = 0.2f, a_y = 0.35f, a_z = 0.65f;
 		Vector3f[] a2 = new Vector3f[] { new Vector3f(+a_x, +a_y, +a_z),
 				new Vector3f(+a_x, +a_y, -a_z), new Vector3f(+a_x, -a_y, +a_z),
 				new Vector3f(+a_x, -a_y, -a_z), new Vector3f(-a_x, +a_y, +a_z),
@@ -447,10 +447,18 @@ public class MyGLSurfaceView extends GameEngine {
 		actor.setPosition(0, 0 - 0.9f * 0, 14 - 5);
 		// actor.setPosition(7, 8, -21.25f);
 		// actor.setRotation(45, -90, 0);//= rot x than rot y than rot z
+		// actor.getOrientation().getQuaternionEuler(45, 30, 76);
+		// actor.getOrientation().addRotationEuler(45, 30, 76);
+		// Quaternion q1 = new Quaternion().getQuaternionEuler(45, 30, 76);
+		// Quaternion q2 = new Quaternion().addRotationEuler(45, 30, 76);
+		// System.out.println(q1);
+		// System.out.println(q2);System.exit(0);
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
-		actor.setMaterial(new Material(0.8f *0, 1f, 0.5f));
+		// actor.setAngularVelocity(0, 0, 90);
+		actor.setMaterial(new Material(0.8f * 0, 1f, 0.5f));
 		world.add(actor);
+		World.debugid = actor.getID();
 		currentActor = actor2;
 
 		final TrackingCamera camera = new TrackingCamera();
@@ -486,38 +494,22 @@ public class MyGLSurfaceView extends GameEngine {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	@Override
-	protected void onSurfaceChanged(int pWidth, int pHeight) {
-		width = pWidth;
-		height = pHeight;
-		GL11.glViewport(0, 0, width, height);
-		final Camera camera = world.getActiveCamera();
-		if (camera != null) {
-			final float ratio = (float) width / height;
-			camera.setFrustum(-ratio, ratio, -1, 1, 0.01F, 100);
-			projectionMatrix = camera.getProjectionMatrix();
-		}
-	}
-
 	public void picking(Vector3f resultStartPoint, Vector3f resultDir,
 			float mouseX, float mouseY, float screenWidth, float screenHeight) {
 		final float x = (mouseX / screenWidth - 0.5F) * 2;
 		final float y = (mouseY / screenHeight - 0.5F) * 2;
-		// Matrix.multiplyMM(mvpTempMatrix, 0, projectionMatrix, 0, viewMatrix,
-		// 0);
-		// Matrix.invertM(mvpTempMatrix, 0, mvpTempMatrix, 0);
-		Matrix.invertM(mvpTempMatrix, 0, vpMatrix, 0);
-		final float v0 = x * mvpTempMatrix[0] + y * mvpTempMatrix[4]
-				+ mvpTempMatrix[12];
-		final float v1 = x * mvpTempMatrix[1] + y * mvpTempMatrix[5]
-				+ mvpTempMatrix[13];
-		final float v2 = x * mvpTempMatrix[2] + y * mvpTempMatrix[6]
-				+ mvpTempMatrix[14];
-		final float v3 = x * mvpTempMatrix[3] + y * mvpTempMatrix[7]
+		MatrixExt.invertM(mvpTempMatrix, 0, vpMatrix, 0);
+		final float v0 = mvpTempMatrix[0] * x + mvpTempMatrix[1] * y
+				+ mvpTempMatrix[3];
+		final float v1 = mvpTempMatrix[4] * x + mvpTempMatrix[5] * y
+				+ mvpTempMatrix[7];
+		final float v2 = mvpTempMatrix[8] * x + mvpTempMatrix[9] * y
+				+ mvpTempMatrix[11];
+		final float v3 = mvpTempMatrix[12] * x + mvpTempMatrix[13] * y
 				+ mvpTempMatrix[15];
-		resultStartPoint.set(v0 - mvpTempMatrix[8], v1 - mvpTempMatrix[9], v2
+		resultStartPoint.set(v0 - mvpTempMatrix[2], v1 - mvpTempMatrix[6], v2
 				- mvpTempMatrix[10]);
-		resultStartPoint.scale(1F / (v3 - mvpTempMatrix[11]));
+		resultStartPoint.scale(1F / (v3 - mvpTempMatrix[14]));
 		resultDir.set(v0, v1, v2);
 		resultDir.scale(1F / v3);
 		resultDir.subtract(resultStartPoint);
@@ -595,6 +587,8 @@ public class MyGLSurfaceView extends GameEngine {
 					boxShape.drawWireframe(wireframed);
 					sphereShape.drawWireframe(wireframed);
 					coinShape.drawWireframe(wireframed);
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_F8) {
+					renderContacts = !renderContacts;
 				} else if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					if (isPaused) {
 						resume();
@@ -634,7 +628,8 @@ public class MyGLSurfaceView extends GameEngine {
 	public static Vector3f cPNormal = new Vector3f();
 	public static boolean cPSet;
 
-	boolean renderRoom = true, renderDynamics = true, wireframed = false;
+	boolean renderRoom = true, renderDynamics = true, wireframed = false,
+			renderContacts = true;
 	boolean renderbounds, renderSweptBounds, renderTree, renderRay;
 
 	int frames = 0;
@@ -654,6 +649,19 @@ public class MyGLSurfaceView extends GameEngine {
 	}
 
 	@Override
+	protected void onSurfaceChanged(int pWidth, int pHeight) {
+		width = pWidth;
+		height = pHeight;
+		GL11.glViewport(0, 0, width, height);
+		final Camera camera = world.getActiveCamera();
+		if (camera != null) {
+			final float ratio = (float) width / height;
+			camera.setFrustum(-ratio, ratio, -1, 1, 0.01F, 100);
+			projectionMatrix = camera.getProjectionMatrix();
+		}
+	}
+
+	@Override
 	protected void render() {
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT | GL11.GL_COLOR_BUFFER_BIT);
 
@@ -663,15 +671,17 @@ public class MyGLSurfaceView extends GameEngine {
 		if (camera != null) {
 			viewMatrix = camera.getViewMatrix();
 		}
-		Matrix.multiplyMM(vpMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+		// MatrixExt.multiplyMM(vpMatrix, 0, viewMatrix, 0, projectionMatrix,
+		// 0);
+		MatrixExt.multiplyMM(vpMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
 		frustum.setFrustum(vpMatrix);
 
 		blinnPhongShader.use();
 		if (light != null) {
 			light.getAffineTransform().getTransformationMatrix(modelMatrix);
-			Matrix.multiplyMV(lightPosInEyeSpace, 0, modelMatrix, 0,
+			MatrixExt.multiplyMV(lightPosInEyeSpace, 0, modelMatrix, 0,
 					lightPosInModelSpace, 0);
-			Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0,
+			MatrixExt.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0,
 					lightPosInEyeSpace, 0);
 			blinnPhongLight.setPosition(lightPosInEyeSpace[0],
 					lightPosInEyeSpace[1], lightPosInEyeSpace[2],
@@ -680,7 +690,7 @@ public class MyGLSurfaceView extends GameEngine {
 		}
 
 		if (roomShape != null && renderRoom) {
-			Matrix.setIdentityM(modelMatrix, 0);
+			MatrixExt.setIdentityM(modelMatrix, 0);
 			roomShape.render(modelMatrix, viewMatrix, projectionMatrix,
 					mvpTempMatrix);
 		}
@@ -711,18 +721,28 @@ public class MyGLSurfaceView extends GameEngine {
 					+ cPNormal.y, p.z + cPNormal.z);
 			primitiveShape.render(vpMatrix);
 		}
-		Collection<Manifold> manifolds = Manifold.manifolds.values();
-		for (Manifold m : manifolds) {
-			for (int i = 0; i < m.size(); i++) {
-				ManifoldContact c = m.getContact(i);
-				primitiveShape.setColor(1, 1f, 0, 1);
-				cPoint2.setPosition(c.point);
-				primitiveShape.addAABB(cPoint2);
-				Vector3f p = cPoint2.getPosition();
-				Vector3f normal = m.getNormal();
-				primitiveShape.addLine(p.x, p.y, p.z, p.x + normal.x, p.y
-						+ normal.y, p.z + normal.z);
-				primitiveShape.render(vpMatrix);
+		if (renderContacts) {
+			Collection<Manifold> manifolds = Manifold.manifolds.values();
+			for (Manifold m : manifolds) {
+				for (int i = 0; i < m.size(); i++) {
+					ManifoldContact c = m.getContact(i);
+					primitiveShape.setColor(1, 1f, 0, 1);
+					cPoint2.setPosition(c.getWorldA());
+					primitiveShape.addAABB(cPoint2);
+					Vector3f p = cPoint2.getPosition();
+					Vector3f normal = m.getNormal();
+					primitiveShape.addLine(p.x, p.y, p.z, p.x + normal.x, p.y
+							+ normal.y, p.z + normal.z);
+					primitiveShape.render(vpMatrix);
+
+					cPoint2.setPosition(c.getWorldB());
+					primitiveShape.addAABB(cPoint2);
+					p = cPoint2.getPosition();
+					normal = m.getNormal();
+					primitiveShape.addLine(p.x, p.y, p.z, p.x + normal.x, p.y
+							+ normal.y, p.z + normal.z);
+					primitiveShape.render(vpMatrix);
+				}
 			}
 		}
 

@@ -14,7 +14,6 @@ import org.lwjgl.opengl.GL20;
 import com.brocorporation.gameengine.elements.collision.Frustum;
 import com.brocorporation.gameengine.parser.WavefrontObject;
 import com.brocorporation.gameengine.utils.AffineTransform;
-import com.brocorporation.gameengine.utils.Matrix;
 import com.brocorporation.gameengine.utils.MatrixExt;
 
 public class MainShape extends GLShape {
@@ -72,9 +71,9 @@ public class MainShape extends GLShape {
 	public void setFrustum(Frustum pF) {
 		f = pF;
 	}
-	
-	public void drawWireframe(boolean t){
-		drawMode = t?GL11.GL_LINES:GL11.GL_TRIANGLES;
+
+	public void drawWireframe(boolean t) {
+		drawMode = t ? GL11.GL_LINES : GL11.GL_TRIANGLES;
 	}
 
 	public void render(final AffineTransform b) {
@@ -87,15 +86,15 @@ public class MainShape extends GLShape {
 		final int positionHandle = aHandle[BlinnPhongShader.a_Position];
 		final int uvHandle = aHandle[BlinnPhongShader.a_UV];
 		final int normalHandle = aHandle[BlinnPhongShader.a_Normal];
-
-		Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+		
+		MatrixExt.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 		shader.setMVMatrix(mvpMatrix);
 		MatrixExt.castM3(normalMatrix, mvpMatrix);
 		MatrixExt.invertM3(normalMatrix, normalMatrix);
 		MatrixExt.transposeM3(normalMatrix, normalMatrix);
 
 		shader.setNMatrix(normalMatrix);
-		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
+		MatrixExt.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
 		shader.setMVPMatrix(mvpMatrix);
 
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer[VBO]);
@@ -144,15 +143,15 @@ public class MainShape extends GLShape {
 
 			for (final AffineTransform b : transformableList) {
 				b.getTransformationMatrix(mvpMatrix);
-				Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, mvpMatrix, 0);
+				MatrixExt.multiplyMM(mvpMatrix, 0, viewMatrix, 0, mvpMatrix, 0);
 				shader.setMVMatrix(mvpMatrix);
 				MatrixExt.castM3(normalMatrix, mvpMatrix);
 				MatrixExt.invertM3(normalMatrix, normalMatrix);
 				MatrixExt.transposeM3(normalMatrix, normalMatrix);
 
 				shader.setNMatrix(normalMatrix);
-				Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix,
-						0);
+				MatrixExt.multiplyMM(mvpMatrix, 0, projectionMatrix, 0,
+						mvpMatrix, 0);
 				shader.setMVPMatrix(mvpMatrix);
 				render();
 			}

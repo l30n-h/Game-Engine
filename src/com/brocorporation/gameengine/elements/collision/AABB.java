@@ -171,18 +171,14 @@ public class AABB implements IShape {
 	}
 
 	@Override
-	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
+	public void getInverseInertiaTensor(Vector3f diagInverseInertiaTensor,
 			float inverseMass) {
 		final float xx = baseHalfsize.x * baseHalfsize.x;
 		final float yy = baseHalfsize.y * baseHalfsize.y;
 		final float zz = baseHalfsize.z * baseHalfsize.z;
 		final float s = 3 * inverseMass;
-		// inverseInertiaTensor.set(s / (yy + zz), s / (xx + zz), s / (xx +
-		// yy));
-		inverseInertiaTensor[1] = inverseInertiaTensor[2] = inverseInertiaTensor[3] = inverseInertiaTensor[5] = inverseInertiaTensor[6] = inverseInertiaTensor[7] = 0;
-		inverseInertiaTensor[0] = s / (yy + zz);
-		inverseInertiaTensor[4] = s / (xx + zz);
-		inverseInertiaTensor[8] = s / (xx + yy);
+		diagInverseInertiaTensor.set(s / (yy + zz), s / (xx + zz), s
+				/ (xx + yy));
 	}
 
 	public Vector3f getBaseHalfsize() {
@@ -613,9 +609,9 @@ public class AABB implements IShape {
 					maxZ = vertex.z;
 				}
 			}
-			final float hx = Math.abs(maxX - minX) * 0.5F;
-			final float hy = Math.abs(maxY - minY) * 0.5F;
-			final float hz = Math.abs(maxZ - minZ) * 0.5F;
+			final float hx = Math.abs(maxX - minX) / 2;
+			final float hy = Math.abs(maxY - minY) / 2;
+			final float hz = Math.abs(maxZ - minZ) / 2;
 			aabb.setPosition(maxX - hx, maxY - hy, maxZ - hz);
 			aabb.setHalfsize(hx + 0.001f, hy + 0.001f, hz + 0.001f);
 		}

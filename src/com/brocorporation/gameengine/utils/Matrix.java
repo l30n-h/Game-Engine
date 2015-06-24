@@ -197,7 +197,6 @@ public class Matrix {
 				- (atmp3 * src4 + atmp6 * src5 + atmp11 * src7);
 		final float dst3 = (atmp5 * src4 + atmp8 * src5 + atmp11 * src6)
 				- (atmp4 * src4 + atmp9 * src5 + atmp10 * src6);
-		
 
 		// calculate determinant
 		final float det = src0 * dst0 + src1 * dst1 + src2 * dst2 + src3 * dst3;
@@ -205,7 +204,7 @@ public class Matrix {
 		if (det == 0.0f) {
 			return false;
 		}
-		
+
 		final float dst4 = (atmp1 * src1 + atmp2 * src2 + atmp5 * src3)
 				- (atmp0 * src1 + atmp3 * src2 + atmp4 * src3);
 		final float dst5 = (atmp0 * src0 + atmp7 * src2 + atmp8 * src3)

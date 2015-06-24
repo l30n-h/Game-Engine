@@ -36,35 +36,66 @@ public class Frustum {
 //			m12 = frustumM[12];
 //			m13 = frustumM[13];
 //			m14 = frustumM[14];
-			planes[FRONT].x = frustumM[3] + frustumM[2];
-			planes[FRONT].y = frustumM[7] + frustumM[6];
-			planes[FRONT].z = frustumM[11] + frustumM[10];
-			planes[FRONT].w = -frustumM[15] - frustumM[14];
+			
+//			planes[FRONT].x = frustumM[3] + frustumM[2];
+//			planes[FRONT].y = frustumM[7] + frustumM[6];
+//			planes[FRONT].z = frustumM[11] + frustumM[10];
+//			planes[FRONT].w = -frustumM[15] - frustumM[14];
+//
+//			planes[BACK].x = frustumM[3] - frustumM[2];
+//			planes[BACK].y = frustumM[7] - frustumM[6];
+//			planes[BACK].z = frustumM[11] - frustumM[10];
+//			planes[BACK].w = frustumM[14] - frustumM[15];
+//
+//			planes[RIGHT].x = frustumM[3] - frustumM[0];
+//			planes[RIGHT].y = frustumM[7] - frustumM[4];
+//			planes[RIGHT].z = frustumM[11] - frustumM[8];
+//			planes[RIGHT].w = frustumM[12] - frustumM[15];
+//
+//			planes[LEFT].x = frustumM[3] + frustumM[0];
+//			planes[LEFT].y = frustumM[7] + frustumM[4];
+//			planes[LEFT].z = frustumM[11] + frustumM[8];
+//			planes[LEFT].w = -frustumM[15] - frustumM[12];
+//
+//			planes[TOP].x = frustumM[3] - frustumM[1];
+//			planes[TOP].y = frustumM[7] - frustumM[5];
+//			planes[TOP].z = frustumM[11] - frustumM[9];
+//			planes[TOP].w = frustumM[13] - frustumM[15];
+//
+//			planes[BOTTOM].x = frustumM[3] + frustumM[1];
+//			planes[BOTTOM].y = frustumM[7] + frustumM[5];
+//			planes[BOTTOM].z = frustumM[11] + frustumM[9];
+//			planes[BOTTOM].w = -frustumM[15] - frustumM[13];
+			
+			planes[FRONT].x = frustumM[12] + frustumM[8];
+			planes[FRONT].y = frustumM[13] + frustumM[9];
+			planes[FRONT].z = frustumM[14] + frustumM[10];
+			planes[FRONT].w = -frustumM[15] - frustumM[11];
 
-			planes[BACK].x = frustumM[3] - frustumM[2];
-			planes[BACK].y = frustumM[7] - frustumM[6];
-			planes[BACK].z = frustumM[11] - frustumM[10];
-			planes[BACK].w = frustumM[14] - frustumM[15];
+			planes[BACK].x = frustumM[12] - frustumM[8];
+			planes[BACK].y = frustumM[13] - frustumM[9];
+			planes[BACK].z = frustumM[14] - frustumM[10];
+			planes[BACK].w = frustumM[11] - frustumM[15];
 
-			planes[RIGHT].x = frustumM[3] - frustumM[0];
-			planes[RIGHT].y = frustumM[7] - frustumM[4];
-			planes[RIGHT].z = frustumM[11] - frustumM[8];
-			planes[RIGHT].w = frustumM[12] - frustumM[15];
+			planes[RIGHT].x = frustumM[12] - frustumM[0];
+			planes[RIGHT].y = frustumM[13] - frustumM[1];
+			planes[RIGHT].z = frustumM[14] - frustumM[2];
+			planes[RIGHT].w = frustumM[3] - frustumM[15];
 
-			planes[LEFT].x = frustumM[3] + frustumM[0];
-			planes[LEFT].y = frustumM[7] + frustumM[4];
-			planes[LEFT].z = frustumM[11] + frustumM[8];
-			planes[LEFT].w = -frustumM[15] - frustumM[12];
+			planes[LEFT].x = frustumM[12] + frustumM[0];
+			planes[LEFT].y = frustumM[13] + frustumM[1];
+			planes[LEFT].z = frustumM[14] + frustumM[2];
+			planes[LEFT].w = -frustumM[15] - frustumM[3];
 
-			planes[TOP].x = frustumM[3] - frustumM[1];
-			planes[TOP].y = frustumM[7] - frustumM[5];
-			planes[TOP].z = frustumM[11] - frustumM[9];
-			planes[TOP].w = frustumM[13] - frustumM[15];
+			planes[TOP].x = frustumM[12] - frustumM[4];
+			planes[TOP].y = frustumM[13] - frustumM[5];
+			planes[TOP].z = frustumM[14] - frustumM[6];
+			planes[TOP].w = frustumM[7] - frustumM[15];
 
-			planes[BOTTOM].x = frustumM[3] + frustumM[1];
-			planes[BOTTOM].y = frustumM[7] + frustumM[5];
-			planes[BOTTOM].z = frustumM[11] + frustumM[9];
-			planes[BOTTOM].w = -frustumM[15] - frustumM[13];
+			planes[BOTTOM].x = frustumM[12] + frustumM[4];
+			planes[BOTTOM].y = frustumM[13] + frustumM[5];
+			planes[BOTTOM].z = frustumM[14] + frustumM[6];
+			planes[BOTTOM].w = -frustumM[15] - frustumM[7];
 
 			normPlane(planes[FRONT]);
 			normPlane(planes[BACK]);

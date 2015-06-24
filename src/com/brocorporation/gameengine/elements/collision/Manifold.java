@@ -1,6 +1,7 @@
 package com.brocorporation.gameengine.elements.collision;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Stack;
 
 import com.brocorporation.gameengine.elements.bodies.RigidBody;
@@ -29,6 +30,18 @@ public class Manifold {
 		}
 		m2.addContact(c);
 		return m2;
+	}
+
+	public static void update() {
+		final Iterator<Manifold> c = manifolds.values().iterator();
+		while (c.hasNext()) {
+			final Manifold m = c.next();
+			m.refreshContactPoints();
+			if (m.size() == 0) {
+				unused.push(m);
+				c.remove();
+			}
+		}
 	}
 
 	protected StaticBody bodyA;
@@ -68,7 +81,6 @@ public class Manifold {
 	static Vector3f localA = new Vector3f();
 
 	public int addContact(Contact c) {
-		refreshContactPoints();// TODO
 		if (size == 0)
 			normal.set(c.getNormal());
 		a.setAddScaled(c.getPointA(), normal, 0.5f * c.getDistance());
@@ -91,9 +103,6 @@ public class Manifold {
 		contacts[insertIndex].worldB.set(b);
 		contacts[insertIndex].localA.set(localA);
 		bodyB.getAffineTransform().toLocal(contacts[insertIndex].localB, b);
-
-		contacts[insertIndex].point.set(c.getPointA());
-
 		return insertIndex;
 	}
 
@@ -233,11 +242,8 @@ public class Manifold {
 	}
 
 	public class ManifoldContact {
-		public Vector3f point = new Vector3f(); // TODO
 		protected Vector3f worldA = new Vector3f();
 		protected Vector3f worldB = new Vector3f();
-		protected Vector3f relPA = new Vector3f();
-		protected Vector3f relPB = new Vector3f();
 		protected Vector3f localA = new Vector3f();
 		protected Vector3f localB = new Vector3f();
 		protected Vector3f IpAxN = new Vector3f();
@@ -255,8 +261,6 @@ public class Manifold {
 		}
 
 		public void calcDependencies() {
-			relPA.setSubtract(worldA, bodyA.getPosition());
-			relPB.setSubtract(worldB, bodyB.getPosition());
 			if (bodyA instanceof RigidBody) {
 				IpAxN.multiplyM3V(
 						((RigidBody) bodyA).getInverseInertiaTensor(), 0,
@@ -269,6 +273,22 @@ public class Manifold {
 						IpBxN.setCross(worldB, normal));
 				IpBxNxpB.setCross(IpBxNxpB, worldB);
 			}
+		}
+
+		public Vector3f getWorldA() {
+			return worldA;
+		}
+
+		public Vector3f getWorldB() {
+			return worldB;
+		}
+
+		public Vector3f getNormal() {
+			return normal;
+		}
+
+		public float getDistance() {
+			return distance;
 		}
 	}
 }

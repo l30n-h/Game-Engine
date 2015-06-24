@@ -64,22 +64,7 @@ public class ElasticContact extends Constraint {
 		}
 	}// http://en.wikipedia.org/wiki/Collision_response
 
-	static boolean frictional = true;// TODO
-
-//	ContactPoint
-//	bodyA
-//	bodyB
-//	Vector pointA
-//	Vector pointB
-//	Vector localA
-//	Vector localB
-//	Vector I(pointxnormal)
-//	float impulse
-//--------------------------
-//	ContactSet
-//	Vector normal
-//	float stcFriction
-//	float dynFriction
+	static boolean frictional = false;// TODO
 	
 	private void staticContact(final IUpdateInfo uInfo) {
 		DynamicBody bodyB = (DynamicBody) this.bodyB;

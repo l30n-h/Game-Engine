@@ -44,7 +44,7 @@ public class Quaternion extends Vector4f {
 		final float t6 = (w + y) * (pW - pZ);
 		final float t7 = (w - y) * (pW + pZ);
 		final float t8 = t5 + t6 + t7;
-		final float t9 = ((z - x) * (pX - pY) + t8) * 0.5f;
+		final float t9 = ((z - x) * (pX - pY) + t8) / 2;
 		return set((w + x) * (pW + pX) + t9 - t8,
 				(w - x) * (pY + pZ) + t9 - t7, (z + y) * (pW - pX) + t9 - t6,
 				(z - y) * (pY - pZ) + t9 - t5);
@@ -65,7 +65,7 @@ public class Quaternion extends Vector4f {
 		final float t6 = (pW1 + pY1) * (pW2 - pZ2);
 		final float t7 = (pW1 - pY1) * (pW2 + pZ2);
 		final float t8 = t5 + t6 + t7;
-		final float t9 = ((pZ1 - pX1) * (pX2 - pY2) + t8) * 0.5f;
+		final float t9 = ((pZ1 - pX1) * (pX2 - pY2) + t8) / 2;
 		return set((pW1 + pX1) * (pW2 + pX2) + t9 - t8, (pW1 - pX1)
 				* (pY2 + pZ2) + t9 - t7, (pZ1 + pY1) * (pW2 - pX2) + t9 - t6,
 				(pZ1 - pY1) * (pY2 - pZ2) + t9 - t5);
@@ -132,93 +132,50 @@ public class Quaternion extends Vector4f {
 	}
 
 	public Quaternion addRotation(final float wx, final float wy, final float wz) {
-		float sq = wx * wx;
-		float qw1;
-		float s;
-		if (sq < 0.001691455f) {
-			qw1 = 1 - sq * 0.125f;
-			s = 0.5f - sq * 0.02083333333f;
-		} else {
-			final float halfthetaMag = wx * 0.5f;
-			qw1 = (float) Math.cos(halfthetaMag);
-			s = (float) Math.sin(halfthetaMag) / wx;
-		}
-		final float wx1 = wx * s;
+		final float hwx = wx / 2;
+		final float hwy = wy / 2;
+		final float hwz = wz / 2;
+		final float sinxh = (float) Math.sin(hwx);
+		final float cosxh = (float) Math.cos(hwx);
+		final float sinyh = (float) Math.sin(hwy);
+		final float cosyh = (float) Math.cos(hwy);
+		final float sinzh = (float) Math.sin(hwz);
+		final float coszh = (float) Math.cos(hwz);
+		final float x1 = cosxh * x + sinxh * w;
+		final float y1 = cosxh * y - sinxh * z;
+		final float z1 = cosxh * z + sinxh * y;
+		final float w1 = cosxh * w - sinxh * x;
+		final float x2 = cosyh * x1 + sinyh * z1;
+		final float y2 = cosyh * y1 + sinyh * w1;
+		final float z2 = cosyh * z1 - sinyh * x1;
+		final float w2 = cosyh * w1 - sinyh * y1;
 
-		float x1 = qw1 * x + wx1 * w;
-		float y1 = qw1 * y - wx1 * z;
-		float z1 = qw1 * z + wx1 * y;
-		float w1 = qw1 * w - wx1 * x;
-
-		float qw2;
-		sq = wy * wy;
-		if (sq < 0.001691455f) {
-			qw2 = 1 - sq * 0.125f;
-			s = 0.5f - sq * 0.02083333333f;
-		} else {
-			final float halfthetaMag = wy * 0.5f;
-			qw2 = (float) Math.cos(halfthetaMag);
-			s = (float) Math.sin(halfthetaMag) / wy;
-		}
-		final float wy1 = wy * s;
-
-		float x2 = qw2 * x1 + wy1 * z1;
-		float y2 = qw2 * y1 + wy1 * w1;
-		float z2 = qw2 * z1 - wy1 * x1;
-		float w2 = qw2 * w1 - wy1 * y1;
-
-		float qw3;
-		sq = wz * wz;
-		if (sq < 0.001691455f) {
-			qw3 = 1 - sq * 0.125f;
-			s = 0.5f - sq * 0.02083333333f;
-		} else {
-			final float halfthetaMag = wz * 0.5f;
-			qw3 = (float) Math.cos(halfthetaMag);
-			s = (float) Math.sin(halfthetaMag) / wz;
-		}
-		final float wz1 = wz * s;
-
-		float x3 = qw3 * x2 - wz1 * y2;
-		float y3 = qw3 * y2 + wz1 * x2;
-		float z3 = qw3 * z2 + wz1 * w2;
-		float w3 = qw3 * w2 - wz1 * z2;
-
-		// float x3 = qw3*qw2*qw1*x + qw3*qw2*wx1*w + qw3*wy1*qw1*z +
-		// qw3*wy1*wx1*y - wz1*qw2*qw1*y + wz1*qw2*wx1*z - wz1*wy1*qw1*w +
-		// wz1*wy1*wx1*x;
-		// float y3 = qw3*qw2*qw1*y - qw3*qw2*wx1*z + qw3*wy1*qw1*w -
-		// qw3*wy1*wx1*x + wz1*qw2*qw1*x + wz1*qw2*wx1*w + wz1*wy1*qw1*z +
-		// wz1*wy1*wx1*y;
-		// float z3 = qw3*qw2*qw1*z + qw3*qw2*wx1*y - qw3*wy1*qw1*x -
-		// qw3*wy1*wx1*w + wz1*qw2*qw1*w - wz1*qw2*wx1*x - wz1*wy1*qw1*y +
-		// wz1*wy1*wx1*z;
-		// float w3 = qw3*qw2*qw1*w - qw3*qw2*wx1*x - qw3*wy1*qw1*y +
-		// qw3*wy1*wx1*z - wz1*qw2*qw1*z - wz1*qw2*wx1*y + wz1*wy1*qw1*x +
-		// wz1*wy1*wx1*w;
-
-		set(x3, y3, z3, w3);
+		set(coszh * x2 - sinzh * y2, coszh * y2 + sinzh * x2, coszh * z2
+				+ sinzh * w2, coszh * w2 - sinzh * z2);
 		return this;
 	}
 
+	static Quaternion tmp = new Quaternion();
+
 	public Quaternion integrateRotation(final float wx, final float wy,
 			final float wz) {
-		// tmp.setMultiply(wx*0.5f,wy*0.5f,wz*0.5f,0, x,y,z,w);
-		// add(tmp);
-		// norm();
-		final float sq = wx * wx + wy * wy + wz * wz;
-		float qw;
-		float s;
-		if (sq < 0.001691455f) {// TODO sq*sq/27 < eps 60fps vs free
-			qw = 1 - sq * 0.125f;
-			s = 0.5f - sq * 0.02083333333f;
-		} else {
-			final float thetaMag = (float) Math.sqrt(sq);
-			final float halfthetaMag = thetaMag * 0.5f;
-			qw = (float) Math.cos(halfthetaMag);
-			s = (float) Math.sin(halfthetaMag) / thetaMag;
-		}
-		setMultiply(wx * s, wy * s, wz * s, qw, x, y, z, w);
+		tmp.setMultiply(wx / 2, wy / 2, wz / 2, 0, x, y, z, w);
+		add(tmp);
+		norm();
+
+		// final float sq = wx * wx + wy * wy + wz * wz;
+		// float qw;
+		// float s;
+		// if (sq < 0.001691455f) {// TODO sq*sq/27 < eps 60fps vs free
+		// qw = 1 - sq * 0.125f;
+		// s = 0.5f - sq * 0.02083333333f;
+		// } else {
+		// final float thetaMag = (float) Math.sqrt(sq);
+		// final float halfthetaMag = thetaMag /2;
+		// qw = (float) Math.cos(halfthetaMag);
+		// s = (float) Math.sin(halfthetaMag) / thetaMag;
+		// }
+		// setMultiply(wx * s, wy * s, wz * s, qw, x, y, z, w);
 		return this;
 	}
 
@@ -227,12 +184,6 @@ public class Quaternion extends Vector4f {
 	}
 
 	public Vector3f rotateV(final Vector3f result, final Vector3f vector) {
-		// qk.setKonjugate(this);
-		// qp.set(vector);qp.w=0;
-		// qp.setMultiply(this, qp);
-		// qp.setMultiply(qp, qk);
-		// result.set(qp);
-		// return result;
 		final float tx = y * vector.z - z * vector.y;
 		final float ty = z * vector.x - x * vector.z;
 		final float tz = x * vector.y - y * vector.x;
@@ -242,12 +193,6 @@ public class Quaternion extends Vector4f {
 	}
 
 	public Vector3f rotateInverseV(final Vector3f result, final Vector3f vector) {
-		// qk.setKonjugate(this);
-		// qp.set(vector);qp.w=0;
-		// qp.setMultiply(qp, qk);
-		// qp.setMultiply(this, qp);
-		// result.set(qp);
-		// return result;
 		final float tx = y * vector.z - z * vector.y;
 		final float ty = z * vector.x - x * vector.z;
 		final float tz = x * vector.y - y * vector.x;
@@ -291,7 +236,7 @@ public class Quaternion extends Vector4f {
 	}
 
 	public Quaternion getQuaternion(final Vector3f vector, float rad) {
-		rad *= 0.5f;
+		rad /= 2;
 		set(vector).norm().scale((float) Math.sin(rad));
 		w = (float) Math.cos(rad);
 		return this;
@@ -330,7 +275,7 @@ public class Quaternion extends Vector4f {
 		return this;
 	}
 
-	public void multiplyMQ(float[] result, int resultOffset, float[] rhs,
+	public void multiplyMQ(float[] result, int resultOffset, float[] lhs,
 			int rhsOffset) {
 		final float x2 = x * x;
 		final float y2 = y * y;
@@ -342,46 +287,47 @@ public class Quaternion extends Vector4f {
 		final float wy = w * y;
 		final float wz = w * z;
 
-		final float l0 = 1 - 2 * (y2 + z2);
-		final float l1 = 2 * (xy + wz);
-		final float l2 = 2 * (xz - wy);
-		final float l4 = 2 * (xy - wz);
-		final float l5 = 1 - 2 * (x2 + z2);
-		final float l6 = 2 * (yz + wx);
-		final float l8 = 2 * (xz + wy);
-		final float l9 = 2 * (yz - wx);
-		final float l10 = 1 - 2 * (x2 + y2);
-		final float r0 = rhs[rhsOffset];
-		final float r1 = rhs[rhsOffset + 1];
-		final float r2 = rhs[rhsOffset + 2];
-		final float r4 = rhs[rhsOffset + 4];
-		final float r5 = rhs[rhsOffset + 5];
-		final float r6 = rhs[rhsOffset + 6];
-		final float r8 = rhs[rhsOffset + 8];
-		final float r9 = rhs[rhsOffset + 9];
-		final float r10 = rhs[rhsOffset + 10];
-		final float r12 = rhs[rhsOffset + 12];
-		final float r13 = rhs[rhsOffset + 13];
-		final float r14 = rhs[rhsOffset + 14];
-		result[resultOffset] = r0 * l0 + r1 * l4 + r2 * l8;
-		result[resultOffset + 1] = r0 * l1 + r1 * l5 + r2 * l9;
-		result[resultOffset + 2] = r0 * l2 + r1 * l6 + r2 * l10;
-		result[resultOffset + 3] = rhs[rhsOffset + 3];
-		result[resultOffset + 4] = r4 * l0 + r5 * l4 + r6 * l8;
-		result[resultOffset + 5] = r4 * l1 + r5 * l5 + r6 * l9;
-		result[resultOffset + 6] = r4 * l2 + r5 * l6 + r6 * l10;
-		result[resultOffset + 7] = rhs[rhsOffset + 7];
-		result[resultOffset + 8] = r8 * l0 + r9 * l4 + r10 * l8;
-		result[resultOffset + 9] = r8 * l1 + r9 * l5 + r10 * l9;
-		result[resultOffset + 10] = r8 * l2 + r9 * l6 + r10 * l10;
-		result[resultOffset + 11] = rhs[rhsOffset + 11];
-		result[resultOffset + 12] = r12 * l0 + r13 * l4 + r14 * l8;
-		result[resultOffset + 13] = r12 * l1 + r13 * l5 + r14 * l9;
-		result[resultOffset + 14] = r12 * l2 + r13 * l6 + r14 * l10;
-		result[resultOffset + 15] = rhs[rhsOffset + 15];
+		final float r0 = 1 - 2 * (y2 + z2);
+		final float r1 = 2 * (xy - wz);
+		final float r2 = 2 * (xz + wy);
+		final float r4 = 2 * (xy + wz);
+		final float r5 = 1 - 2 * (x2 + z2);
+		final float r6 = 2 * (yz - wx);
+		final float r8 = 2 * (xz - wy);
+		final float r9 = 2 * (yz + wx);
+		final float r10 = 1 - 2 * (x2 + y2);
+
+		final float l0 = lhs[rhsOffset];
+		final float l1 = lhs[rhsOffset + 1];
+		final float l2 = lhs[rhsOffset + 2];
+		final float l4 = lhs[rhsOffset + 4];
+		final float l5 = lhs[rhsOffset + 5];
+		final float l6 = lhs[rhsOffset + 6];
+		final float l8 = lhs[rhsOffset + 8];
+		final float l9 = lhs[rhsOffset + 9];
+		final float l10 = lhs[rhsOffset + 10];
+		final float l12 = lhs[rhsOffset + 12];
+		final float l13 = lhs[rhsOffset + 13];
+		final float l14 = lhs[rhsOffset + 14];
+		result[resultOffset] = l0 * r0 + l1 * r4 + l2 * r8;
+		result[resultOffset + 1] = l0 * r1 + l1 * r5 + l2 * r9;
+		result[resultOffset + 2] = l0 * r2 + l1 * r6 + l2 * r10;
+		result[resultOffset + 3] = lhs[rhsOffset + 3];
+		result[resultOffset + 4] = l4 * r0 + l5 * r4 + l6 * r8;
+		result[resultOffset + 5] = l4 * r1 + l5 * r5 + l6 * r9;
+		result[resultOffset + 6] = l4 * r2 + l5 * r6 + l6 * r10;
+		result[resultOffset + 7] = lhs[rhsOffset + 7];
+		result[resultOffset + 8] = l8 * r0 + l9 * r4 + l10 * r8;
+		result[resultOffset + 9] = l8 * r1 + l9 * r5 + l10 * r9;
+		result[resultOffset + 10] = l8 * r2 + l9 * r6 + l10 * r10;
+		result[resultOffset + 11] = lhs[rhsOffset + 11];
+		result[resultOffset + 12] = l12 * r0 + l13 * r4 + l14 * r8;
+		result[resultOffset + 13] = l12 * r1 + l13 * r5 + l14 * r9;
+		result[resultOffset + 14] = l12 * r2 + l13 * r6 + l14 * r10;
+		result[resultOffset + 15] = lhs[rhsOffset + 15];
 	}
 
-	public void multiplyQM(float[] result, int resultOffset, float[] lhs,
+	public void multiplyQM(float[] result, int resultOffset, float[] rhs,
 			int lhsOffset) {
 		final float x2 = x * x;
 		final float y2 = y * y;
@@ -393,43 +339,44 @@ public class Quaternion extends Vector4f {
 		final float wy = w * y;
 		final float wz = w * z;
 
-		final float r0 = 1 - 2 * (y2 + z2);
-		final float r1 = 2 * (xy + wz);
-		final float r2 = 2 * (xz - wy);
-		final float r4 = 2 * (xy - wz);
-		final float r5 = 1 - 2 * (x2 + z2);
-		final float r6 = 2 * (yz + wx);
-		final float r8 = 2 * (xz + wy);
-		final float r9 = 2 * (yz - wx);
-		final float r10 = 1 - 2 * (x2 + y2);
-		final float l0 = lhs[lhsOffset];
-		final float l1 = lhs[lhsOffset + 1];
-		final float l2 = lhs[lhsOffset + 2];
-		final float l3 = lhs[lhsOffset + 3];
-		final float l4 = lhs[lhsOffset + 4];
-		final float l5 = lhs[lhsOffset + 5];
-		final float l6 = lhs[lhsOffset + 6];
-		final float l7 = lhs[lhsOffset + 7];
-		final float l8 = lhs[lhsOffset + 8];
-		final float l9 = lhs[lhsOffset + 9];
-		final float l10 = lhs[lhsOffset + 10];
-		final float l11 = lhs[lhsOffset + 11];
-		result[resultOffset] = r0 * l0 + r1 * l4 + r2 * l8;
-		result[resultOffset + 1] = r0 * l1 + r1 * l5 + r2 * l9;
-		result[resultOffset + 2] = r0 * l2 + r1 * l6 + r2 * l10;
-		result[resultOffset + 3] = r0 * l3 + r1 * l7 + r2 * l11;
-		result[resultOffset + 4] = r4 * l0 + r5 * l4 + r6 * l8;
-		result[resultOffset + 5] = r4 * l1 + r5 * l5 + r6 * l9;
-		result[resultOffset + 6] = r4 * l2 + r5 * l6 + r6 * l10;
-		result[resultOffset + 7] = r4 * l3 + r5 * l7 + r6 * l11;
-		result[resultOffset + 8] = r8 * l0 + r9 * l4 + r10 * l8;
-		result[resultOffset + 9] = r8 * l1 + r9 * l5 + r10 * l9;
-		result[resultOffset + 10] = r8 * l2 + r9 * l6 + r10 * l10;
-		result[resultOffset + 11] = r8 * l3 + r9 * l7 + r10 * l11;
-		result[resultOffset + 12] = lhs[lhsOffset + 12];
-		result[resultOffset + 13] = lhs[lhsOffset + 13];
-		result[resultOffset + 14] = lhs[lhsOffset + 14];
-		result[resultOffset + 15] = lhs[lhsOffset + 15];
+		final float l0 = 1 - 2 * (y2 + z2);
+		final float l1 = 2 * (xy - wz);
+		final float l2 = 2 * (xz + wy);
+		final float l4 = 2 * (xy + wz);
+		final float l5 = 1 - 2 * (x2 + z2);
+		final float l6 = 2 * (yz - wx);
+		final float l8 = 2 * (xz - wy);
+		final float l9 = 2 * (yz + wx);
+		final float l10 = 1 - 2 * (x2 + y2);
+
+		final float r0 = rhs[lhsOffset];
+		final float r1 = rhs[lhsOffset + 1];
+		final float r2 = rhs[lhsOffset + 2];
+		final float r3 = rhs[lhsOffset + 3];
+		final float r4 = rhs[lhsOffset + 4];
+		final float r5 = rhs[lhsOffset + 5];
+		final float r6 = rhs[lhsOffset + 6];
+		final float r7 = rhs[lhsOffset + 7];
+		final float r8 = rhs[lhsOffset + 8];
+		final float r9 = rhs[lhsOffset + 9];
+		final float r10 = rhs[lhsOffset + 10];
+		final float r11 = rhs[lhsOffset + 11];
+		result[resultOffset] = l0 * r0 + l1 * r4 + l2 * r8;
+		result[resultOffset + 1] = l0 * r1 + l1 * r5 + l2 * r9;
+		result[resultOffset + 2] = l0 * r2 + l1 * r6 + l2 * r10;
+		result[resultOffset + 3] = l0 * r3 + l1 * r7 + l2 * r11;
+		result[resultOffset + 4] = l4 * r0 + l5 * r4 + l6 * r8;
+		result[resultOffset + 5] = l4 * r1 + l5 * r5 + l6 * r9;
+		result[resultOffset + 6] = l4 * r2 + l5 * r6 + l6 * r10;
+		result[resultOffset + 7] = l4 * r3 + l5 * r7 + l6 * r11;
+		result[resultOffset + 8] = l8 * r0 + l9 * r4 + l10 * r8;
+		result[resultOffset + 9] = l8 * r1 + l9 * r5 + l10 * r9;
+		result[resultOffset + 10] = l8 * r2 + l9 * r6 + l10 * r10;
+		result[resultOffset + 11] = l8 * r3 + l9 * r7 + l10 * r11;
+		result[resultOffset + 12] = rhs[lhsOffset + 12];
+		result[resultOffset + 13] = rhs[lhsOffset + 13];
+		result[resultOffset + 14] = rhs[lhsOffset + 14];
+		result[resultOffset + 15] = rhs[lhsOffset + 15];
 	}
 
 	public float[] getRotationMatrix(final float[] result) {
@@ -442,17 +389,16 @@ public class Quaternion extends Vector4f {
 		final float wx = w * x;
 		final float wy = w * y;
 		final float wz = w * z;
-
 		result[0] = 1 - 2 * (y2 + z2);
-		result[1] = 2 * (xy + wz);
-		result[2] = 2 * (xz - wy);
+		result[1] = 2 * (xy - wz);
+		result[2] = 2 * (xz + wy);
 		result[3] = 0;
-		result[4] = 2 * (xy - wz);
-		result[5] = 1 - 2 * (x2 + z2);
-		result[6] = 2 * (yz + wx);
+		result[4] = 2 * (xy + wz);
+		result[5] = 1 - (x2 + z2);
+		result[6] = 2 * (yz - wx);
 		result[7] = 0;
-		result[8] = 2 * (xz + wy);
-		result[9] = 2 * (yz - wx);
+		result[8] = 2 * (xz - wy);
+		result[9] = 2 * (yz + wx);
 		result[10] = 1 - 2 * (x2 + y2);
 		result[11] = 0;
 		result[12] = 0;
@@ -472,15 +418,14 @@ public class Quaternion extends Vector4f {
 		final float wx = w * x;
 		final float wy = w * y;
 		final float wz = w * z;
-
 		result[0] = 1 - 2 * (y2 + z2);
-		result[1] = 2 * (xy + wz);
-		result[2] = 2 * (xz - wy);
-		result[3] = 2 * (xy - wz);
+		result[1] = 2 * (xy - wz);
+		result[2] = 2 * (xz + wy);
+		result[3] = 2 * (xy + wz);
 		result[4] = 1 - 2 * (x2 + z2);
-		result[5] = 2 * (yz + wx);
-		result[6] = 2 * (xz + wy);
-		result[7] = 2 * (yz - wx);
+		result[5] = 2 * (yz - wx);
+		result[6] = 2 * (xz - wy);
+		result[7] = 2 * (yz + wx);
 		result[8] = 1 - 2 * (x2 + y2);
 		return result;
 	}

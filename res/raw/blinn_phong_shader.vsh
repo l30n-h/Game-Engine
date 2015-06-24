@@ -10,9 +10,9 @@ varying vec2 uv;
 
 void main()
 {
-	position = u_MVMatrix * a_Position;
+	position =  a_Position * u_MVMatrix;
 	viewDirection = normalize(-position.xyz);
-	normal = normalize(u_NMatrix * a_Normal);
+	normal = normalize(a_Normal * u_NMatrix);
 	uv = a_UV;
-	gl_Position = u_MVPMatrix * a_Position;
+	gl_Position = a_Position * u_MVPMatrix;
 }

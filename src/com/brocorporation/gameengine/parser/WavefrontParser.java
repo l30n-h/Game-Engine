@@ -279,8 +279,8 @@ public class WavefrontParser extends SwingWorker<WavefrontObject, Integer> {
 			maxZ = vertex[2];
 		}
 
-		currentHalfsize.set(Math.abs(maxX - minX) * 0.5F,
-				Math.abs(maxY - minY) * 0.5F, Math.abs(maxZ - minZ) * 0.5F);
+		currentHalfsize.set(Math.abs(maxX - minX) / 2,
+				Math.abs(maxY - minY) / 2, Math.abs(maxZ - minZ) / 2);
 		currentPosition.set(maxX - currentHalfsize.x, maxY - currentHalfsize.y,
 				maxZ - currentHalfsize.z);
 	}

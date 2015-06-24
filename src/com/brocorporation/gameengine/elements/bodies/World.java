@@ -31,7 +31,9 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	protected Camera activeCamera;
 	protected StaticLight activeLight;
 	
-	public static boolean debug = false;
+	public static boolean debug = true;
+	public static int debugid;
+	
 	@Override
 	public void broadphaseCollision(final DynamicBody dynBody,
 			final StaticBody stcBody, final IUpdateInfo uInfo) {
@@ -57,6 +59,13 @@ public class World implements CollisionDetection.BroadphaseCallback {
 						c.setDistance(((Plane) stcBody).getDistance(c.getPointB()));
 						c.getPointA().set(c.getPointB());
 						if(c.getDistance() <= 0){Manifold m = Manifold.add(stcBody, dynBody, c);
+//						for(int i=0;i<m.size();i++){
+//							c.setDistance(m.getContact(i).getDistance());
+//							c.getNormal().set(m.getContact(i).getNormal());
+//							c.getPointA().setSubtractScaled(m.getContact(i).getWorldA(), c.getNormal(),0.5f*c.getDistance());
+//							c.getPointB().set(c.getPointA());
+//							ElasticContactSolver.addContact(stcBody, dynBody, c);
+//						}
 							ElasticContactSolver.addContact(stcBody, dynBody, c);
 						}
 					}
@@ -67,11 +76,12 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				ElasticContactSolver.addContact(stcBody, dynBody, c);
 			}	
 		} else {
-			if(debug) System.out.println("=================spc==============");
+			if(debug) System.out.println("=================spc==============");	
+			
 //			SpeculativeContactSolver.addContact(stcBody, dynBody,
 //					c);
 		}
-		if(debug && dynBody.getMass()==80){
+		if(debug && dynBody.getID()==World.debugid){
 			System.out.println(stcBody);
 			if(dynBody instanceof RigidBody) {
 				System.out.println("ang:\t"+((RigidBody) dynBody).getAngularVelocity());
@@ -150,11 +160,11 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		for (final Constraint contraint : constraintList) {
 			contraint.solve(uInfo);
 		}
+		Manifold.update();
 		CollisionDetection.checkBroadphase(this, updateList, collisionTree,
 				uInfo);
 		ElasticContactSolver.run(uInfo);
 		SpeculativeContactSolver.run(uInfo);
-
 		collisionTree.optimize();
 		if (uInfo.isPreRendering()) {
 			activeCamera.prepareUpdatePosition(uInfo);

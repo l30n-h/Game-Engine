@@ -130,7 +130,7 @@ public abstract class GameEngine implements IUpdateInfo {
 
 	public void setRate(final float dRate) {
 		rate = dRate;
-		halfRate = rate * 0.5F;
+		halfRate = rate / 2;
 		inverseRate = 1 / rate;
 	}
 

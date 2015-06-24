@@ -11,15 +11,16 @@ public class RigidBody extends DynamicBody {
 	protected final Vector3f angularVelocity = new Vector3f();
 	protected final Vector3f angularMomentum = new Vector3f();
 	protected final float[] inverseInertiaTensor = new float[9];
-	protected final float[] defI = new float[9];// TODO replace by Vector after
-												// rotation matrix
+	protected final Vector3f diagI = new Vector3f();
 
 	protected boolean updateAngularMomantum = false;
 
 	public RigidBody(final IShape shape, final float pMass) {
 		super(shape, pMass);
-		shape.getInverseInertiaTensor(inverseInertiaTensor, inverseMass);
-		MatrixExt.setM(defI, inverseInertiaTensor);
+		shape.getInverseInertiaTensor(diagI, inverseMass);
+		inverseInertiaTensor[0] = diagI.x;
+		inverseInertiaTensor[4] = diagI.y;
+		inverseInertiaTensor[8] = diagI.z;
 	}
 
 	public void setAngularVelocity(final float degreeX, final float degreeY,
@@ -77,23 +78,15 @@ public class RigidBody extends DynamicBody {
 		super.updatePosition(uInfo);
 		if (angularVelocity.x != 0 || angularVelocity.y != 0
 				|| angularVelocity.z != 0) {
-			affineTransform.getOrientation().integrateRotationScaled(angularVelocity,
-					uInfo.getRate());
+			affineTransform.getOrientation().integrateRotationScaled(
+					angularVelocity, uInfo.getRate());
 			updateOrientation = true;
 		}
 		if (updateOrientation) {// TODO only if inertia is needed (Coins not)
 			affineTransform.getOrientation().getRotationMatrix3(rot);
 			
-			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, rot, 0, defI, 0);
-			MatrixExt.transposeM3(rot, rot);
-			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
-					inverseInertiaTensor, 0, rot, 0);// RxIxT <-> TxIxR
-			
-
-//			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0, defI, 0, rot, 0);//vml nicht das richtige
-//			MatrixExt.transposeM3(rot, rot);
-//			MatrixExt.multiplyM3M3(inverseInertiaTensor, 0,
-//					rot, 0, inverseInertiaTensor, 0);// TxIxR <-> RxIxT
+			MatrixExt.multiplyM3D3MT3(inverseInertiaTensor,rot,diagI);
+			if(World.debug && getID()==World.debugid){MatrixExt.logM("A", inverseInertiaTensor);System.out.println();}
 		}
 	}
 }

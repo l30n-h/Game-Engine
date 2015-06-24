@@ -122,7 +122,7 @@ public class Octree extends Tree {
 	public List<Object> retrieveAll(List<Object> returnObjects) {
 		return root.retrieveAll(returnObjects);
 	}
-	
+
 	protected class Node extends AABB {
 		protected final byte level;
 		protected final HashMap<AABB, Object> objects;
@@ -149,7 +149,7 @@ public class Octree extends Tree {
 		}
 
 		protected void split() {
-			final float hs = halfsize.x * 0.5F;
+			final float hs = halfsize.x / 2;
 			final float px = position.x + hs;
 			final float py = position.y + hs;
 			final float pz = position.z + hs;
@@ -243,11 +243,12 @@ public class Octree extends Tree {
 			if (isEmpty()) {
 				hasChanged = enabled != childEnabled;
 				enabled = childEnabled;
-			} else{
-				if(!enabled){
+			} else {
+				if (!enabled) {
 					enabled = true;
 					hasChanged = true;
-				} else hasChanged = false;
+				} else
+					hasChanged = false;
 			}
 			return enabled;
 		}

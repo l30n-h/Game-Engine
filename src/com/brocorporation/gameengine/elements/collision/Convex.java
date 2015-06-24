@@ -182,9 +182,9 @@ public class Convex implements IShape {
 	}
 
 	@Override
-	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
+	public void getInverseInertiaTensor(Vector3f diagInverseInertiaTensor,
 			float inverseMass) {
-		aabb.getInverseInertiaTensor(inverseInertiaTensor, inverseMass);
+		aabb.getInverseInertiaTensor(diagInverseInertiaTensor, inverseMass);
 	}
 
 	public static void getCOM(Vector3f result, Vector3f[] points) {

@@ -11,9 +11,11 @@ public interface IShape {
 
 	public Vector3f getMinAlongDirection(Vector3f result, Vector3f dir);
 
-	public Vector3f[] getAllMaxAlongDirection(Vector3f[] result, Vector3f dir, int count, float eps);
+	public Vector3f[] getAllMaxAlongDirection(Vector3f[] result, Vector3f dir,
+			int count, float eps);
 
-	public Vector3f[] getAllMinAlongDirection(Vector3f[] result, Vector3f dir, int count, float eps);
+	public Vector3f[] getAllMinAlongDirection(Vector3f[] result, Vector3f dir,
+			int count, float eps);
 
 	public AABB getAABB();
 
@@ -26,6 +28,6 @@ public interface IShape {
 	public void updateBounds(AffineTransform transform,
 			boolean updateTranslation, boolean updateOrientation);
 
-	public void getInverseInertiaTensor(float[] inverseInertiaTensor,
+	public void getInverseInertiaTensor(Vector3f diagInverseInertiaTensor,
 			float inverseMass);
 }

@@ -44,7 +44,7 @@ public class AffineTransform {
 	public Vector3f getTranslation() {
 		return translation;
 	}
-
+	
 	public Quaternion getOrientation() {
 		return orientation;
 	}
@@ -59,10 +59,10 @@ public class AffineTransform {
 	}
 
 	public float[] getTransformationMatrix(float[] result) {
-		Matrix.setIdentityM(result, 0);
-		Matrix.translateM(result, 0, translation.x, translation.y,
+		MatrixExt.setIdentityM(result, 0);
+		MatrixExt.translateM(result, 0, translation.x, translation.y,
 				translation.z);
-		orientation.multiplyQM(result, 0, result, 0);
+		orientation.multiplyMQ(result, 0, result, 0);
 		return result;
 	}
 
