@@ -11,7 +11,7 @@ public class ElasticContactSolver {
 	private final static Stack<ElasticContact> useStack = new Stack<ElasticContact>();
 	private final static Stack<ElasticContact> unusedStack = new Stack<ElasticContact>();
 
-	public static void addContact(final StaticBody stcBody,
+	public static ElasticContact addContact(final StaticBody stcBody,
 			final DynamicBody dynBody, final Contact contact) {
 		try {
 			final ElasticContact c;
@@ -22,11 +22,18 @@ public class ElasticContactSolver {
 				c.reset(stcBody, dynBody, contact);
 			}
 			useStack.push(c);
+			return c;
 		} catch (Exception e) {
 		}
+		return null;
 	}
 
 	public static void run(final IUpdateInfo uInfo) {
+//		for (int i = 1; i < 4; i++) {
+//			for (final ElasticContact c : useStack) {
+//				c.solve(uInfo);
+//			}
+//		}
 		while (!useStack.isEmpty()) {
 			final ElasticContact c;
 			if ((c = useStack.pop()) != null) {

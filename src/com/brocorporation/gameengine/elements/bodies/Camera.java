@@ -48,13 +48,19 @@ public abstract class Camera implements AABB.IBounds {
 	}
 
 	public void setZoom(final float pZoom) {
-		final float scale = pZoom / zoom;
-		left *= scale;
-		right *= scale;
-		top *= scale;
-		bottom *= scale;
-		zoom = pZoom;
-		updateFrustumMatrix = true;
+		if (pZoom != 0) {
+			final float scale = pZoom / zoom;
+			left *= scale;
+			right *= scale;
+			top *= scale;
+			bottom *= scale;
+			zoom = pZoom;
+			updateFrustumMatrix = true;
+		}
+	}
+
+	public float getZoom() {
+		return zoom;
 	}
 
 	public float getLeft() {

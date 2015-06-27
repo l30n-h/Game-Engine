@@ -12,7 +12,7 @@ public class SpeculativeContactSolver {
 	private final static Stack<SpeculativeContact> unusedStack = new Stack<SpeculativeContact>();
 	private static int iterations = 2;
 
-	public static void addContact(final StaticBody stcBody,
+	public static SpeculativeContact addContact(final StaticBody stcBody,
 			final DynamicBody dynBody, final Contact contact) {
 		try {
 			final SpeculativeContact c;
@@ -23,8 +23,10 @@ public class SpeculativeContactSolver {
 				c.reset(stcBody, dynBody, contact);
 			}
 			useStack.push(c);
+			return c;
 		} catch (Exception e) {
 		}
+		return null;
 	}
 
 	public static void setIterations(final int pIterations) {

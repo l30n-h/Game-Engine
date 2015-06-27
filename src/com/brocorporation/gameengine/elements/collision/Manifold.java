@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Stack;
 
-import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.utils.Vector3f;
 
@@ -81,10 +80,10 @@ public class Manifold {
 	static Vector3f localA = new Vector3f();
 
 	public int addContact(Contact c) {
-		if (size == 0)
+		//if (size == 0)
 			normal.set(c.getNormal());
-		a.setAddScaled(c.getPointA(), normal, 0.5f * c.getDistance());
-		b.setSubtractScaled(a, normal, c.getDistance());
+		b.setAddScaled(c.getPointA(), normal, c.getDistance() /2);
+		a.setSubtractScaled(b, normal, c.getDistance());
 		bodyA.getAffineTransform().toLocal(localA, a);
 		int insertIndex = size;
 		if (insertIndex == contacts.length) {
@@ -246,10 +245,10 @@ public class Manifold {
 		protected Vector3f worldB = new Vector3f();
 		protected Vector3f localA = new Vector3f();
 		protected Vector3f localB = new Vector3f();
-		protected Vector3f IpAxN = new Vector3f();
-		protected Vector3f IpBxN = new Vector3f();
-		protected Vector3f IpAxNxpA = new Vector3f();
-		protected Vector3f IpBxNxpB = new Vector3f();
+//		protected Vector3f IpAxN = new Vector3f();
+//		protected Vector3f IpBxN = new Vector3f();
+//		protected Vector3f IpAxNxpA = new Vector3f();
+//		protected Vector3f IpBxNxpB = new Vector3f();
 		protected float distance;
 
 		public void reset(ManifoldContact c) {
@@ -260,20 +259,20 @@ public class Manifold {
 			bodyB.getOrientation().rotateInverseV(localB, worldB);
 		}
 
-		public void calcDependencies() {
-			if (bodyA instanceof RigidBody) {
-				IpAxN.multiplyM3V(
-						((RigidBody) bodyA).getInverseInertiaTensor(), 0,
-						IpAxN.setCross(worldA, normal));
-				IpAxNxpA.setCross(IpAxNxpA, worldA);
-			}
-			if (bodyB instanceof RigidBody) {
-				IpBxN.multiplyM3V(
-						((RigidBody) bodyB).getInverseInertiaTensor(), 0,
-						IpBxN.setCross(worldB, normal));
-				IpBxNxpB.setCross(IpBxNxpB, worldB);
-			}
-		}
+//		public void calcDependencies() {
+//			if (bodyA instanceof RigidBody) {
+//				IpAxN.multiplyM3V(
+//						((RigidBody) bodyA).getInverseInertiaTensor(), 0,
+//						IpAxN.setCross(worldA, normal));
+//				IpAxNxpA.setCross(IpAxNxpA, worldA);
+//			}
+//			if (bodyB instanceof RigidBody) {
+//				IpBxN.multiplyM3V(
+//						((RigidBody) bodyB).getInverseInertiaTensor(), 0,
+//						IpBxN.setCross(worldB, normal));
+//				IpBxNxpB.setCross(IpBxNxpB, worldB);
+//			}
+//		}
 
 		public Vector3f getWorldA() {
 			return worldA;

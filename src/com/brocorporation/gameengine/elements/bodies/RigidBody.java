@@ -84,9 +84,7 @@ public class RigidBody extends DynamicBody {
 		}
 		if (updateOrientation) {// TODO only if inertia is needed (Coins not)
 			affineTransform.getOrientation().getRotationMatrix3(rot);
-			
-			MatrixExt.multiplyM3D3MT3(inverseInertiaTensor,rot,diagI);
-			if(World.debug && getID()==World.debugid){MatrixExt.logM("A", inverseInertiaTensor);System.out.println();}
+			MatrixExt.multiplyM3D3MT3(inverseInertiaTensor, rot, diagI);
 		}
 	}
 }

@@ -4,6 +4,7 @@ import com.brocorporation.gameengine.IUpdateInfo;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
+import com.brocorporation.gameengine.elements.collision.Manifold.ManifoldContact;
 import com.brocorporation.gameengine.utils.Vector3f;
 
 public class ElasticContact extends Constraint {
@@ -57,7 +58,7 @@ public class ElasticContact extends Constraint {
 	@Override
 	public void solve(final IUpdateInfo uInfo) {
 		if (bodyA.isStatic()) {
-			staticContact(uInfo);
+			staticContactMulti(uInfo);
 		} else {// TODO
 			// dynamicContact(uInfo);
 			rigidContact(uInfo);
@@ -65,6 +66,79 @@ public class ElasticContact extends Constraint {
 	}// http://en.wikipedia.org/wiki/Collision_response
 
 	static boolean frictional = false;// TODO
+	
+	public Manifold manifold;
+	private void staticContactMulti(final IUpdateInfo uInfo){
+		DynamicBody bodyB = (DynamicBody) this.bodyB;
+		boolean isRigidB = bodyB instanceof RigidBody;
+		final Material mA = bodyA.getMaterial();
+		final Material mB = bodyB.getMaterial();
+		Vector3f normal = manifold.getNormal();
+		if(isRigidB){
+			final Vector3f dynBlV = bodyB.getLinearVelocity();
+			final Vector3f dynBaV = new Vector3f().set(((RigidBody) bodyB).getAngularVelocity());
+			float minDist = 0;
+			float linmax=0;
+			final float[] itB = ((RigidBody) bodyB).getInverseInertiaTensor();
+			for(int i=0;i< manifold.size();i++){
+				ManifoldContact c = manifold.getContact(i);
+				Vector3f pointB = new Vector3f().setSubtract(c.getWorldB(),bodyB.getPosition());
+				Vector3f relVel = rV.setAdd(dynBlV, rV.setCross(dynBaV, pointB));
+				float velAlongNormal = relVel.dot(normal);
+				if (velAlongNormal >= 0) {
+					continue;
+				}
+				tmp2.multiplyM3V(itB, 0, tmp2.setCross(pointB, normal));
+				tmp11.setCross(tmp2, pointB);
+				final float jn = (-(1 + Math.max(mA.getRestitution(), mB.getRestitution())) * velAlongNormal)
+					/ (bodyB.getInverseMass() + tmp11.dot(normal));
+				if(jn > linmax){
+					linmax = jn;
+				}
+				((RigidBody) bodyB).getAngularVelocity().addScaled(tmp2, jn);
+				if(c.getDistance()<minDist){
+					minDist = c.getDistance();
+				}
+			}
+			bodyB.getLinearVelocity().addScaled(normal, bodyB.getInverseMass() * linmax);
+			if ((minDist += slop) < 0) {
+				bodyB.getPositionCorrection().addScaled(normal, percent * minDist);
+			}
+		}else {
+			Vector3f dynBlV = bodyB.getLinearVelocity();
+			Vector3f relVel = bodyB.getLinearVelocity();
+			float velAlongNormal = relVel.dot(normal);
+			if (velAlongNormal >= 0) {
+				return;
+			}
+			if ((distance += slop) < 0) {
+				bodyB.getPositionCorrection().addScaled(normal, percent * distance);
+			}
+			final float jn = -(1 + Math.max(mA.getRestitution(), mB.getRestitution()))
+					* velAlongNormal;
+			dynBlV.addScaled(normal, jn);
+			if (frictional) {
+				relVel = dynBlV;
+				velAlongNormal = relVel.dot(normal);
+				tangent.setSubtractScaled(relVel, normal, velAlongNormal)
+						.norm();
+				final float jt = -relVel.dot(tangent);
+				if (jt != 0) {
+					if (Math.abs(jt) < jn
+							* clamp(mA.getStaticFriction(),
+									mB.getStaticFriction())) {
+						dynBlV.addScaled(tangent, jt);
+					} else {
+						dynBlV.addScaled(
+								tangent,
+								-clamp(mA.getDynamicFriction(),
+										mB.getDynamicFriction())
+										* jn);
+					}
+				}
+			}
+		}
+	}
 	
 	private void staticContact(final IUpdateInfo uInfo) {
 		DynamicBody bodyB = (DynamicBody) this.bodyB;

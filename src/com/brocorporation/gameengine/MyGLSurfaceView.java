@@ -40,6 +40,7 @@ import com.brocorporation.gameengine.elements.opengl.PrimitiveShader;
 import com.brocorporation.gameengine.elements.opengl.PrimitiveShape;
 import com.brocorporation.gameengine.parser.WavefrontParser;
 import com.brocorporation.gameengine.utils.MatrixExt;
+import com.brocorporation.gameengine.utils.Quaternion;
 import com.brocorporation.gameengine.utils.Vector3f;
 
 public class MyGLSurfaceView extends GameEngine {
@@ -76,7 +77,7 @@ public class MyGLSurfaceView extends GameEngine {
 	private final List<Object> frustumList = new ArrayList<Object>();
 
 	public MyGLSurfaceView() {
-		//super(60, 80);
+		super(60, 80);
 	}
 
 	public void create() {
@@ -287,7 +288,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-1.6F, -1.75F, -24F),
 				new Vector3f(-1.6F, -1.75F, 21.8F),
 				new Vector3f(10.4F, -1.75F, 21.8F),
-				new Vector3f(10.4F, -1.75F, -24F) });
+				new Vector3f(10.4F, -1.75F, -24F)});
 		final Convex floorBig2 = new Convex(new Vector3f[] {
 				new Vector3f(-1.6F, 2.25F, -24F),
 				new Vector3f(-1.6F, 2.25F, 21.8F),
@@ -327,7 +328,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-1.1F, -1.75F, -24F),
 				new Vector3f(-1.1F, -1.75F, 21.8F),
 				new Vector3f(-1.1F, 9.75F, 21.8F),
-				new Vector3f(-1.1F, 9.75F, -24F) });
+				new Vector3f(-1.1F, 9.75F, -24F)});
 		final Convex wallRight = new Convex(new Vector3f[] {
 				new Vector3f(1.1F, -1.75F, -18.6F),
 				new Vector3f(1.1F, -1.75F, 18.6F),
@@ -364,7 +365,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(10.4F, 9.75F, 21.8F),
 				new Vector3f(10.4F, 9.75F, 18.6F) });
 		world.add(new Plane(normalUp, floorBig1));
-		// world.add(new RigidBody(floorBig1, 0));
+//		world.add(new RigidBody(floorBig1, 0));
 		world.add(new Plane(normalUp, floorBig2));
 		world.add(new Plane(normalUp, floorBig3));
 		world.add(new Plane(normalDown, ceilingBig1));
@@ -403,7 +404,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-0.2f, +0.85f, -0.2f),
 				new Vector3f(-0.2f, -0.85f, +0.2f),
 				new Vector3f(-0.2f, -0.85f, -0.2f) };
-		float a_x = 0.2f, a_y = 0.35f, a_z = 0.65f;
+		float a_x = 0.85f, a_y = 0.2f, a_z = 0.2f;
 		Vector3f[] a2 = new Vector3f[] { new Vector3f(+a_x, +a_y, +a_z),
 				new Vector3f(+a_x, +a_y, -a_z), new Vector3f(+a_x, -a_y, +a_z),
 				new Vector3f(+a_x, -a_y, -a_z), new Vector3f(-a_x, +a_y, +a_z),
@@ -444,8 +445,8 @@ public class MyGLSurfaceView extends GameEngine {
 		actor.setGLShape(boxShape);
 		// actor = new Actor(new Sphere(0.75f), 80);
 		// actor.setGLShape(sphereShape);
-		actor.setPosition(0, 0 - 0.9f * 0, 14 - 5);
-		// actor.setPosition(7, 8, -21.25f);
+		actor.setPosition(0, 0 - 0.9f*1, 9);
+//		 actor.setPosition(7, 8, -21.25f);
 		// actor.setRotation(45, -90, 0);//= rot x than rot y than rot z
 		// actor.getOrientation().getQuaternionEuler(45, 30, 76);
 		// actor.getOrientation().addRotationEuler(45, 30, 76);
@@ -597,6 +598,14 @@ public class MyGLSurfaceView extends GameEngine {
 				}
 			}
 		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_ADD)) {
+			float z = world.getActiveCamera().getZoom()-0.5f*dTime;
+			world.getActiveCamera().setZoom(Math.max(0.02f, z));
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_SUBTRACT)) {
+			float z = world.getActiveCamera().getZoom()+0.5f*dTime;
+			world.getActiveCamera().setZoom(Math.min(1, z));
+		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
 			currentActor.push(uInfo);
 		}
@@ -621,7 +630,7 @@ public class MyGLSurfaceView extends GameEngine {
 			world.update(uInfo);
 		}
 		pause();
-	}
+	}static Quaternion qu = new Quaternion();
 
 	public static AABB cPoint = new AABB(0.08f, 0.08f, 0.08f);
 	public static AABB cPoint2 = new AABB(0.08f, 0.08f, 0.08f);
@@ -657,7 +666,6 @@ public class MyGLSurfaceView extends GameEngine {
 		if (camera != null) {
 			final float ratio = (float) width / height;
 			camera.setFrustum(-ratio, ratio, -1, 1, 0.01F, 100);
-			projectionMatrix = camera.getProjectionMatrix();
 		}
 	}
 
@@ -670,9 +678,8 @@ public class MyGLSurfaceView extends GameEngine {
 
 		if (camera != null) {
 			viewMatrix = camera.getViewMatrix();
+			projectionMatrix = camera.getProjectionMatrix();
 		}
-		// MatrixExt.multiplyMM(vpMatrix, 0, viewMatrix, 0, projectionMatrix,
-		// 0);
 		MatrixExt.multiplyMM(vpMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
 		frustum.setFrustum(vpMatrix);
 
@@ -699,12 +706,10 @@ public class MyGLSurfaceView extends GameEngine {
 			for (final Object bounds : frustumList) {
 				if (bounds instanceof StaticBody) {
 					final StaticBody body = (StaticBody) bounds;
-					// /if (transformable.isVisible()) {TODO
 					final GLShape shape = body.getGLShape();
 					if (shape instanceof MainShape) {
 						((MainShape) shape).render(body.getAffineTransform());
 					}
-					// }
 				}
 			}
 			coinShape.render(viewMatrix, projectionMatrix, mvpTempMatrix);

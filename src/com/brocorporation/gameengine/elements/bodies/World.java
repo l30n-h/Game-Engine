@@ -10,6 +10,7 @@ import com.brocorporation.gameengine.elements.collision.Collidable;
 import com.brocorporation.gameengine.elements.collision.CollisionDetection;
 import com.brocorporation.gameengine.elements.collision.Constraint;
 import com.brocorporation.gameengine.elements.collision.Contact;
+import com.brocorporation.gameengine.elements.collision.ElasticContact;
 import com.brocorporation.gameengine.elements.collision.ElasticContactSolver;
 import com.brocorporation.gameengine.elements.collision.GJK;
 import com.brocorporation.gameengine.elements.collision.IShape;
@@ -31,7 +32,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	protected Camera activeCamera;
 	protected StaticLight activeLight;
 	
-	public static boolean debug = true;
+	public static boolean debug =false;
 	public static int debugid;
 	
 	@Override
@@ -53,23 +54,18 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				// MPR.relVel.set(dynBody.getLinearVelocity());
 				if (MPR.intersects(c, stcShape, dynShape)) {
 					if(debug) System.out.println("=================mpr==============");
-					if(stcBody instanceof Plane){
+					if(stcBody instanceof Plane && (((Plane) stcBody).getNormal().y==1 || ((Plane) stcBody).getNormal().y == 0)){
 						c.getNormal().set(((Plane) stcBody).getNormal());
 						dynShape.getMinAlongDirection(c.getPointB(), c.getNormal());
 						c.setDistance(((Plane) stcBody).getDistance(c.getPointB()));
+						c.getPointB().setSubtractScaled(c.getPointB(), c.getNormal(), c.getDistance()/2);
 						c.getPointA().set(c.getPointB());
-						if(c.getDistance() <= 0){Manifold m = Manifold.add(stcBody, dynBody, c);
-//						for(int i=0;i<m.size();i++){
-//							c.setDistance(m.getContact(i).getDistance());
-//							c.getNormal().set(m.getContact(i).getNormal());
-//							c.getPointA().setSubtractScaled(m.getContact(i).getWorldA(), c.getNormal(),0.5f*c.getDistance());
-//							c.getPointB().set(c.getPointA());
-//							ElasticContactSolver.addContact(stcBody, dynBody, c);
-//						}
-							ElasticContactSolver.addContact(stcBody, dynBody, c);
-						}
 					}
-					else ElasticContactSolver.addContact(stcBody, dynBody, c);
+					if(c.getDistance() <= 0){
+						Manifold m = Manifold.add(stcBody, dynBody, c);
+						ElasticContact ec = ElasticContactSolver.addContact(stcBody, dynBody, c);
+						ec.manifold = m;
+					}
 				}
 			} else {
 				if(debug) System.out.println("=================gjk==============");
@@ -77,6 +73,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			}	
 		} else {
 			if(debug) System.out.println("=================spc==============");	
+//			Manifold m = Manifold.add(stcBody, dynBody, c);
 			
 //			SpeculativeContactSolver.addContact(stcBody, dynBody,
 //					c);
@@ -84,9 +81,9 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		if(debug && dynBody.getID()==World.debugid){
 			System.out.println(stcBody);
 			if(dynBody instanceof RigidBody) {
+				MatrixExt.logM("inertia", ((RigidBody) dynBody).getInverseInertiaTensor());
 				System.out.println("ang:\t"+((RigidBody) dynBody).getAngularVelocity());
 				System.out.println("ang:\t"+((RigidBody) dynBody).getAngularVelocity().length());
-				MatrixExt.logM("inertia", ((RigidBody) dynBody).getInverseInertiaTensor());
 				System.out.println("lin:\t"+dynBody.getLinearVelocity());
 				System.out.println("lin:\t"+dynBody.getLinearVelocity().length());
 			}
