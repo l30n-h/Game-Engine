@@ -47,97 +47,97 @@ public class ElasticContact extends Constraint {
 		distance = contact.getDistance();
 		pointA.setSubtract(contact.getPointA(), a.getPosition());
 		pointB.setSubtract(contact.getPointB(), b.getPosition());
+		prepare();
 	}
 
 	@Override
 	public void reset() {
 		super.reset();
 		distance = 0;
+		normalImpulseSum = 0;
 	}
 
 	@Override
 	public void solve(final IUpdateInfo uInfo) {
 		if (bodyA.isStatic()) {
-			staticContactMulti(uInfo);
+			staticlagrangian(uInfo);
+			//staticContactMulti(uInfo);
 		} else {// TODO
 			// dynamicContact(uInfo);
-			rigidContact(uInfo);
+			//rigidContact(uInfo);
+			lagrangian(uInfo);
 		}
 	}// http://en.wikipedia.org/wiki/Collision_response
-
-	static boolean frictional = false;// TODO
 	
+	static boolean frictional = false;// TODO
 	public Manifold manifold;
-	private void staticContactMulti(final IUpdateInfo uInfo){
-		DynamicBody bodyB = (DynamicBody) this.bodyB;
-		boolean isRigidB = bodyB instanceof RigidBody;
-		final Material mA = bodyA.getMaterial();
-		final Material mB = bodyB.getMaterial();
-		Vector3f normal = manifold.getNormal();
-		if(isRigidB){
-			final Vector3f dynBlV = bodyB.getLinearVelocity();
-			final Vector3f dynBaV = new Vector3f().set(((RigidBody) bodyB).getAngularVelocity());
-			float minDist = 0;
-			float linmax=0;
-			final float[] itB = ((RigidBody) bodyB).getInverseInertiaTensor();
-			for(int i=0;i< manifold.size();i++){
-				ManifoldContact c = manifold.getContact(i);
-				Vector3f pointB = new Vector3f().setSubtract(c.getWorldB(),bodyB.getPosition());
-				Vector3f relVel = rV.setAdd(dynBlV, rV.setCross(dynBaV, pointB));
-				float velAlongNormal = relVel.dot(normal);
-				if (velAlongNormal >= 0) {
-					continue;
-				}
-				tmp2.multiplyM3V(itB, 0, tmp2.setCross(pointB, normal));
-				tmp11.setCross(tmp2, pointB);
-				final float jn = (-(1 + Math.max(mA.getRestitution(), mB.getRestitution())) * velAlongNormal)
-					/ (bodyB.getInverseMass() + tmp11.dot(normal));
-				if(jn > linmax){
-					linmax = jn;
-				}
-				((RigidBody) bodyB).getAngularVelocity().addScaled(tmp2, jn);
-				if(c.getDistance()<minDist){
-					minDist = c.getDistance();
-				}
-			}
-			bodyB.getLinearVelocity().addScaled(normal, bodyB.getInverseMass() * linmax);
-			if ((minDist += slop) < 0) {
-				bodyB.getPositionCorrection().addScaled(normal, percent * minDist);
-			}
-		}else {
-			Vector3f dynBlV = bodyB.getLinearVelocity();
-			Vector3f relVel = bodyB.getLinearVelocity();
-			float velAlongNormal = relVel.dot(normal);
-			if (velAlongNormal >= 0) {
-				return;
-			}
-			if ((distance += slop) < 0) {
-				bodyB.getPositionCorrection().addScaled(normal, percent * distance);
-			}
-			final float jn = -(1 + Math.max(mA.getRestitution(), mB.getRestitution()))
-					* velAlongNormal;
-			dynBlV.addScaled(normal, jn);
-			if (frictional) {
-				relVel = dynBlV;
-				velAlongNormal = relVel.dot(normal);
-				tangent.setSubtractScaled(relVel, normal, velAlongNormal)
-						.norm();
-				final float jt = -relVel.dot(tangent);
-				if (jt != 0) {
-					if (Math.abs(jt) < jn
-							* clamp(mA.getStaticFriction(),
-									mB.getStaticFriction())) {
-						dynBlV.addScaled(tangent, jt);
-					} else {
-						dynBlV.addScaled(
-								tangent,
-								-clamp(mA.getDynamicFriction(),
-										mB.getDynamicFriction())
-										* jn);
-					}
-				}
-			}
+	
+
+	float normalImpulseSum;
+	
+	Vector3f axn = new Vector3f();
+	Vector3f bxn = new Vector3f();
+	Vector3f Iaxn = new Vector3f();
+	Vector3f Ibxn = new Vector3f();
+	float den, res;
+	
+	protected void prepare(){
+		if (bodyB instanceof DynamicBody) {
+			tmp1.set(((DynamicBody) bodyB).getLinearVelocity());
+		}else tmp1.set(0, 0, 0);
+		if(bodyA instanceof DynamicBody){
+			tmp1.subtract(((DynamicBody) bodyA).getLinearVelocity());
 		}
+		float vel =tmp1.dot(normal);
+		den = normal.dot(normal)*(bodyA.getInverseMass()+bodyB.getInverseMass());
+		if(bodyA instanceof RigidBody){
+			RigidBody bodyA = (RigidBody)this.bodyA;
+			axn.setCross(pointA, normal);
+			Iaxn.multiplyM3V(bodyA.getInverseInertiaTensor(), 0, axn);
+			vel-=axn.dot(bodyA.getAngularVelocity());
+			den+=axn.dot(Iaxn);
+		}
+		if(bodyB instanceof RigidBody){
+			RigidBody bodyB = (RigidBody)this.bodyB;
+			bxn.setCross(pointB, normal);
+			Ibxn.multiplyM3V(bodyB.getInverseInertiaTensor(), 0, bxn);
+			vel+=bxn.dot(bodyB.getAngularVelocity());
+			den+=bxn.dot(Ibxn);
+		}
+		float e = Math.max(bodyA.getMaterial().getRestitution(), bodyB.getMaterial().getRestitution());
+		res = e*Math.min(vel+slop,0);
+	}
+	
+	public void staticlagrangian(final IUpdateInfo uInfo){
+		RigidBody bodyB =(RigidBody) this.bodyB;
+		
+		float num = bodyB.getLinearVelocity().dot(normal)+bxn.dot(bodyB.getAngularVelocity());
+		float b=0.2f*uInfo.getInverseRate()*Math.min(distance+slop,0)+res;
+		float lagrangian = -(num+b)/den;
+		
+		float imp = normalImpulseSum;
+		if((normalImpulseSum+=lagrangian)<0)normalImpulseSum = 0;
+		float jn = normalImpulseSum-imp;
+		bodyB.getLinearVelocity().addScaled(normal, jn*bodyB.getInverseMass());
+		bodyB.getAngularVelocity().addScaled(Ibxn, jn);
+	}
+	
+	public void lagrangian(final IUpdateInfo uInfo){
+		RigidBody bodyA =(RigidBody) this.bodyA;
+		RigidBody bodyB =(RigidBody) this.bodyB;
+		
+		float num = tmp1.setSubtract(bodyB.getLinearVelocity(), bodyA.getLinearVelocity()).dot(normal)+bxn.dot(bodyB.getAngularVelocity())-axn.dot(bodyA.getAngularVelocity());
+		float b=0.2f*uInfo.getInverseRate()*Math.min(distance+slop,0)+res;
+		float lagrangian = -(num+b)/den;
+		
+		float imp = normalImpulseSum;
+		if((normalImpulseSum+=lagrangian)<0)normalImpulseSum = 0;
+		float jn = normalImpulseSum-imp;
+		
+		bodyA.getLinearVelocity().subtractScaled(normal, jn*bodyA.getInverseMass());
+		bodyA.getAngularVelocity().subtractScaled(Iaxn, jn);
+		bodyB.getLinearVelocity().addScaled(normal, jn*bodyB.getInverseMass());
+		bodyB.getAngularVelocity().addScaled(Ibxn, jn);
 	}
 	
 	private void staticContact(final IUpdateInfo uInfo) {

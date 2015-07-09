@@ -62,6 +62,14 @@ public class Manifold {
 		bodyB = bB;
 		size = 0;
 	}
+	
+	public StaticBody getBodyA(){
+		return bodyA;
+	}
+	
+	public StaticBody getBodyB(){
+		return bodyB;
+	}
 
 	public Vector3f getNormal() {
 		return normal;
@@ -140,7 +148,6 @@ public class Manifold {
 			}
 		}
 		if (maxPenetrationIndex != 2) {
-			;
 			tmpB.setSubtract(contacts[3].localA, contacts[1].localA);
 			tmpB.setCross(tmpA, tmpB);
 			float res = tmpB.dot(tmpB);
@@ -175,7 +182,7 @@ public class Manifold {
 					manifoldPoint.localA);
 			bodyB.getAffineTransform().toWorld(manifoldPoint.worldB,
 					manifoldPoint.localB);
-			tmpA.setSubtract(manifoldPoint.worldA, manifoldPoint.worldB);
+			tmpA.setSubtract(manifoldPoint.worldB, manifoldPoint.worldA);
 			manifoldPoint.distance = tmpA.dot(normal);
 			// manifoldPoint.lifeTime++;
 		}
@@ -190,6 +197,7 @@ public class Manifold {
 			} else {
 				// contact also becomes invalid when relative movement
 				// orthogonal to normal exceeds margin
+				
 				tmpA.setSubtractScaled(manifoldPoint.worldA, normal,
 						manifoldPoint.distance);
 				tmpA.setSubtract(manifoldPoint.worldB, tmpA);

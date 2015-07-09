@@ -29,11 +29,11 @@ public class ElasticContactSolver {
 	}
 
 	public static void run(final IUpdateInfo uInfo) {
-//		for (int i = 1; i < 4; i++) {
-//			for (final ElasticContact c : useStack) {
-//				c.solve(uInfo);
-//			}
-//		}
+		for (int i = 1; i < 9; i++) {
+			for (final ElasticContact c : useStack) {
+				c.solve(uInfo);
+			}
+		}
 		while (!useStack.isEmpty()) {
 			final ElasticContact c;
 			if ((c = useStack.pop()) != null) {

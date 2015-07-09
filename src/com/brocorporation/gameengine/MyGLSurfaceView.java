@@ -15,6 +15,7 @@ import com.brocorporation.gameengine.elements.bodies.Camera;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.Item;
 import com.brocorporation.gameengine.elements.bodies.Plane;
+import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.elements.bodies.StaticLight;
 import com.brocorporation.gameengine.elements.bodies.TrackingCamera;
@@ -288,7 +289,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-1.6F, -1.75F, -24F),
 				new Vector3f(-1.6F, -1.75F, 21.8F),
 				new Vector3f(10.4F, -1.75F, 21.8F),
-				new Vector3f(10.4F, -1.75F, -24F)});
+				new Vector3f(10.4F, -1.75F, -24F) });
 		final Convex floorBig2 = new Convex(new Vector3f[] {
 				new Vector3f(-1.6F, 2.25F, -24F),
 				new Vector3f(-1.6F, 2.25F, 21.8F),
@@ -328,7 +329,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-1.1F, -1.75F, -24F),
 				new Vector3f(-1.1F, -1.75F, 21.8F),
 				new Vector3f(-1.1F, 9.75F, 21.8F),
-				new Vector3f(-1.1F, 9.75F, -24F)});
+				new Vector3f(-1.1F, 9.75F, -24F) });
 		final Convex wallRight = new Convex(new Vector3f[] {
 				new Vector3f(1.1F, -1.75F, -18.6F),
 				new Vector3f(1.1F, -1.75F, 18.6F),
@@ -365,7 +366,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(10.4F, 9.75F, 21.8F),
 				new Vector3f(10.4F, 9.75F, 18.6F) });
 		world.add(new Plane(normalUp, floorBig1));
-//		world.add(new RigidBody(floorBig1, 0));
+		// world.add(new RigidBody(floorBig1, 0));
 		world.add(new Plane(normalUp, floorBig2));
 		world.add(new Plane(normalUp, floorBig3));
 		world.add(new Plane(normalDown, ceilingBig1));
@@ -404,33 +405,32 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-0.2f, +0.85f, -0.2f),
 				new Vector3f(-0.2f, -0.85f, +0.2f),
 				new Vector3f(-0.2f, -0.85f, -0.2f) };
-		float a_x = 0.85f, a_y = 0.2f, a_z = 0.2f;
+		float a_x = 0.2f, a_y = 0.85f, a_z = 0.2f;
 		Vector3f[] a2 = new Vector3f[] { new Vector3f(+a_x, +a_y, +a_z),
 				new Vector3f(+a_x, +a_y, -a_z), new Vector3f(+a_x, -a_y, +a_z),
 				new Vector3f(+a_x, -a_y, -a_z), new Vector3f(-a_x, +a_y, +a_z),
 				new Vector3f(-a_x, +a_y, -a_z), new Vector3f(-a_x, -a_y, +a_z),
 				new Vector3f(-a_x, -a_y, -a_z) };
 
-		// final int bodyCount = 10;
-		// final int hCount = bodyCount / 2;
-		// final Material m = new Material(1,1.0f,0.9f);
-		// for (int i = 0; i < bodyCount; i++) {
-		// // final RigidBody b = new RigidBody(new Sphere(0.75f), (i * 20 + 20)
-		// * 0 + 10);
-		// // b.setGLShape(sphereShape);
-		// final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 +
-		// 10);
-		// b.setGLShape(actorShape);
-		// b.setMaterial(m);
-		// b.isGravityEnabled(true);
-		// world.add(b);
-		//
-		// if (i < hCount) {
-		// b.setPosition(0, -1.75f+a_y, 10 - i * 2*a_z);
-		// } else {
-		// b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*a_z);
-		// }
-		// }
+//		 final int bodyCount = 10;
+//		 final int hCount = bodyCount / 2;
+//		 final Material m = new Material(1*0,1.0f*0,0.9f*0);
+//		 for (int i = 0; i < bodyCount; i++) {
+//		 // final RigidBody b = new RigidBody(new Sphere(0.75f), (i * 20 + 20) * 0 + 10);
+//		 // b.setGLShape(sphereShape);
+//		 final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 +
+//		 10);
+//		 b.setGLShape(boxShape);
+//		 b.setMaterial(m);
+//		 b.isGravityEnabled(true);
+//		 world.add(b);
+//		
+//		 if (i < hCount) {
+//		 b.setPosition(0, -1.75f+a_y, 10 - i * 2*(a_z+0.1f));
+//		 } else {
+//		 b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*(a_z+0.1f));
+//		 }
+//		 }
 
 		actor2 = new Actor(new Convex(a), Actor.INFINITY_MASS);
 		actor2.setPosition(0, 0 - 0.9f, 12);
@@ -443,21 +443,14 @@ public class MyGLSurfaceView extends GameEngine {
 
 		actor = new Actor(new Convex(a), 80);
 		actor.setGLShape(boxShape);
-		// actor = new Actor(new Sphere(0.75f), 80);
-		// actor.setGLShape(sphereShape);
-		actor.setPosition(0, 0 - 0.9f*1, 9);
+//		 actor = new Actor(new Sphere(0.75f), 80);
+//		 actor.setGLShape(sphereShape);
+		actor.setPosition(0, 0 - 0.9f * 0, 9);
 //		 actor.setPosition(7, 8, -21.25f);
-		// actor.setRotation(45, -90, 0);//= rot x than rot y than rot z
-		// actor.getOrientation().getQuaternionEuler(45, 30, 76);
-		// actor.getOrientation().addRotationEuler(45, 30, 76);
-		// Quaternion q1 = new Quaternion().getQuaternionEuler(45, 30, 76);
-		// Quaternion q2 = new Quaternion().addRotationEuler(45, 30, 76);
-		// System.out.println(q1);
-		// System.out.println(q2);System.exit(0);
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
 		// actor.setAngularVelocity(0, 0, 90);
-		actor.setMaterial(new Material(0.8f * 0, 1f, 0.5f));
+		actor.setMaterial(new Material(0.5f*0, 1f, 0.5f));
 		world.add(actor);
 		World.debugid = actor.getID();
 		currentActor = actor2;
@@ -566,7 +559,10 @@ public class MyGLSurfaceView extends GameEngine {
 					}
 					final TrackingCamera camera = (TrackingCamera) world
 							.getActiveCamera();
-					camera.followBody(currentActor, 0, 1.6F, -3.5F);
+					qu.setMultiply(leftright, updown).norm();
+					qu.rotateV(followOffsetTmp, followOffset);
+					camera.followBody(currentActor, followOffsetTmp.x,
+							followOffsetTmp.y, followOffsetTmp.z);
 					camera.lookAtBody(currentActor.getPosition(), 0, 1.6F, 0);
 					final StaticLight light = world.getActiveLight();
 					light.followBody(currentActor, 0, 1.7F, -1);
@@ -598,12 +594,31 @@ public class MyGLSurfaceView extends GameEngine {
 				}
 			}
 		}
+		if (world.getActiveCamera() instanceof TrackingCamera
+				&& (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD2)
+						|| Keyboard.isKeyDown(Keyboard.KEY_NUMPAD4)
+						|| Keyboard.isKeyDown(Keyboard.KEY_NUMPAD6) || Keyboard
+							.isKeyDown(Keyboard.KEY_NUMPAD8))) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD2)) {
+				updown.addRotationEuler(-90 * dTime, 0, 0);
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD4)) {
+				leftright.addRotationEuler(0, -90 * dTime, 0);
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD6)) {
+				leftright.addRotationEuler(0, 90 * dTime, 0);
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD8)) {
+				updown.addRotationEuler(90 * dTime, 0, 0);
+			}
+			qu.setMultiply(leftright, updown).norm();
+			qu.rotateV(followOffsetTmp, followOffset);
+			((TrackingCamera) world.getActiveCamera()).followBody(currentActor,
+					followOffsetTmp.x, followOffsetTmp.y, followOffsetTmp.z);
+		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_ADD)) {
-			float z = world.getActiveCamera().getZoom()-0.5f*dTime;
+			float z = world.getActiveCamera().getZoom() - 0.5f * dTime;
 			world.getActiveCamera().setZoom(Math.max(0.02f, z));
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_SUBTRACT)) {
-			float z = world.getActiveCamera().getZoom()+0.5f*dTime;
+			float z = world.getActiveCamera().getZoom() + 0.5f * dTime;
 			world.getActiveCamera().setZoom(Math.min(1, z));
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
@@ -630,7 +645,13 @@ public class MyGLSurfaceView extends GameEngine {
 			world.update(uInfo);
 		}
 		pause();
-	}static Quaternion qu = new Quaternion();
+	}
+
+	static Quaternion updown = new Quaternion();
+	static Quaternion leftright = new Quaternion();
+	static Quaternion qu = new Quaternion();
+	static Vector3f followOffset = new Vector3f(0, 1.6f, -3.5f);
+	static Vector3f followOffsetTmp = new Vector3f();
 
 	public static AABB cPoint = new AABB(0.08f, 0.08f, 0.08f);
 	public static AABB cPoint2 = new AABB(0.08f, 0.08f, 0.08f);

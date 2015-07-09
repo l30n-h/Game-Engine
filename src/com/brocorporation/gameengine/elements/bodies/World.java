@@ -16,6 +16,7 @@ import com.brocorporation.gameengine.elements.collision.GJK;
 import com.brocorporation.gameengine.elements.collision.IShape;
 import com.brocorporation.gameengine.elements.collision.MPR;
 import com.brocorporation.gameengine.elements.collision.Manifold;
+import com.brocorporation.gameengine.elements.collision.Manifold.ManifoldContact;
 import com.brocorporation.gameengine.elements.collision.Octree;
 import com.brocorporation.gameengine.elements.collision.RaycastHit;
 import com.brocorporation.gameengine.elements.collision.SpeculativeContactSolver;
@@ -63,8 +64,16 @@ public class World implements CollisionDetection.BroadphaseCallback {
 					}
 					if(c.getDistance() <= 0){
 						Manifold m = Manifold.add(stcBody, dynBody, c);
-						ElasticContact ec = ElasticContactSolver.addContact(stcBody, dynBody, c);
-						ec.manifold = m;
+						for(int i=0;i<m.size();i++){
+							ManifoldContact co = m.getContact(i);
+							c.setDistance(co.getDistance());
+							c.getNormal().set(co.getNormal());
+							c.getPointA().set(co.getWorldA());
+							c.getPointB().set(co.getWorldB());
+							ElasticContactSolver.addContact(stcBody, dynBody, c);
+						}
+//						ElasticContact ec = ElasticContactSolver.addContact(stcBody, dynBody, c);
+//						ec.manifold = m;
 					}
 				}
 			} else {
@@ -125,17 +134,29 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			final Contact c = Contact.DEFAULT;
 			final IShape dS1 = dynBody1.getShape();
 			final IShape dS2 = dynBody2.getShape();
-			if (GJK.intersects(c, dS1, dS2, 0.02f)) {
-				if (c.getDistance() == 0) {
+			if(GJK.distance(c, dS1, dS2)==0){
+			//if (GJK.intersects(c, dS1, dS2, 0.02f*0)) {
+				if (c.getDistance() == 0 || true) {
 					if (MPR.intersects(c, dS1, dS2)) {
-						ElasticContactSolver.addContact(dynBody1, dynBody2, c);
+						//ElasticContactSolver.addContact(dynBody1, dynBody2, c);
+						
+						Manifold m = Manifold.add(dynBody1, dynBody2, c);
+						for(int i=0;i<m.size();i++){
+							ManifoldContact co = m.getContact(i);
+							c.setDistance(co.getDistance());
+							c.getNormal().set(co.getNormal());
+							c.getPointA().set(co.getWorldA());
+							c.getPointB().set(co.getWorldB());
+							ElasticContactSolver.addContact((RigidBody)m.getBodyA(), (RigidBody)m.getBodyB(), c);
+						}
 					}
 				} else {
-					ElasticContactSolver.addContact(dynBody1, dynBody2, c);
+					//ElasticContactSolver.addContact(dynBody1, dynBody2, c);
 				}
+				
 			} else {
-				SpeculativeContactSolver.addContact(dynBody1, dynBody2,
-						c);
+				//SpeculativeContactSolver.addContact(dynBody1, dynBody2,
+				//		c);
 			}
 			dynBody1.onCollide(dynBody2);
 			dynBody2.onCollide(dynBody1);
