@@ -62,12 +62,12 @@ public class Manifold {
 		bodyB = bB;
 		size = 0;
 	}
-	
-	public StaticBody getBodyA(){
+
+	public StaticBody getBodyA() {
 		return bodyA;
 	}
-	
-	public StaticBody getBodyB(){
+
+	public StaticBody getBodyB() {
 		return bodyB;
 	}
 
@@ -88,9 +88,9 @@ public class Manifold {
 	static Vector3f localA = new Vector3f();
 
 	public int addContact(Contact c) {
-		//if (size == 0)
-			normal.set(c.getNormal());
-		b.setAddScaled(c.getPointA(), normal, c.getDistance() /2);
+		// if (size == 0)
+		normal.set(c.getNormal());
+		b.setAddScaled(c.getPointA(), normal, c.getDistance() / 2);
 		a.setSubtractScaled(b, normal, c.getDistance());
 		bodyA.getAffineTransform().toLocal(localA, a);
 		int insertIndex = size;
@@ -112,7 +112,7 @@ public class Manifold {
 		bodyB.getAffineTransform().toLocal(contacts[insertIndex].localB, b);
 		return insertIndex;
 	}
-
+	
 	// / sort cached points so most isolated points come first
 	private int sortCachedPoints(Vector3f localA, float distance) {
 		// calculate 4 possible cases areas, and take biggest area
@@ -197,8 +197,7 @@ public class Manifold {
 			} else {
 				// contact also becomes invalid when relative movement
 				// orthogonal to normal exceeds margin
-				
-				tmpA.setSubtractScaled(manifoldPoint.worldA, normal,
+				tmpA.setAddScaled(manifoldPoint.worldA, normal,
 						manifoldPoint.distance);
 				tmpA.setSubtract(manifoldPoint.worldB, tmpA);
 				distance2d = tmpA.dot(tmpA);
@@ -253,10 +252,10 @@ public class Manifold {
 		protected Vector3f worldB = new Vector3f();
 		protected Vector3f localA = new Vector3f();
 		protected Vector3f localB = new Vector3f();
-//		protected Vector3f IpAxN = new Vector3f();
-//		protected Vector3f IpBxN = new Vector3f();
-//		protected Vector3f IpAxNxpA = new Vector3f();
-//		protected Vector3f IpBxNxpB = new Vector3f();
+		// protected Vector3f IpAxN = new Vector3f();
+		// protected Vector3f IpBxN = new Vector3f();
+		// protected Vector3f IpAxNxpA = new Vector3f();
+		// protected Vector3f IpBxNxpB = new Vector3f();
 		protected float distance;
 
 		public void reset(ManifoldContact c) {
@@ -267,20 +266,20 @@ public class Manifold {
 			bodyB.getOrientation().rotateInverseV(localB, worldB);
 		}
 
-//		public void calcDependencies() {
-//			if (bodyA instanceof RigidBody) {
-//				IpAxN.multiplyM3V(
-//						((RigidBody) bodyA).getInverseInertiaTensor(), 0,
-//						IpAxN.setCross(worldA, normal));
-//				IpAxNxpA.setCross(IpAxNxpA, worldA);
-//			}
-//			if (bodyB instanceof RigidBody) {
-//				IpBxN.multiplyM3V(
-//						((RigidBody) bodyB).getInverseInertiaTensor(), 0,
-//						IpBxN.setCross(worldB, normal));
-//				IpBxNxpB.setCross(IpBxNxpB, worldB);
-//			}
-//		}
+		// public void calcDependencies() {
+		// if (bodyA instanceof RigidBody) {
+		// IpAxN.multiplyM3V(
+		// ((RigidBody) bodyA).getInverseInertiaTensor(), 0,
+		// IpAxN.setCross(worldA, normal));
+		// IpAxNxpA.setCross(IpAxNxpA, worldA);
+		// }
+		// if (bodyB instanceof RigidBody) {
+		// IpBxN.multiplyM3V(
+		// ((RigidBody) bodyB).getInverseInertiaTensor(), 0,
+		// IpBxN.setCross(worldB, normal));
+		// IpBxNxpB.setCross(IpBxNxpB, worldB);
+		// }
+		// }
 
 		public Vector3f getWorldA() {
 			return worldA;

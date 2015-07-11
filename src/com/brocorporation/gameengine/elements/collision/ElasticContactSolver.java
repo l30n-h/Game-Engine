@@ -29,6 +29,9 @@ public class ElasticContactSolver {
 	}
 
 	public static void run(final IUpdateInfo uInfo) {
+		for (final ElasticContact c : useStack) {
+			c.prepare(uInfo);
+		}
 		for (int i = 1; i < 9; i++) {
 			for (final ElasticContact c : useStack) {
 				c.solve(uInfo);

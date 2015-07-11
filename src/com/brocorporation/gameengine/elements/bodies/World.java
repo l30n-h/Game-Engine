@@ -139,7 +139,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				if (c.getDistance() == 0 || true) {
 					if (MPR.intersects(c, dS1, dS2)) {
 						//ElasticContactSolver.addContact(dynBody1, dynBody2, c);
-						
+						if(c.getNormal().isAlmostZero())return;//TODO
 						Manifold m = Manifold.add(dynBody1, dynBody2, c);
 						for(int i=0;i<m.size();i++){
 							ManifoldContact co = m.getContact(i);

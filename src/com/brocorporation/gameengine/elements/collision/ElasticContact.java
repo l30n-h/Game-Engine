@@ -47,7 +47,6 @@ public class ElasticContact extends Constraint {
 		distance = contact.getDistance();
 		pointA.setSubtract(contact.getPointA(), a.getPosition());
 		pointB.setSubtract(contact.getPointB(), b.getPosition());
-		prepare();
 	}
 
 	@Override
@@ -79,9 +78,9 @@ public class ElasticContact extends Constraint {
 	Vector3f bxn = new Vector3f();
 	Vector3f Iaxn = new Vector3f();
 	Vector3f Ibxn = new Vector3f();
-	float den, res;
+	float den, b;
 	
-	protected void prepare(){
+	public void prepare(final IUpdateInfo uInfo){
 		if (bodyB instanceof DynamicBody) {
 			tmp1.set(((DynamicBody) bodyB).getLinearVelocity());
 		}else tmp1.set(0, 0, 0);
@@ -104,22 +103,24 @@ public class ElasticContact extends Constraint {
 			vel+=bxn.dot(bodyB.getAngularVelocity());
 			den+=bxn.dot(Ibxn);
 		}
-		float e = Math.max(bodyA.getMaterial().getRestitution(), bodyB.getMaterial().getRestitution());
-		res = e*Math.min(vel+slop,0);
+		float eslop = 0.5f;
+		b = Math.max(bodyA.getMaterial().getRestitution(), bodyB.getMaterial().getRestitution())*Math.min(vel+eslop,0);
+		b += 0.2f*uInfo.getInverseRate()*Math.min(distance+slop,0);
 	}
 	
 	public void staticlagrangian(final IUpdateInfo uInfo){
 		RigidBody bodyB =(RigidBody) this.bodyB;
 		
 		float num = bodyB.getLinearVelocity().dot(normal)+bxn.dot(bodyB.getAngularVelocity());
-		float b=0.2f*uInfo.getInverseRate()*Math.min(distance+slop,0)+res;
 		float lagrangian = -(num+b)/den;
 		
 		float imp = normalImpulseSum;
 		if((normalImpulseSum+=lagrangian)<0)normalImpulseSum = 0;
 		float jn = normalImpulseSum-imp;
 		bodyB.getLinearVelocity().addScaled(normal, jn*bodyB.getInverseMass());
+		System.out.println(bodyB.getAngularVelocity());
 		bodyB.getAngularVelocity().addScaled(Ibxn, jn);
+		System.out.println(bodyB.getAngularVelocity());System.out.println();
 	}
 	
 	public void lagrangian(final IUpdateInfo uInfo){
@@ -127,9 +128,7 @@ public class ElasticContact extends Constraint {
 		RigidBody bodyB =(RigidBody) this.bodyB;
 		
 		float num = tmp1.setSubtract(bodyB.getLinearVelocity(), bodyA.getLinearVelocity()).dot(normal)+bxn.dot(bodyB.getAngularVelocity())-axn.dot(bodyA.getAngularVelocity());
-		float b=0.2f*uInfo.getInverseRate()*Math.min(distance+slop,0)+res;
 		float lagrangian = -(num+b)/den;
-		
 		float imp = normalImpulseSum;
 		if((normalImpulseSum+=lagrangian)<0)normalImpulseSum = 0;
 		float jn = normalImpulseSum-imp;
