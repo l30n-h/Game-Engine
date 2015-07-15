@@ -6,25 +6,19 @@ public abstract class GameEngine implements IUpdateInfo {
 
 	protected boolean isFixedTimeSteps;
 	protected boolean isRunning, isPaused;
-	protected int maxFPS;
-	protected int maxFramesSkipped;
-	protected int framePeriod;
+	protected double framePeriod;
 	protected float inverseRate;
 	protected float rate;
 	protected float halfRate;
 	protected boolean isPreRendering = true;
-	protected long startTime;
-	protected long sleepTime;
 
 	public GameEngine() {
 		isFixedTimeSteps = false;
 	}
 
-	public GameEngine(final int pFPS, final int pMaxFramesSkipped) {
-		maxFPS = pFPS;
-		maxFramesSkipped = pMaxFramesSkipped;
-		framePeriod = 1000 / maxFPS;
-		setRate(1F / maxFPS);
+	public GameEngine(final int pUPS) {
+		framePeriod = 1000d / pUPS;
+		setRate(1f / pUPS);
 		isFixedTimeSteps = true;
 	}
 
@@ -43,7 +37,7 @@ public abstract class GameEngine implements IUpdateInfo {
 	protected abstract void render();
 
 	public final void runVariableTimeSteps() {
-		startTime = System.nanoTime();
+		long startTime = System.nanoTime();
 		isPreRendering(true);
 		while (isRunning && !Display.isCloseRequested()) {
 			if (Display.wasResized()) {
@@ -59,35 +53,45 @@ public abstract class GameEngine implements IUpdateInfo {
 		Display.destroy();
 	}
 
-	public final void runFixedTimeSteps() {
-		startTime = System.nanoTime();
+	public void runFixedTimeSteps() {
+		double lastTime = System.nanoTime();
+		double lag = 0;
+		isPreRendering(true);
+		boolean doRendering = false;
 		while (isRunning && !Display.isCloseRequested()) {
+			double currentTime = System.nanoTime();
+			double timeDiff = (currentTime - lastTime) / 1000000;
+			lastTime = currentTime;
+			lag += timeDiff;
+			doRendering = lag >= framePeriod;
+			if (doRendering) {
+				isPreRendering(false);
+				while (true) {
+					lag -= framePeriod;
+					if (lag < framePeriod) {
+						isPreRendering(true);
+						update(this);
+						break;
+					}
+					update(this);
+				}
+			}
 			if (Display.wasResized()) {
 				onSurfaceChanged(Display.getWidth(), Display.getHeight());
+				doRendering = true;
 			}
-			final long timeDiff = (System.nanoTime() - startTime) / 1000000L;
-			sleepTime += framePeriod - timeDiff;
-			if (sleepTime > 0) {
+			if (doRendering) {
+				render();
+				Display.update();
+			} else {
+				long sleep = Math.round(framePeriod - lag);
+				if (sleep == 0)
+					sleep = 1;
 				try {
-					Thread.sleep(sleepTime);
+					Thread.sleep(sleep);
 				} catch (InterruptedException e) {
 				}
-				sleepTime = 0;
-			} else {
-				int framesSkipped = 0;
-				isPreRendering(false);
-				while (sleepTime <= -framePeriod
-						&& framesSkipped < maxFramesSkipped) {
-					update(this);
-					sleepTime += framePeriod;
-					framesSkipped++;
-				}
-				isPreRendering(true);
 			}
-			startTime = System.nanoTime();
-			update(this);
-			render();
-			Display.update();
 		}
 		Display.destroy();
 	}

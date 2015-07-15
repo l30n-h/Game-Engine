@@ -4,7 +4,9 @@ import com.brocorporation.gameengine.IUpdateInfo;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
+import com.brocorporation.gameengine.elements.bodies.World;
 import com.brocorporation.gameengine.elements.collision.Manifold.ManifoldContact;
+import com.brocorporation.gameengine.utils.MatrixExt;
 import com.brocorporation.gameengine.utils.Vector3f;
 
 public class ElasticContact extends Constraint {
@@ -88,7 +90,7 @@ public class ElasticContact extends Constraint {
 			tmp1.subtract(((DynamicBody) bodyA).getLinearVelocity());
 		}
 		float vel =tmp1.dot(normal);
-		den = normal.dot(normal)*(bodyA.getInverseMass()+bodyB.getInverseMass());
+		den = /*normal.dot(normal)**/(bodyA.getInverseMass()+bodyB.getInverseMass());
 		if(bodyA instanceof RigidBody){
 			RigidBody bodyA = (RigidBody)this.bodyA;
 			axn.setCross(pointA, normal);
@@ -103,9 +105,9 @@ public class ElasticContact extends Constraint {
 			vel+=bxn.dot(bodyB.getAngularVelocity());
 			den+=bxn.dot(Ibxn);
 		}
-		float eslop = 0.5f;
+		float eslop = 0.25f;
 		b = Math.max(bodyA.getMaterial().getRestitution(), bodyB.getMaterial().getRestitution())*Math.min(vel+eslop,0);
-		b += 0.2f*uInfo.getInverseRate()*Math.min(distance+slop,0);
+		b += 0.1f*uInfo.getInverseRate()*Math.min(distance+slop,0);
 	}
 	
 	public void staticlagrangian(final IUpdateInfo uInfo){
@@ -118,9 +120,7 @@ public class ElasticContact extends Constraint {
 		if((normalImpulseSum+=lagrangian)<0)normalImpulseSum = 0;
 		float jn = normalImpulseSum-imp;
 		bodyB.getLinearVelocity().addScaled(normal, jn*bodyB.getInverseMass());
-		System.out.println(bodyB.getAngularVelocity());
 		bodyB.getAngularVelocity().addScaled(Ibxn, jn);
-		System.out.println(bodyB.getAngularVelocity());System.out.println();
 	}
 	
 	public void lagrangian(final IUpdateInfo uInfo){

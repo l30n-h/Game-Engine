@@ -233,7 +233,6 @@ public class MPR {
 	protected static void findPenetrationTouch(Contact c, IShape shape1,
 			IShape shape2) {
 		c.setDistance(0);
-		c.getNormal().set(0, 0, 0);
 		c.getPointA().setAdd(e1.pA, e1.pB).scale(0.5f);
 		c.getPointB().set(c.getPointA());
 	}

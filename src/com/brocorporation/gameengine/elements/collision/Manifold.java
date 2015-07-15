@@ -9,7 +9,8 @@ import com.brocorporation.gameengine.utils.Vector3f;
 
 public class Manifold {
 
-	protected final static float contactBreakingThreshold = 0.02f;
+	protected final static float eps = 0.02f;
+	protected final static float eps_2 = eps * eps;
 
 	public static HashMap<Manifold, Manifold> manifolds = new HashMap<Manifold, Manifold>();
 	protected static Stack<Manifold> unused = new Stack<Manifold>();// TODO sync
@@ -45,7 +46,7 @@ public class Manifold {
 
 	protected StaticBody bodyA;
 	protected StaticBody bodyB;
-	protected Vector3f normal = new Vector3f();
+	// protected Vector3f normal = new Vector3f();
 	protected ManifoldContact[] contacts = { new ManifoldContact(),
 			new ManifoldContact(), new ManifoldContact(), new ManifoldContact() };
 	protected int size;
@@ -71,10 +72,6 @@ public class Manifold {
 		return bodyB;
 	}
 
-	public Vector3f getNormal() {
-		return normal;
-	}
-
 	public ManifoldContact getContact(int i) {
 		return contacts[i];
 	}
@@ -88,15 +85,20 @@ public class Manifold {
 	static Vector3f localA = new Vector3f();
 
 	public int addContact(Contact c) {
-		// if (size == 0)
-		normal.set(c.getNormal());
+		final Vector3f normal = c.getNormal();
 		b.setAddScaled(c.getPointA(), normal, c.getDistance() / 2);
 		a.setSubtractScaled(b, normal, c.getDistance());
 		bodyA.getAffineTransform().toLocal(localA, a);
+		for (int i = 0; i < size; i++) {
+			tmpA.setSubtract(contacts[i].localA, localA);
+			if (tmpA.dot(tmpA) <= eps_2) {
+				// TODO persistent
+				return -1;
+			}
+		}
 		int insertIndex = size;
 		if (insertIndex == contacts.length) {
 			if (contacts.length >= 4) {
-				// sort cache so best points come first, based on area
 				insertIndex = sortCachedPoints(localA, c.getDistance());
 			} else {
 				insertIndex = 0;
@@ -110,9 +112,10 @@ public class Manifold {
 		contacts[insertIndex].worldB.set(b);
 		contacts[insertIndex].localA.set(localA);
 		bodyB.getAffineTransform().toLocal(contacts[insertIndex].localB, b);
+		contacts[insertIndex].normal.set(normal);
 		return insertIndex;
 	}
-	
+
 	// / sort cached points so most isolated points come first
 	private int sortCachedPoints(Vector3f localA, float distance) {
 		// calculate 4 possible cases areas, and take biggest area
@@ -168,14 +171,11 @@ public class Manifold {
 	}
 
 	private boolean validContactDistance(float distance) {
-		return distance <= contactBreakingThreshold;
+		return distance <= eps;
 	}
 
-	// / calculated new worldspace coordinates and depth, and reject points that
-	// exceed the collision margin
 	public void refreshContactPoints() {
 		int i;
-		// first refresh worldspace positions and distance
 		for (i = size - 1; i >= 0; i--) {
 			ManifoldContact manifoldPoint = contacts[i];
 			bodyA.getAffineTransform().toWorld(manifoldPoint.worldA,
@@ -183,26 +183,22 @@ public class Manifold {
 			bodyB.getAffineTransform().toWorld(manifoldPoint.worldB,
 					manifoldPoint.localB);
 			tmpA.setSubtract(manifoldPoint.worldB, manifoldPoint.worldA);
-			manifoldPoint.distance = tmpA.dot(normal);
+			manifoldPoint.distance = tmpA.dot(manifoldPoint.normal);
 			// manifoldPoint.lifeTime++;
 		}
-		// then
 		float distance2d;
 		for (i = size - 1; i >= 0; i--) {
 			ManifoldContact manifoldPoint = contacts[i];
-			// contact becomes invalid when signed distance exceeds margin
-			// (projected on contactnormal direction)
 			if (!validContactDistance(manifoldPoint.distance)) {
 				remove(i);
 			} else {
 				// contact also becomes invalid when relative movement
 				// orthogonal to normal exceeds margin
-				tmpA.setAddScaled(manifoldPoint.worldA, normal,
+				tmpA.setAddScaled(manifoldPoint.worldA, manifoldPoint.normal,
 						manifoldPoint.distance);
 				tmpA.setSubtract(manifoldPoint.worldB, tmpA);
 				distance2d = tmpA.dot(tmpA);
-				if (distance2d > contactBreakingThreshold
-						* contactBreakingThreshold) {
+				if (distance2d > eps_2) {
 					remove(i);
 				} else {
 					// contact point processed callback
@@ -248,14 +244,11 @@ public class Manifold {
 	}
 
 	public class ManifoldContact {
+		protected Vector3f normal = new Vector3f();
 		protected Vector3f worldA = new Vector3f();
 		protected Vector3f worldB = new Vector3f();
 		protected Vector3f localA = new Vector3f();
 		protected Vector3f localB = new Vector3f();
-		// protected Vector3f IpAxN = new Vector3f();
-		// protected Vector3f IpBxN = new Vector3f();
-		// protected Vector3f IpAxNxpA = new Vector3f();
-		// protected Vector3f IpBxNxpB = new Vector3f();
 		protected float distance;
 
 		public void reset(ManifoldContact c) {
@@ -265,21 +258,6 @@ public class Manifold {
 			bodyA.getOrientation().rotateInverseV(localA, worldA);
 			bodyB.getOrientation().rotateInverseV(localB, worldB);
 		}
-
-		// public void calcDependencies() {
-		// if (bodyA instanceof RigidBody) {
-		// IpAxN.multiplyM3V(
-		// ((RigidBody) bodyA).getInverseInertiaTensor(), 0,
-		// IpAxN.setCross(worldA, normal));
-		// IpAxNxpA.setCross(IpAxNxpA, worldA);
-		// }
-		// if (bodyB instanceof RigidBody) {
-		// IpBxN.multiplyM3V(
-		// ((RigidBody) bodyB).getInverseInertiaTensor(), 0,
-		// IpBxN.setCross(worldB, normal));
-		// IpBxNxpB.setCross(IpBxNxpB, worldB);
-		// }
-		// }
 
 		public Vector3f getWorldA() {
 			return worldA;

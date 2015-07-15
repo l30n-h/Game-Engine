@@ -15,7 +15,6 @@ import com.brocorporation.gameengine.elements.bodies.Camera;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.Item;
 import com.brocorporation.gameengine.elements.bodies.Plane;
-import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.elements.bodies.StaticLight;
 import com.brocorporation.gameengine.elements.bodies.TrackingCamera;
@@ -78,7 +77,7 @@ public class MyGLSurfaceView extends GameEngine {
 	private final List<Object> frustumList = new ArrayList<Object>();
 
 	public MyGLSurfaceView() {
-		super(60, 80);
+		super(60);
 	}
 
 	public void create() {
@@ -412,25 +411,26 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-a_x, +a_y, -a_z), new Vector3f(-a_x, -a_y, +a_z),
 				new Vector3f(-a_x, -a_y, -a_z) };
 
-//		 final int bodyCount = 10;
-//		 final int hCount = bodyCount / 2;
-//		 final Material m = new Material(1*0,1.0f*0,0.9f*0);
-//		 for (int i = 0; i < bodyCount; i++) {
-//		 // final RigidBody b = new RigidBody(new Sphere(0.75f), (i * 20 + 20) * 0 + 10);
-//		 // b.setGLShape(sphereShape);
-//		 final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 +
-//		 10);
-//		 b.setGLShape(boxShape);
-//		 b.setMaterial(m);
-//		 b.isGravityEnabled(true);
-//		 world.add(b);
-//		
-//		 if (i < hCount) {
-//		 b.setPosition(0, -1.75f+a_y, 10 - i * 2*(a_z+0.1f));
-//		 } else {
-//		 b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*(a_z+0.1f));
-//		 }
-//		 }
+		// final int bodyCount = 10;
+		// final int hCount = bodyCount / 2;
+		// final Material m = new Material(1*0,1.0f*0,0.9f*0);
+		// for (int i = 0; i < bodyCount; i++) {
+		// // final RigidBody b = new RigidBody(new Sphere(0.75f), (i * 20 + 20)
+		// * 0 + 10);
+		// // b.setGLShape(sphereShape);
+		// final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 +
+		// 10);
+		// b.setGLShape(boxShape);
+		// b.setMaterial(m);
+		// b.isGravityEnabled(true);
+		// world.add(b);
+		//
+		// if (i < hCount) {
+		// b.setPosition(0, -1.75f+a_y, 10 - i * 2*(a_z+0.1f));
+		// } else {
+		// b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*(a_z+0.1f));
+		// }
+		// }
 
 		actor2 = new Actor(new Convex(a), Actor.INFINITY_MASS);
 		actor2.setPosition(0, 0 - 0.9f, 12);
@@ -443,14 +443,14 @@ public class MyGLSurfaceView extends GameEngine {
 
 		actor = new Actor(new Convex(a), 80);
 		actor.setGLShape(boxShape);
-//		 actor = new Actor(new Sphere(0.75f), 80);
-//		 actor.setGLShape(sphereShape);
+		// actor = new Actor(new Sphere(0.75f), 80);
+		// actor.setGLShape(sphereShape);
 		actor.setPosition(0, 0 - 0.9f * 0, 9);
 //		 actor.setPosition(7, 8, -21.25f);
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
-		// actor.setAngularVelocity(0, 0, 90);
-		actor.setMaterial(new Material(0.5f*0, 1f, 0.5f));
+		// actor.setAngularVelocity(30, 30, -30);
+		actor.setMaterial(new Material(1f * 0, 1f, 0.5f));
 		world.add(actor);
 		World.debugid = actor.getID();
 		currentActor = actor2;
@@ -602,9 +602,9 @@ public class MyGLSurfaceView extends GameEngine {
 			if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD2)) {
 				updown.addRotationEuler(-90 * dTime, 0, 0);
 			} else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD4)) {
-				leftright.addRotationEuler(0, -90 * dTime, 0);
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD6)) {
 				leftright.addRotationEuler(0, 90 * dTime, 0);
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD6)) {
+				leftright.addRotationEuler(0, -90 * dTime, 0);
 			} else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD8)) {
 				updown.addRotationEuler(90 * dTime, 0, 0);
 			}
@@ -756,7 +756,7 @@ public class MyGLSurfaceView extends GameEngine {
 					cPoint2.setPosition(c.getWorldA());
 					primitiveShape.addAABB(cPoint2);
 					Vector3f p = cPoint2.getPosition();
-					Vector3f normal = m.getNormal();
+					Vector3f normal = c.getNormal();
 					primitiveShape.addLine(p.x, p.y, p.z, p.x + normal.x, p.y
 							+ normal.y, p.z + normal.z);
 					primitiveShape.render(vpMatrix);
@@ -764,7 +764,7 @@ public class MyGLSurfaceView extends GameEngine {
 					cPoint2.setPosition(c.getWorldB());
 					primitiveShape.addAABB(cPoint2);
 					p = cPoint2.getPosition();
-					normal = m.getNormal();
+					normal = c.getNormal();
 					primitiveShape.addLine(p.x, p.y, p.z, p.x + normal.x, p.y
 							+ normal.y, p.z + normal.z);
 					primitiveShape.render(vpMatrix);

@@ -55,7 +55,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				// MPR.relVel.set(dynBody.getLinearVelocity());
 				if (MPR.intersects(c, stcShape, dynShape)) {
 					if(debug) System.out.println("=================mpr==============");
-					if(stcBody instanceof Plane && (((Plane) stcBody).getNormal().y==1 || ((Plane) stcBody).getNormal().y == 0)){
+					if(stcBody instanceof Plane && (((Plane) stcBody).getNormal().y==1 || ((Plane) stcBody).getNormal().x == 1)|| ((Plane) stcBody).getNormal().z == 1){
 						c.getNormal().set(((Plane) stcBody).getNormal());
 						dynShape.getMinAlongDirection(c.getPointB(), c.getNormal());
 						c.setDistance(((Plane) stcBody).getDistance(c.getPointB()));
@@ -139,7 +139,6 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				if (c.getDistance() == 0 || true) {
 					if (MPR.intersects(c, dS1, dS2)) {
 						//ElasticContactSolver.addContact(dynBody1, dynBody2, c);
-						if(c.getNormal().isAlmostZero())return;//TODO
 						Manifold m = Manifold.add(dynBody1, dynBody2, c);
 						for(int i=0;i<m.size();i++){
 							ManifoldContact co = m.getContact(i);
@@ -165,13 +164,16 @@ public class World implements CollisionDetection.BroadphaseCallback {
 
 	public void update(IUpdateInfo uInfo) {
 		for (final DynamicBody dynBody : updateList) {// TODO all bodies
+//			dynBody.prepareUpdatePosition(uInfo);
+//			dynBody.generateSweptBounds(uInfo);	
+			
 			dynBody.updatePosition(uInfo);
 			dynBody.updateBounds();
-
 			final IShape shape = dynBody.getShape();
 			if (shape.hasChanged()) {
 				collisionTree.hasMoved(shape.getAABB());
 			}
+			
 			dynBody.prepareUpdatePosition(uInfo);
 			dynBody.generateSweptBounds(uInfo);	
 		}
