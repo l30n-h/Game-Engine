@@ -6,8 +6,8 @@ public class Contact {
 
 	public final static Contact DEFAULT = new Contact();
 
-	protected Vector3f pointA = new Vector3f();
-	protected Vector3f pointB = new Vector3f();
+	protected Vector3f worldA = new Vector3f();
+	protected Vector3f worldB = new Vector3f();
 	protected final Vector3f normal = new Vector3f();
 	protected float distance;
 
@@ -19,11 +19,11 @@ public class Contact {
 	}
 
 	public Vector3f getPointA() {
-		return pointA;
+		return worldA;
 	}
 
 	public Vector3f getPointB() {
-		return pointB;
+		return worldB;
 	}
 
 	public Vector3f getNormal() {
@@ -36,8 +36,8 @@ public class Contact {
 
 	public void swap() {
 		normal.invert();
-		final Vector3f tmp = pointA;
-		pointA = pointB;
-		pointB = tmp;
+		final Vector3f tmp = worldA;
+		worldA = worldB;
+		worldB = tmp;
 	}
 }

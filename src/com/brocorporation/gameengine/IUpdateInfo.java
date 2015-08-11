@@ -2,7 +2,7 @@ package com.brocorporation.gameengine;
 
 public interface IUpdateInfo {
 
-	public float getInverseRate();
+	public int getInverseRate();
 	
 	public float getRate();
 	

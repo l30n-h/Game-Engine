@@ -172,6 +172,62 @@ public class MatrixExt extends Matrix {
 		return true;
 	}
 
+	public static float detM3(final float[] matrix) {
+		final float m0 = matrix[0];
+		final float m1 = matrix[1];
+		final float m2 = matrix[2];
+		final float m3 = matrix[3];
+		final float m4 = matrix[4];
+		final float m5 = matrix[5];
+		final float m6 = matrix[6];
+		final float m7 = matrix[7];
+		final float m8 = matrix[8];
+		final float m4x8subm7x5 = m4 * m8 - m5 * m7;
+		final float m7x2submm1x8 = m2 * m7 - m1 * m8;
+		final float m1x5submm4x2 = m1 * m5 - m2 * m4;
+		return m0 * m4x8subm7x5 + m3 * m7x2submm1x8 + m6 * m1x5submm4x2;
+	}
+
+	public static float detM4(final float[] matrix) {
+		final float m0 = matrix[0];
+		final float m1 = matrix[1];
+		final float m2 = matrix[2];
+		final float m3 = matrix[3];
+		final float m4 = matrix[4];
+		final float m5 = matrix[5];
+		final float m6 = matrix[6];
+		final float m7 = matrix[7];
+		final float m8 = matrix[8];
+		final float m9 = matrix[9];
+		final float m10 = matrix[10];
+		final float m11 = matrix[11];
+		final float m12 = matrix[12];
+		final float m13 = matrix[13];
+		final float m14 = matrix[14];
+		final float m15 = matrix[15];
+		final float atmp0 = m10 * m15;
+		final float atmp1 = m11 * m14;
+		final float atmp2 = m9 * m15;
+		final float atmp3 = m11 * m13;
+		final float atmp4 = m9 * m14;
+		final float atmp5 = m10 * m13;
+		final float atmp6 = m8 * m15;
+		final float atmp7 = m11 * m12;
+		final float atmp8 = m8 * m14;
+		final float atmp9 = m10 * m12;
+		final float atmp10 = m8 * m13;
+		final float atmp11 = m9 * m12;
+		final float dst0 = (atmp0 * m5 + atmp3 * m6 + atmp4 * m7)
+				- (atmp1 * m5 + atmp2 * m6 + atmp5 * m7);
+		final float dst1 = (atmp1 * m4 + atmp6 * m6 + atmp9 * m7)
+				- (atmp0 * m4 + atmp7 * m6 + atmp8 * m7);
+		final float dst2 = (atmp2 * m4 + atmp7 * m5 + atmp10 * m7)
+				- (atmp3 * m4 + atmp6 * m5 + atmp11 * m7);
+		final float dst3 = (atmp5 * m4 + atmp8 * m5 + atmp11 * m6)
+				- (atmp4 * m4 + atmp9 * m5 + atmp10 * m6);
+		return m0 * dst0 + m1 * dst1 + m2 * dst2 + m3 * dst3;
+	}
+
 	public static boolean invertM3(final float[] result, final float[] matrix) {
 		final float m0 = matrix[0];
 		final float m1 = matrix[1];

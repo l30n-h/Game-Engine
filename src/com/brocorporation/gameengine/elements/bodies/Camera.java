@@ -40,10 +40,11 @@ public abstract class Camera implements AABB.IBounds {
 			final float pFar) {
 		near = pNear;
 		far = pFar;
-		left = pLeft * near;
-		right = pRight * near;
-		bottom = pBottom * near;
-		top = pTop * near;
+		final float scale = near * zoom;
+		left = pLeft * scale;
+		right = pRight * scale;
+		bottom = pBottom * scale;
+		top = pTop * scale;
 		updateFrustumMatrix = true;
 	}
 

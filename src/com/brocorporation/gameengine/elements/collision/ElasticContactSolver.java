@@ -1,6 +1,6 @@
 package com.brocorporation.gameengine.elements.collision;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
 
 import com.brocorporation.gameengine.IUpdateInfo;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
@@ -8,8 +8,8 @@ import com.brocorporation.gameengine.elements.bodies.StaticBody;
 
 public class ElasticContactSolver {
 
-	private final static Stack<ElasticContact> useStack = new Stack<ElasticContact>();
-	private final static Stack<ElasticContact> unusedStack = new Stack<ElasticContact>();
+	private final static ArrayDeque<ElasticContact> useStack = new ArrayDeque<ElasticContact>();
+	private final static ArrayDeque<ElasticContact> unusedStack = new ArrayDeque<ElasticContact>();
 
 	public static ElasticContact addContact(final StaticBody stcBody,
 			final DynamicBody dynBody, final Contact contact) {
@@ -29,20 +29,21 @@ public class ElasticContactSolver {
 	}
 
 	public static void run(final IUpdateInfo uInfo) {
-		for (final ElasticContact c : useStack) {
-			c.prepare(uInfo);
-		}
-		for (int i = 1; i < 9; i++) {
+		if (!useStack.isEmpty()) {
 			for (final ElasticContact c : useStack) {
-				c.solve(uInfo);
+				c.prepare(uInfo);
 			}
-		}
-		while (!useStack.isEmpty()) {
-			final ElasticContact c;
-			if ((c = useStack.pop()) != null) {
-				c.solve(uInfo);
-				c.reset();
-				unusedStack.push(c);
+			for (int i = 1; i < 10; i++) {
+				for (final ElasticContact c : useStack) {
+					c.solve(uInfo);
+				}
+			}
+			while (!useStack.isEmpty()) {
+				final ElasticContact c;
+				if ((c = useStack.pop()) != null) {
+					c.reset();
+					unusedStack.push(c);
+				}
 			}
 		}
 	}

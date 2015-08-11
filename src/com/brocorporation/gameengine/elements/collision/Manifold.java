@@ -1,8 +1,8 @@
 package com.brocorporation.gameengine.elements.collision;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Stack;
 
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.utils.Vector3f;
@@ -13,7 +13,7 @@ public class Manifold {
 	protected final static float eps_2 = eps * eps;
 
 	public static HashMap<Manifold, Manifold> manifolds = new HashMap<Manifold, Manifold>();
-	protected static Stack<Manifold> unused = new Stack<Manifold>();// TODO sync
+	protected static ArrayDeque<Manifold> unused = new ArrayDeque<Manifold>();
 
 	public static Manifold add(StaticBody a, StaticBody b, Contact c) {
 		Manifold m = unused.isEmpty() ? new Manifold() : unused.pop();
@@ -21,12 +21,12 @@ public class Manifold {
 		Manifold m2 = manifolds.get(m);
 		if (m2 != null) {
 			unused.push(m);
+			if (a != m2.bodyA) {
+				c.swap();
+			}
 		} else {
 			m2 = m;
 			manifolds.put(m2, m2);
-		}
-		if (a != m2.bodyA) {
-			c.swap();
 		}
 		m2.addContact(c);
 		return m2;
@@ -81,22 +81,32 @@ public class Manifold {
 	}
 
 	static Vector3f a = new Vector3f();
-	static Vector3f b = new Vector3f();
+	static Vector3f n = new Vector3f();
 	static Vector3f localA = new Vector3f();
+	static Vector3f b = new Vector3f();
 
 	public int addContact(Contact c) {
 		final Vector3f normal = c.getNormal();
-		b.setAddScaled(c.getPointA(), normal, c.getDistance() / 2);
-		a.setSubtractScaled(b, normal, c.getDistance());
-		bodyA.getAffineTransform().toLocal(localA, a);
+		n.setScale(normal, c.getDistance() / 2);
+		a.setSubtract(c.getPointA(), n);
+		// bodyA.getAffineTransform().toLocal(localA, a);
+		b.setAdd(c.getPointA(), n);
 		for (int i = 0; i < size; i++) {
-			tmpA.setSubtract(contacts[i].localA, localA);
+			// tmpA.setSubtract(contacts[i].localA, localA);
+			// if (tmpA.dot(tmpA) <= eps_2) {
+			// return -1;
+			// }
+			tmpA.setSubtract(contacts[i].worldA, a);
 			if (tmpA.dot(tmpA) <= eps_2) {
-				// TODO persistent
+				return -1;
+			}
+			tmpA.setSubtract(contacts[i].worldB, b);
+			if (tmpA.dot(tmpA) <= eps_2) {
 				return -1;
 			}
 		}
 		int insertIndex = size;
+		bodyA.getAffineTransform().toLocal(localA, a);
 		if (insertIndex == contacts.length) {
 			if (contacts.length >= 4) {
 				insertIndex = sortCachedPoints(localA, c.getDistance());
@@ -107,11 +117,12 @@ public class Manifold {
 			size++;
 		}
 		// contacts[insertIndex].reset(c);
+		n.add(c.getPointA());
 		contacts[insertIndex].distance = c.getDistance();
 		contacts[insertIndex].worldA.set(a);
-		contacts[insertIndex].worldB.set(b);
+		contacts[insertIndex].worldB.set(n);
 		contacts[insertIndex].localA.set(localA);
-		bodyB.getAffineTransform().toLocal(contacts[insertIndex].localB, b);
+		bodyB.getAffineTransform().toLocal(contacts[insertIndex].localB, n);
 		contacts[insertIndex].normal.set(normal);
 		return insertIndex;
 	}
@@ -170,13 +181,45 @@ public class Manifold {
 		return biggestarea;
 	}
 
-	private boolean validContactDistance(float distance) {
-		return distance <= eps;
+	public void refreshContactPoints3() {
+		for (int i = size - 1; i >= 0; i--) {
+			Vector3f worldA = new Vector3f(), worldB = new Vector3f();
+			ManifoldContact manifoldPoint = contacts[i];
+			bodyA.getAffineTransform().toWorld(worldA, manifoldPoint.localA);
+			bodyB.getAffineTransform().toWorld(worldB, manifoldPoint.localB);
+			tmpA.setSubtract(worldA, manifoldPoint.worldA);
+			tmpB.setSubtract(worldB, manifoldPoint.worldB);
+			if (tmpA.dot(tmpA) > eps_2 || tmpB.dot(tmpB) > eps_2) {
+				remove(i);
+			}
+			float distance = tmpA.dot(manifoldPoint.normal);
+			// manifoldPoint.distance = distance;//TODO
+		}
+	}
+
+	public void refreshContactPoints2() {
+		for (int i = size - 1; i >= 0; i--) {
+			Vector3f worldA = new Vector3f(), worldB = new Vector3f();
+			ManifoldContact manifoldPoint = contacts[i];
+			bodyA.getAffineTransform().toWorld(worldA, manifoldPoint.localA);
+			bodyB.getAffineTransform().toWorld(worldB, manifoldPoint.localB);
+			tmpA.setSubtract(worldB, worldA);
+			float distance = tmpA.dot(manifoldPoint.normal);
+			if (distance > eps) {
+				remove(i);
+			} else {
+				tmpA.setSubtract(manifoldPoint.worldA, manifoldPoint.worldB);
+				if (tmpA.dot(tmpA) - manifoldPoint.distance
+						* manifoldPoint.distance > eps_2) {
+					remove(i);
+				}
+			}
+			manifoldPoint.distance = distance;// TODO
+		}
 	}
 
 	public void refreshContactPoints() {
-		int i;
-		for (i = size - 1; i >= 0; i--) {
+		for (int i = size - 1; i >= 0; i--) {
 			ManifoldContact manifoldPoint = contacts[i];
 			bodyA.getAffineTransform().toWorld(manifoldPoint.worldA,
 					manifoldPoint.localA);
@@ -184,29 +227,14 @@ public class Manifold {
 					manifoldPoint.localB);
 			tmpA.setSubtract(manifoldPoint.worldB, manifoldPoint.worldA);
 			manifoldPoint.distance = tmpA.dot(manifoldPoint.normal);
-			// manifoldPoint.lifeTime++;
-		}
-		float distance2d;
-		for (i = size - 1; i >= 0; i--) {
-			ManifoldContact manifoldPoint = contacts[i];
-			if (!validContactDistance(manifoldPoint.distance)) {
+
+			if (manifoldPoint.distance > eps) {
 				remove(i);
 			} else {
-				// contact also becomes invalid when relative movement
-				// orthogonal to normal exceeds margin
-				tmpA.setAddScaled(manifoldPoint.worldA, manifoldPoint.normal,
-						manifoldPoint.distance);
-				tmpA.setSubtract(manifoldPoint.worldB, tmpA);
-				distance2d = tmpA.dot(tmpA);
-				if (distance2d > eps_2) {
+				tmpA.setSubtract(manifoldPoint.worldA, manifoldPoint.worldB);
+				if (tmpA.dot(tmpA) - manifoldPoint.distance
+						* manifoldPoint.distance > eps_2) {
 					remove(i);
-				} else {
-					// contact point processed callback
-					// if (BulletGlobals.getContactProcessedCallback() != null)
-					// {
-					// BulletGlobals.getContactProcessedCallback().contactProcessed(manifoldPoint,
-					// body0, body1);
-					// }
 				}
 			}
 		}
@@ -216,6 +244,7 @@ public class Manifold {
 		if (i < size && 0 <= i) {
 			if (--size > i) {
 				final ManifoldContact ei = contacts[i];
+				ei.reset();
 				while (i < size) {
 					contacts[i] = contacts[++i];
 				}
@@ -243,20 +272,19 @@ public class Manifold {
 		return false;
 	}
 
-	public class ManifoldContact {
-		protected Vector3f normal = new Vector3f();
-		protected Vector3f worldA = new Vector3f();
-		protected Vector3f worldB = new Vector3f();
+	public class ManifoldContact extends Contact {
+		// protected Vector3f normal = new Vector3f();//TODO save global
+		// protected Vector3f worldA = new Vector3f();
+		// protected Vector3f worldB = new Vector3f();
+		// protected float distance;
 		protected Vector3f localA = new Vector3f();
 		protected Vector3f localB = new Vector3f();
-		protected float distance;
+		protected float lastImpulseSum;
+		protected Vector3f tangent1 = new Vector3f();
+		protected Vector3f tangent2 = new Vector3f();
 
-		public void reset(ManifoldContact c) {
-			distance = c.distance;// TODO
-			worldA.setSubtract(c.worldA, bodyA.getPosition());
-			worldB.setSubtract(c.worldB, bodyB.getPosition());
-			bodyA.getOrientation().rotateInverseV(localA, worldA);
-			bodyB.getOrientation().rotateInverseV(localB, worldB);
+		public void reset() {
+			lastImpulseSum = 0;
 		}
 
 		public Vector3f getWorldA() {
@@ -273,6 +301,32 @@ public class Manifold {
 
 		public float getDistance() {
 			return distance;
+		}
+
+		public void setLastImpulseSum(float l) {
+			lastImpulseSum = l;
+		}
+
+		public float getLastImpulseSum() {
+			return lastImpulseSum;
+		}
+
+		public Vector3f getTangent1() {
+			return tangent1;
+		}
+
+		public Vector3f gettangent1() {
+			return tangent2;
+		}
+
+		public void calcTangent() {
+			if (Math.abs(normal.x) >= 0.57735f) {
+				tangent1.set(normal.y, -normal.x, 0);
+			} else {
+				tangent1.set(0, normal.z, -normal.y);
+			}
+			tangent1.norm();
+			tangent2.setCross(normal, tangent1);
 		}
 	}
 }

@@ -37,6 +37,15 @@ public class ElasticContact extends Constraint {
 	public void reset(final StaticBody a, final DynamicBody b,
 			final Contact contact) throws Exception {
 		setBodies(a, b);
+		normal.set(contact.getNormal());
+		distance = contact.getDistance();
+		pointA.setSubtract(contact.getPointA(), a.getPosition());
+		pointB.setSubtract(contact.getPointB(), b.getPosition());
+		
+//		tmp1.setSubtractScaled(contact.getPointB(), normal, distance/2);
+//		pointA.setSubtract(tmp1, a.getPosition());
+//		pointB.setSubtract(tmp1, b.getPosition());
+		
 		if (bodyA instanceof DynamicBody) {
 			if (normal.y < -0.25f) {
 				((DynamicBody) bodyA).isOnGround(true);
@@ -45,12 +54,7 @@ public class ElasticContact extends Constraint {
 		if (normal.y > 0.25f) {
 			((DynamicBody) bodyB).isOnGround(true);
 		}
-		normal.set(contact.getNormal());
-		distance = contact.getDistance();
-		pointA.setSubtract(contact.getPointA(), a.getPosition());
-		pointB.setSubtract(contact.getPointB(), b.getPosition());
 	}
-
 	@Override
 	public void reset() {
 		super.reset();
@@ -71,11 +75,9 @@ public class ElasticContact extends Constraint {
 	}// http://en.wikipedia.org/wiki/Collision_response
 	
 	static boolean frictional = false;// TODO
-	public Manifold manifold;
 	
-
 	float normalImpulseSum;
-	
+	Manifold.ManifoldContact mancon;
 	Vector3f axn = new Vector3f();
 	Vector3f bxn = new Vector3f();
 	Vector3f Iaxn = new Vector3f();
@@ -109,16 +111,20 @@ public class ElasticContact extends Constraint {
 		b = Math.max(bodyA.getMaterial().getRestitution(), bodyB.getMaterial().getRestitution())*Math.min(vel+eslop,0);
 		b += 0.1f*uInfo.getInverseRate()*Math.min(distance+slop,0);
 	}
-	
+	static int ca,cb;
 	public void staticlagrangian(final IUpdateInfo uInfo){
 		RigidBody bodyB =(RigidBody) this.bodyB;
 		
 		float num = bodyB.getLinearVelocity().dot(normal)+bxn.dot(bodyB.getAngularVelocity());
+		if(num>0){
+			return;
+		}
 		float lagrangian = -(num+b)/den;
 		
 		float imp = normalImpulseSum;
 		if((normalImpulseSum+=lagrangian)<0)normalImpulseSum = 0;
 		float jn = normalImpulseSum-imp;
+		
 		bodyB.getLinearVelocity().addScaled(normal, jn*bodyB.getInverseMass());
 		bodyB.getAngularVelocity().addScaled(Ibxn, jn);
 	}
@@ -129,6 +135,7 @@ public class ElasticContact extends Constraint {
 		
 		float num = tmp1.setSubtract(bodyB.getLinearVelocity(), bodyA.getLinearVelocity()).dot(normal)+bxn.dot(bodyB.getAngularVelocity())-axn.dot(bodyA.getAngularVelocity());
 		float lagrangian = -(num+b)/den;
+		
 		float imp = normalImpulseSum;
 		if((normalImpulseSum+=lagrangian)<0)normalImpulseSum = 0;
 		float jn = normalImpulseSum-imp;
@@ -151,7 +158,7 @@ public class ElasticContact extends Constraint {
 			return;
 		}
 		if ((distance += slop) < 0) {
-			bodyB.getPositionCorrection().addScaled(normal, percent * distance);
+//			bodyB.getPositionCorrection().addScaled(normal, percent * distance);
 		}
 		final Material mA = bodyA.getMaterial();
 		final Material mB = bodyB.getMaterial();
@@ -234,9 +241,9 @@ public class ElasticContact extends Constraint {
 					percent
 							* (distance / (bodyA.getInverseMass() + bodyB
 									.getInverseMass())));
-			bodyA.getPositionCorrection().subtractScaled(rV,
-					bodyA.getInverseMass());
-			bodyB.getPositionCorrection().addScaled(rV, bodyB.getInverseMass());
+//			bodyA.getPositionCorrection().subtractScaled(rV,
+//					bodyA.getInverseMass());
+//			bodyB.getPositionCorrection().addScaled(rV, bodyB.getInverseMass());
 		}
 		final float inverseInverseMassSum = 1F / (bodyA.getInverseMass() + bodyB
 				.getInverseMass());
@@ -294,10 +301,10 @@ public class ElasticContact extends Constraint {
 					percent
 							* (distance / (bodyA.getInverseMass() + bodyB
 									.getInverseMass())));
-			bodyA.getPositionCorrection().subtractScaled(tmp11,
-					bodyA.getInverseMass());
-			bodyB.getPositionCorrection().addScaled(tmp11,
-					bodyB.getInverseMass());
+//			bodyA.getPositionCorrection().subtractScaled(tmp11,
+//					bodyA.getInverseMass());
+//			bodyB.getPositionCorrection().addScaled(tmp11,
+//					bodyB.getInverseMass());
 		}
 		final Material mA = bodyA.getMaterial();
 		final Material mB = bodyB.getMaterial();

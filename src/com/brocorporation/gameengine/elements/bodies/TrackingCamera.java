@@ -34,7 +34,7 @@ public class TrackingCamera extends Camera {
 	@Override
 	public void prepareUpdatePosition(final IUpdateInfo uInfo) {
 		if (followBody != null) {
-			orientation.set(followBody.getOrientation());
+//			orientation.set(followBody.getOrientation());
 			orientation.rotateV(finalFollowOffset, followOffset);
 			final Vector3f h = aabb.getHalfsize();
 			h.setScale(finalFollowOffset, 0.5F);

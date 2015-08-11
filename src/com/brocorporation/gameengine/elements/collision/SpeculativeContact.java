@@ -28,6 +28,14 @@ public class SpeculativeContact extends Constraint {
 	public void reset(final StaticBody a, final DynamicBody b,
 			final Contact contact) throws Exception {
 		setBodies(a, b);
+		normal.set(contact.getNormal());
+		distance = contact.getDistance();
+		pointA.setSubtract(contact.getPointA(), a.getPosition());
+		pointB.setSubtract(contact.getPointB(), b.getPosition());
+		impulse = 0;
+		clampedStaticFriction = -1;
+		clampedDynamicFriction = -1;
+		
 		if (bodyA instanceof DynamicBody) {
 			inverseInverseMassSum = 1F / (bodyA.getInverseMass() + bodyB
 					.getInverseMass());
@@ -38,13 +46,6 @@ public class SpeculativeContact extends Constraint {
 		if (normal.y > 0.25f) {
 			((DynamicBody) bodyB).isOnGround(true);
 		}
-		normal.set(contact.getNormal());
-		distance = contact.getDistance();
-		pointA.setSubtract(contact.getPointA(), a.getPosition());
-		pointB.setSubtract(contact.getPointB(), b.getPosition());
-		impulse = 0;
-		clampedStaticFriction = -1;
-		clampedDynamicFriction = -1;
 	}
 
 	@Override
@@ -73,7 +74,7 @@ public class SpeculativeContact extends Constraint {
 	static Vector3f tmp11 = new Vector3f();
 	static Vector3f tmp2 = new Vector3f();
 	static Vector3f tmp21 = new Vector3f();
-	static boolean frictional = true;// TODO
+	static boolean frictional = false;// TODO
 
 	private void staticContact2(final IUpdateInfo uInfo) {
 		if (distance < 0)

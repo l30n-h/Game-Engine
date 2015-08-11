@@ -1,14 +1,14 @@
 package com.brocorporation.gameengine.utils;
 
+import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
 
 public class VectorPool {
 
 	private final static Set<Vector3f> useForCycleSet = new HashSet<Vector3f>();
 	private final static Set<Vector3f> useSet = new HashSet<Vector3f>();
-	private final static Stack<Vector3f> unusedV3Stack = new Stack<Vector3f>();
+	private final static ArrayDeque<Vector3f> unusedV3Stack = new ArrayDeque<Vector3f>();
 
 	public static Vector3f getVectorV3(boolean forCycle) {
 		final Vector3f vector;

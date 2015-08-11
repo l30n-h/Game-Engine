@@ -15,6 +15,7 @@ import com.brocorporation.gameengine.elements.bodies.Camera;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.Item;
 import com.brocorporation.gameengine.elements.bodies.Plane;
+import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.elements.bodies.StaticLight;
 import com.brocorporation.gameengine.elements.bodies.TrackingCamera;
@@ -112,7 +113,7 @@ public class MyGLSurfaceView extends GameEngine {
 					"assets/Human3.obj", "assets/Human3.mtl", glTexture);
 			boxParser.parse(false);
 			final WavefrontParser sphereParser = new WavefrontParser(
-					"assets/ball.obj", "assets/ball.mtl", glTexture);
+					"assets/ball_smooth.obj", "assets/ball_smooth.mtl", glTexture);
 			sphereParser.parse(false);
 
 			final WavefrontParser coinParser = new WavefrontParser(
@@ -404,33 +405,33 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(-0.2f, +0.85f, -0.2f),
 				new Vector3f(-0.2f, -0.85f, +0.2f),
 				new Vector3f(-0.2f, -0.85f, -0.2f) };
-		float a_x = 0.2f, a_y = 0.85f, a_z = 0.2f;
+		float a_x = 0.85f, a_y = 0.85f, a_z = 0.85f;
 		Vector3f[] a2 = new Vector3f[] { new Vector3f(+a_x, +a_y, +a_z),
 				new Vector3f(+a_x, +a_y, -a_z), new Vector3f(+a_x, -a_y, +a_z),
 				new Vector3f(+a_x, -a_y, -a_z), new Vector3f(-a_x, +a_y, +a_z),
 				new Vector3f(-a_x, +a_y, -a_z), new Vector3f(-a_x, -a_y, +a_z),
 				new Vector3f(-a_x, -a_y, -a_z) };
 
-		// final int bodyCount = 10;
-		// final int hCount = bodyCount / 2;
-		// final Material m = new Material(1*0,1.0f*0,0.9f*0);
-		// for (int i = 0; i < bodyCount; i++) {
-		// // final RigidBody b = new RigidBody(new Sphere(0.75f), (i * 20 + 20)
-		// * 0 + 10);
-		// // b.setGLShape(sphereShape);
-		// final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 +
-		// 10);
-		// b.setGLShape(boxShape);
-		// b.setMaterial(m);
-		// b.isGravityEnabled(true);
-		// world.add(b);
-		//
-		// if (i < hCount) {
-		// b.setPosition(0, -1.75f+a_y, 10 - i * 2*(a_z+0.1f));
-		// } else {
-		// b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*(a_z+0.1f));
-		// }
-		// }
+//		 final int bodyCount = 10;
+//		 final int hCount = bodyCount / 2;
+//		 final Material m = new Material(1*0,1.0f*0,0.9f*0);
+//		 for (int i = 0; i < bodyCount; i++) {
+//		 // final RigidBody b = new RigidBody(new Sphere(0.75f), (i * 20 + 20)
+//		 // * 0 + 10);
+//		 // b.setGLShape(sphereShape);
+//		 final RigidBody b = new RigidBody(new Convex(a2), (i * 20 + 20) * 0 +
+//		 10);
+//		 b.setGLShape(boxShape);
+//		 b.setMaterial(m);
+//		 b.isGravityEnabled(true);
+//		 world.add(b);
+//		
+//		 if (i < hCount) {
+//		 b.setPosition(0, -1.75f+a_y, 10 - i * 2*(a_z+0.1f));
+//		 } else {
+//		 b.setPosition(0, -1.75f+3*a_y, 10 - (i - hCount) * 2*(a_z+0.1f));
+//		 }
+//		 }
 
 		actor2 = new Actor(new Convex(a), Actor.INFINITY_MASS);
 		actor2.setPosition(0, 0 - 0.9f, 12);
@@ -443,20 +444,24 @@ public class MyGLSurfaceView extends GameEngine {
 
 		actor = new Actor(new Convex(a), 80);
 		actor.setGLShape(boxShape);
-		// actor = new Actor(new Sphere(0.75f), 80);
-		// actor.setGLShape(sphereShape);
-		actor.setPosition(0, 0 - 0.9f * 0, 9);
+//		 actor = new Actor(new Sphere(0.75f), 80);
+//		 actor.setGLShape(sphereShape);
+		actor.setPosition(0, 0 - 0.9f * 0-1.73f*0, 9);
 //		 actor.setPosition(7, 8, -21.25f);
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
-		// actor.setAngularVelocity(30, 30, -30);
+//		 actor.setAngularVelocity(10, 10, 10);
 		actor.setMaterial(new Material(1f * 0, 1f, 0.5f));
 		world.add(actor);
 		World.debugid = actor.getID();
 		currentActor = actor2;
 
 		final TrackingCamera camera = new TrackingCamera();
-		camera.followBody(currentActor, 0, 1.6f, -3.5F);
+		camera.setZoom(0.3f);
+		updown.getQuaternionEuler(-30, 0, 0);
+		qu.setMultiply(leftright, updown).norm();
+		qu.rotateV(followOffsetTmp, followOffset);
+		camera.followBody(currentActor, followOffsetTmp.x, followOffsetTmp.y, followOffsetTmp.z);
 		camera.lookAtBody(currentActor.getPosition(), 0, 1.6F, 0);
 		final StaticLight light = new StaticLight(new AABB(), 0);
 		light.followBody(currentActor, 0, 1.7F, -3.5f);
@@ -587,7 +592,7 @@ public class MyGLSurfaceView extends GameEngine {
 				} else if (Keyboard.getEventKey() == Keyboard.KEY_F8) {
 					renderContacts = !renderContacts;
 				} else if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-					if (isPaused) {
+					if (isPaused()) {
 						resume();
 					} else
 						pause();
@@ -650,7 +655,7 @@ public class MyGLSurfaceView extends GameEngine {
 	static Quaternion updown = new Quaternion();
 	static Quaternion leftright = new Quaternion();
 	static Quaternion qu = new Quaternion();
-	static Vector3f followOffset = new Vector3f(0, 1.6f, -3.5f);
+	static Vector3f followOffset = new Vector3f(0, 1.6f, 3.5f);
 	static Vector3f followOffsetTmp = new Vector3f();
 
 	public static AABB cPoint = new AABB(0.08f, 0.08f, 0.08f);
@@ -669,8 +674,9 @@ public class MyGLSurfaceView extends GameEngine {
 	private void fps() {
 		frames++;
 		long time = System.currentTimeMillis();
-		if (time > lastTime + 1000) {
-			fontShape.setText(Long.toString((time - lastTime) / 1000 * frames),// +" F: "+Integer.toString(updates),
+		long dif = time-lastTime;
+		if (dif >= 1000) {
+			fontShape.setText(Long.toString(dif / 1000 * frames) +" F: "+Integer.toString(updates),
 					4);
 			lastTime = time;
 			frames = 0;
@@ -706,9 +712,13 @@ public class MyGLSurfaceView extends GameEngine {
 
 		blinnPhongShader.use();
 		if (light != null) {
-			light.getAffineTransform().getTransformationMatrix(modelMatrix);
-			MatrixExt.multiplyMV(lightPosInEyeSpace, 0, modelMatrix, 0,
-					lightPosInModelSpace, 0);
+//			light.getAffineTransform().getTransformationMatrix(modelMatrix);
+//			MatrixExt.multiplyMV(lightPosInEyeSpace, 0, modelMatrix, 0,
+//					lightPosInModelSpace, 0);
+			lightPosInEyeSpace[0]=camera.getPosition().x;
+			lightPosInEyeSpace[1]=camera.getPosition().y;
+			lightPosInEyeSpace[2]=camera.getPosition().z;
+			lightPosInEyeSpace[3]=1;
 			MatrixExt.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0,
 					lightPosInEyeSpace, 0);
 			blinnPhongLight.setPosition(lightPosInEyeSpace[0],

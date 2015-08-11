@@ -72,12 +72,17 @@ public class RigidBody extends DynamicBody {
 
 	static Vector3f tmp = new Vector3f();
 	static float[] rot = new float[9];
-
+	
+//	Vector3f oldAngVel = new Vector3f();
 	@Override
 	public void updatePosition(final IUpdateInfo uInfo) {
 		super.updatePosition(uInfo);
 		if (angularVelocity.x != 0 || angularVelocity.y != 0
 				|| angularVelocity.z != 0) {
+//			oldAngVel.add(angularVelocity).scale(0.5f);
+//			affineTransform.getOrientation().integrateRotationScaled(
+//					oldAngVel, uInfo.getRate());
+//			oldAngVel.set(angularVelocity);
 			affineTransform.getOrientation().integrateRotationScaled(
 					angularVelocity, uInfo.getRate());
 			updateOrientation = true;
@@ -86,5 +91,6 @@ public class RigidBody extends DynamicBody {
 			affineTransform.getOrientation().getRotationMatrix3(rot);
 			MatrixExt.multiplyM3D3MT3(inverseInertiaTensor, rot, diagI);
 		}
+
 	}
 }

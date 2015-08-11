@@ -12,8 +12,6 @@ public class DynamicBody extends StaticBody {
 	protected final float mass;
 	protected final float inverseMass;
 
-	protected final Vector3f positionCorrection = new Vector3f();
-
 	protected final Vector3f linearVelocity = new Vector3f();
 	protected final Vector3f linearMomentum = new Vector3f();
 
@@ -54,10 +52,6 @@ public class DynamicBody extends StaticBody {
 		return isOnGround;
 	}
 
-	public Vector3f getPositionCorrection() {
-		return positionCorrection;
-	}
-
 	public Vector3f getLinearVelocity() {
 		return linearVelocity;
 	}
@@ -94,7 +88,7 @@ public class DynamicBody extends StaticBody {
 			clearMomenta();
 		}
 	}
-
+	
 	@Override
 	public void prepareUpdatePosition(final IUpdateInfo uInfo) {
 		applyMomenta();
@@ -111,20 +105,20 @@ public class DynamicBody extends StaticBody {
 		}
 	}
 
+//	Vector3f oldlinVel = new Vector3f();
 	@Override
 	public void updatePosition(final IUpdateInfo uInfo) {
-		super.updatePosition(uInfo);
-		final Vector3f translation = affineTransform.getTranslation();
 		if (isLinearMoving
 				&& linearVelocity.dot(linearVelocity) > MIN_VELOCITY2) {
-			translation.addScaled(linearVelocity, uInfo.getRate());
+//			oldlinVel.add(linearVelocity).scale(0.5f);
+//			affineTransform.getTranslation().addScaled(oldlinVel,
+//					uInfo.getRate());
+//			oldlinVel.set(linearVelocity);
+			affineTransform.getTranslation().addScaled(linearVelocity,
+					uInfo.getRate());
 			updateTranslation = true;
 		}
-		if (!positionCorrection.isZero()) {
-			translation.subtract(positionCorrection);
-			updateTranslation = true;
-			positionCorrection.set(0, 0, 0);
-		}
+
 	}
 
 	public void generateSweptBounds(final IUpdateInfo uInfo) {

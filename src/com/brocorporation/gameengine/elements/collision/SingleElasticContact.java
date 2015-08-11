@@ -93,7 +93,7 @@ public class SingleElasticContact extends Constraint {
 			return;
 		}
 		if ((distance += slop) < 0) {
-			bodyB.getPositionCorrection().addScaled(normal, percent * distance);
+//			bodyB.getPositionCorrection().addScaled(normal, percent * distance);
 		}
 		final Material mA = bodyA.getMaterial();
 		final Material mB = bodyB.getMaterial();
@@ -176,9 +176,9 @@ public class SingleElasticContact extends Constraint {
 					percent
 							* (distance / (bodyA.getInverseMass() + bodyB
 									.getInverseMass())));
-			bodyA.getPositionCorrection().subtractScaled(rV,
-					bodyA.getInverseMass());
-			bodyB.getPositionCorrection().addScaled(rV, bodyB.getInverseMass());
+//			bodyA.getPositionCorrection().subtractScaled(rV,
+//					bodyA.getInverseMass());
+//			bodyB.getPositionCorrection().addScaled(rV, bodyB.getInverseMass());
 		}
 		final float inverseInverseMassSum = 1F / (bodyA.getInverseMass() + bodyB
 				.getInverseMass());
@@ -236,10 +236,10 @@ public class SingleElasticContact extends Constraint {
 					percent
 							* (distance / (bodyA.getInverseMass() + bodyB
 									.getInverseMass())));
-			bodyA.getPositionCorrection().subtractScaled(tmp11,
-					bodyA.getInverseMass());
-			bodyB.getPositionCorrection().addScaled(tmp11,
-					bodyB.getInverseMass());
+//			bodyA.getPositionCorrection().subtractScaled(tmp11,
+//					bodyA.getInverseMass());
+//			bodyB.getPositionCorrection().addScaled(tmp11,
+//					bodyB.getInverseMass());
 		}
 		final Material mA = bodyA.getMaterial();
 		final Material mB = bodyB.getMaterial();

@@ -4,22 +4,19 @@ import org.lwjgl.opengl.Display;
 
 public abstract class GameEngine implements IUpdateInfo {
 
-	protected boolean isFixedTimeSteps;
 	protected boolean isRunning, isPaused;
 	protected double framePeriod;
-	protected float inverseRate;
+	protected int inverseRate;
 	protected float rate;
 	protected float halfRate;
 	protected boolean isPreRendering = true;
 
 	public GameEngine() {
-		isFixedTimeSteps = false;
+		this(60);
 	}
 
 	public GameEngine(final int pUPS) {
-		framePeriod = 1000d / pUPS;
-		setRate(1f / pUPS);
-		isFixedTimeSteps = true;
+		setRate(pUPS);
 	}
 
 	protected abstract void create();
@@ -35,23 +32,6 @@ public abstract class GameEngine implements IUpdateInfo {
 	protected abstract void update(final IUpdateInfo uInfo);
 
 	protected abstract void render();
-
-	public final void runVariableTimeSteps() {
-		long startTime = System.nanoTime();
-		isPreRendering(true);
-		while (isRunning && !Display.isCloseRequested()) {
-			if (Display.wasResized()) {
-				onSurfaceChanged(Display.getWidth(), Display.getHeight());
-			}
-			final long lastTime = startTime;
-			startTime = System.nanoTime();
-			setRate((float) ((startTime - lastTime) * 1E-9));
-			update(this);
-			render();
-			Display.update();
-		}
-		Display.destroy();
-	}
 
 	public void runFixedTimeSteps() {
 		double lastTime = System.nanoTime();
@@ -104,11 +84,7 @@ public abstract class GameEngine implements IUpdateInfo {
 			onSurfaceChanged(Display.getWidth(), Display.getHeight());
 			isRunning = true;
 			resume();
-			if (isFixedTimeSteps) {
-				runFixedTimeSteps();
-			} else {
-				runVariableTimeSteps();
-			}
+			runFixedTimeSteps();
 		}
 	}
 
@@ -132,10 +108,11 @@ public abstract class GameEngine implements IUpdateInfo {
 		isRunning = false;
 	}
 
-	public void setRate(final float dRate) {
-		rate = dRate;
+	public void setRate(final int pUPS) {
+		framePeriod = 1000d / pUPS;
+		rate = 1f / pUPS;
 		halfRate = rate / 2;
-		inverseRate = 1 / rate;
+		inverseRate = pUPS;
 	}
 
 	public void isPreRendering(final boolean pPreRendering) {
@@ -143,7 +120,7 @@ public abstract class GameEngine implements IUpdateInfo {
 	}
 
 	@Override
-	public float getInverseRate() {
+	public int getInverseRate() {
 		return inverseRate;
 	}
 
