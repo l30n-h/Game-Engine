@@ -414,7 +414,7 @@ public class MyGLSurfaceView extends GameEngine {
 
 //		 final int bodyCount = 10;
 //		 final int hCount = bodyCount / 2;
-//		 final Material m = new Material(1*0,1.0f*0,0.9f*0);
+//		 final Material m = new Material(1*0,1.0f,0.9f);
 //		 for (int i = 0; i < bodyCount; i++) {
 //		 // final RigidBody b = new RigidBody(new Sphere(0.75f), (i * 20 + 20)
 //		 // * 0 + 10);
@@ -446,7 +446,7 @@ public class MyGLSurfaceView extends GameEngine {
 		actor.setGLShape(boxShape);
 //		 actor = new Actor(new Sphere(0.75f), 80);
 //		 actor.setGLShape(sphereShape);
-		actor.setPosition(0, 0 - 0.9f * 0-1.73f*0, 9);
+		actor.setPosition(0, 0 -0.9f*1 -1.73f*0, 9);
 //		 actor.setPosition(7, 8, -21.25f);
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);

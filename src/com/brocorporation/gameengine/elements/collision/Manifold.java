@@ -315,7 +315,7 @@ public class Manifold {
 			return tangent1;
 		}
 
-		public Vector3f gettangent1() {
+		public Vector3f getTangent2() {
 			return tangent2;
 		}
 
