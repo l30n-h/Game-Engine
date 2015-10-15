@@ -12,7 +12,7 @@ public class ElasticContactSolver {
 	private final static ArrayDeque<ElasticContact> unusedStack = new ArrayDeque<ElasticContact>();
 
 	public static ElasticContact addContact(final StaticBody stcBody,
-			final DynamicBody dynBody, final Contact contact) {
+			final DynamicBody dynBody, final Manifold.ManifoldContact contact) {
 		try {
 			final ElasticContact c;
 			if (unusedStack.isEmpty()) {

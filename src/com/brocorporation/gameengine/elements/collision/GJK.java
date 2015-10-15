@@ -27,7 +27,7 @@ public class GJK {
 		MinkowskiDifference.getMaxSupport(e, shape1, shape2, v);
 		simplex.addElement();
 		v.set(e.v);
-		float d_2 = v.dot(v);
+		float d_2 = v.dot();
 		int i = 0;
 		if (d_2 > EPSILON_2) {
 			float d0_2;
@@ -70,7 +70,7 @@ public class GJK {
 		MinkowskiDifference.getMaxSupport(e, shape1, shape2, v);
 		simplex.addElement();
 		v.set(e.v);
-		float d_2 = v.dot(v);
+		float d_2 = v.dot();
 		int i = 0;
 		boolean checkIntersection = true;
 		final float r2 = 2 * r;
@@ -143,7 +143,7 @@ public class GJK {
 		MinkowskiDifference.getMaxSupport(e, shape1, vertex, v);
 		simplex.addElement();
 		v.set(e.v);
-		float d_2 = v.dot(v);
+		float d_2 = v.dot();
 		int i = 0;
 		while (d_2 > EPSILON_2 && i++ < MAX_ITERATIONS) {
 			e = simplex.getNewElement();
@@ -166,7 +166,7 @@ public class GJK {
 		MinkowskiDifference.getMaxSupport(e, shape1, shape2, v);
 		simplex.addElement();
 		v.set(e.v);
-		float d_2 = v.dot(v);
+		float d_2 = v.dot();
 		int i = 0;
 		while (d_2 > EPSILON_2 && i++ < MAX_ITERATIONS) {
 			e = simplex.getNewElement();
@@ -190,7 +190,7 @@ public class GJK {
 		simplex.setRef(x);
 		v.setSubtract(x, stcShape.getPosition());
 		int i = 0;
-		float d_2 = v.dot(v);
+		float d_2 = v.dot();
 		while (d_2 > EPSILON_2) {
 			if (i > MAX_ITERATIONS) {
 				return false;
@@ -225,7 +225,7 @@ public class GJK {
 		simplex.setRef(x);
 		v.setSubtract(x, v.setSubtract(from, stcShape.getPosition()));
 		int i = 0;
-		float d_2 = v.dot(v);
+		float d_2 = v.dot();
 		while (d_2 > EPSILON_2) {
 			if (i >= MAX_ITERATIONS) {
 				return false;
@@ -263,7 +263,7 @@ public class GJK {
 			simplex.removeB();
 			result.set(A);
 		} else {
-			final float ABdotAB = -AB.dot(AB);
+			final float ABdotAB = -AB.dot();
 			if (ABdotA <= ABdotAB) {
 				simplex.removeA();
 				result.set(B);
@@ -272,7 +272,7 @@ public class GJK {
 				result.setAddScaled(A, AB, s);
 			}
 		}
-		return result.dot(result);
+		return result.dot();
 	}
 
 	private static float closestPointToTriangle(Vector3f result, Simplex simplex) {
@@ -287,7 +287,7 @@ public class GJK {
 			simplex.removeB();
 			simplex.removeC();
 			result.set(A);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float boab = -B.dot(AB);
 		final float boac = -B.dot(AC);
@@ -295,14 +295,14 @@ public class GJK {
 			simplex.removeA();
 			simplex.removeC();
 			result.set(B);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float vc = aoab * boac - boab * aoac;
 		if (vc <= 0 && aoab >= 0 && boab <= 0) {
 			simplex.removeC();
 			s = aoab / (aoab - boab);
 			result.setAddScaled(A, AB, s);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float coab = -C.dot(AB);
 		final float coac = -C.dot(AC);
@@ -310,14 +310,14 @@ public class GJK {
 			simplex.removeA();
 			simplex.removeB();
 			result.set(C);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float vb = coab * aoac - aoab * coac;
 		if (vb <= 0 && aoac >= 0 && coac <= 0) {
 			simplex.removeB();
 			s = aoac / (aoac - coac);
 			result.setAddScaled(A, AC, s);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float va = boab * coac - coab * boac;
 		final float bacmbab, cabmcac;
@@ -326,13 +326,13 @@ public class GJK {
 			simplex.removeA();
 			s = bacmbab / (bacmbab + cabmcac);
 			result.setAddScaled(B, AB.setSubtract(C, B), s);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float denom = 1 / (va + vb + vc);
 		s = vb * denom;
 		t = vc * denom;
 		result.setAddScaled(A, AB, s).addScaled(AC, t);
-		return result.dot(result);
+		return result.dot();
 	}
 
 	static Vector3f tmp = new Vector3f();
@@ -354,7 +354,7 @@ public class GJK {
 			// TODO degenerated lösche nur damit contact points berechnet werden
 			// können
 			simplex.removeA();
-			return result.dot(result);
+			return result.dot();
 		}
 		float dD = -A.x * abXacX - A.y * abXacY - A.z * abXacZ;
 		final float signD = Math.signum(dD);
@@ -394,7 +394,7 @@ public class GJK {
 		if (dOsign != Math.signum(dO - dD - dC - dB)) {
 			// TODO dOsing != dAsign remove A cause Origin lies outside BCD
 			simplex.removeA();
-			return result.dot(result);
+			return result.dot();
 		}
 		byte rem = 0;
 		float bestsqD = Float.POSITIVE_INFINITY;
@@ -404,14 +404,14 @@ public class GJK {
 		final float aoad = -A.dot(AD);
 		if (!samedOdD) {// distance to ABC
 			if (aoab <= 0 && aoac <= 0) {
-				bestsqD = A.dot(A);
+				bestsqD = A.dot();
 				result.set(A);
 				rem = 14;
 			} else {
 				final float boab = -B.dot(AB);
 				final float boac = -B.dot(AC);
 				if (boab >= 0 && boac <= boab) {
-					bestsqD = B.dot(B);
+					bestsqD = B.dot();
 					result.set(B);
 					rem = 13;
 				} else {
@@ -419,14 +419,14 @@ public class GJK {
 					if (vc <= 0 && aoab >= 0 && boab <= 0) {
 						s = aoab / (aoab - boab);
 						tmp.setAddScaled(A, AB, s);
-						bestsqD = tmp.dot(tmp);
+						bestsqD = tmp.dot();
 						result.set(tmp);
 						rem = 12;
 					} else {
 						final float coab = -C.dot(AB);
 						final float coac = -C.dot(AC);
 						if (coac >= 0 && coab <= coac) {
-							bestsqD = C.dot(C);
+							bestsqD = C.dot();
 							result.set(C);
 							rem = 11;
 						} else {
@@ -434,7 +434,7 @@ public class GJK {
 							if (vb <= 0 && aoac >= 0 && coac <= 0) {
 								s = aoac / (aoac - coac);
 								tmp.setAddScaled(A, AC, s);
-								bestsqD = tmp.dot(tmp);
+								bestsqD = tmp.dot();
 								result.set(tmp);
 								rem = 10;
 							} else {
@@ -445,7 +445,7 @@ public class GJK {
 									s = bacmbab / (bacmbab + cabmcac);
 									tmp.setAddScaled(B, tmp.setSubtract(C, B),
 											s);
-									bestsqD = tmp.dot(tmp);
+									bestsqD = tmp.dot();
 									result.set(tmp);
 									rem = 9;
 								} else {
@@ -453,7 +453,7 @@ public class GJK {
 									s = vb * denom;
 									t = vc * denom;
 									tmp.setAddScaled(A, AB, s).addScaled(AC, t);
-									bestsqD = tmp.dot(tmp);
+									bestsqD = tmp.dot();
 									result.set(tmp);
 									rem = 8;
 								}
@@ -465,7 +465,7 @@ public class GJK {
 		}
 		if (!samedOdC) {// distance to ABD
 			if (aoab <= 0 && aoad <= 0) {
-				d = A.dot(A);
+				d = A.dot();
 				if (d < bestsqD) {
 					bestsqD = d;
 					result.set(A);
@@ -475,7 +475,7 @@ public class GJK {
 				final float boab = -B.dot(AB);
 				final float boad = -B.dot(AD);
 				if (boab >= 0 && boad <= boab) {
-					d = B.dot(B);
+					d = B.dot();
 					if (d < bestsqD) {
 						bestsqD = d;
 						result.set(B);
@@ -486,7 +486,7 @@ public class GJK {
 					if (vd <= 0 && aoab >= 0 && boab <= 0) {
 						float ss = aoab / (aoab - boab);
 						tmp.setAddScaled(A, AB, ss);
-						d = tmp.dot(tmp);
+						d = tmp.dot();
 						if (d < bestsqD) {
 							s = ss;
 							bestsqD = d;
@@ -497,7 +497,7 @@ public class GJK {
 						final float doab = -D.dot(AB);
 						final float doad = -D.dot(AD);
 						if (doad >= 0 && doab <= doad) {
-							d = D.dot(D);
+							d = D.dot();
 							if (d < bestsqD) {
 								bestsqD = d;
 								result.set(D);
@@ -508,7 +508,7 @@ public class GJK {
 							if (vb <= 0 && aoad >= 0 && doad <= 0) {
 								float ss = aoad / (aoad - doad);
 								tmp.setAddScaled(A, AD, ss);
-								d = tmp.dot(tmp);
+								d = tmp.dot();
 								if (d < bestsqD) {
 									s = ss;
 									bestsqD = d;
@@ -523,7 +523,7 @@ public class GJK {
 									float ss = badmbab / (badmbab + dabmdad);
 									tmp.setAddScaled(B, tmp.setSubtract(D, B),
 											ss);
-									d = tmp.dot(tmp);
+									d = tmp.dot();
 									if (d < bestsqD) {
 										s = ss;
 										bestsqD = d;
@@ -536,7 +536,7 @@ public class GJK {
 									float tt = vd * denom;
 									tmp.setAddScaled(A, AB, ss).addScaled(AD,
 											tt);
-									d = tmp.dot(tmp);
+									d = tmp.dot();
 									if (d < bestsqD) {
 										s = ss;
 										t = tt;
@@ -553,7 +553,7 @@ public class GJK {
 		}
 		if (!samedOdB) {// distance to ACD
 			if (aoac <= 0 && aoad <= 0) {
-				d = A.dot(A);
+				d = A.dot();
 				if (d < bestsqD) {
 					bestsqD = d;
 					result.set(A);
@@ -563,7 +563,7 @@ public class GJK {
 				final float coac = -C.dot(AC);
 				final float coad = -C.dot(AD);
 				if (coac >= 0 && coad <= coac) {
-					d = C.dot(C);
+					d = C.dot();
 					if (d < bestsqD) {
 						bestsqD = d;
 						result.set(C);
@@ -574,7 +574,7 @@ public class GJK {
 					if (vd <= 0 && aoac >= 0 && coac <= 0) {
 						float ss = aoac / (aoac - coac);
 						tmp.setAddScaled(A, AC, ss);
-						d = tmp.dot(tmp);
+						d = tmp.dot();
 						if (d < bestsqD) {
 							s = ss;
 							bestsqD = d;
@@ -585,7 +585,7 @@ public class GJK {
 						final float doac = -D.dot(AC);
 						final float doad = -D.dot(AD);
 						if (doad >= 0 && doac <= doad) {
-							d = D.dot(D);
+							d = D.dot();
 							if (d < bestsqD) {
 								bestsqD = d;
 								result.set(D);
@@ -596,7 +596,7 @@ public class GJK {
 							if (vc <= 0 && aoad >= 0 && doad <= 0) {
 								float ss = aoad / (aoad - doad);
 								tmp.setAddScaled(A, AD, ss);
-								d = tmp.dot(tmp);
+								d = tmp.dot();
 								if (d < bestsqD) {
 									s = ss;
 									bestsqD = d;
@@ -611,7 +611,7 @@ public class GJK {
 									float ss = cadmcac / (cadmcac + dacmdad);
 									tmp.setAddScaled(C, tmp.setSubtract(D, C),
 											ss);
-									d = tmp.dot(tmp);
+									d = tmp.dot();
 									if (d < bestsqD) {
 										s = ss;
 										bestsqD = d;
@@ -624,7 +624,7 @@ public class GJK {
 									float tt = vd * denom;
 									tmp.setAddScaled(A, AC, ss).addScaled(AD,
 											tt);
-									d = tmp.dot(tmp);
+									d = tmp.dot();
 									if (d < bestsqD) {
 										s = ss;
 										t = tt;
@@ -655,7 +655,7 @@ public class GJK {
 		final int size = simplex.size();
 		if (size == 1) {
 			result.set(simplex.getV(0));
-			return result.dot(result);
+			return result.dot();
 		} else if (size == 2) {
 			return closestPointToLineSegment(result, simplex);
 		} else if (size == 3) {

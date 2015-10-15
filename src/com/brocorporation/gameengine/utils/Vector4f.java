@@ -155,12 +155,16 @@ public class Vector4f extends Vector3f {
 		return dot(vector.x, vector.y, vector.z, vector.w);
 	}
 
+	public float dot() {
+		return x * x + y * y + z * z + w * w;
+	}
+
 	public float norm1() {
 		return Math.abs(x) + Math.abs(y) + Math.abs(z) + Math.abs(w);
 	}
 
 	public Vector4f norm() {
-		final float length2 = dot(this);
+		final float length2 = dot();
 		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			scale(1F / (float) Math.sqrt(length2));
 		}
@@ -168,7 +172,7 @@ public class Vector4f extends Vector3f {
 	}
 
 	public float normLength() {
-		float length2 = dot(this);
+		float length2 = dot();
 		if (length2 == 0)
 			return 0;
 		if (Math.abs(length2 - 1) <= Tolerance.NULL)
@@ -179,7 +183,7 @@ public class Vector4f extends Vector3f {
 	}
 
 	public Vector4f setNorm(Vector4f vector) {
-		final float length2 = vector.dot(vector);
+		final float length2 = vector.dot();
 		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return setScale(vector, 1F / (float) Math.sqrt(length2));
 		}
@@ -187,7 +191,7 @@ public class Vector4f extends Vector3f {
 	}
 
 	public Vector4f norm(float l) {
-		final float length2 = dot(this);
+		final float length2 = dot();
 		if (length2 != 0) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
 				scale(l / (float) Math.sqrt(length2));
@@ -199,7 +203,7 @@ public class Vector4f extends Vector3f {
 	}
 
 	public Vector4f setNorm(Vector4f vector, float l) {
-		final float length2 = vector.dot(vector);
+		final float length2 = vector.dot();
 		if (length2 != 0) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
 				return setScale(vector, l / (float) Math.sqrt(length2));
@@ -211,7 +215,7 @@ public class Vector4f extends Vector3f {
 	}
 
 	public float length() {
-		final float length2 = dot(this);
+		final float length2 = dot();
 		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return (float) Math.sqrt(length2);
 		}

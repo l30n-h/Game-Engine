@@ -451,7 +451,7 @@ public class MyGLSurfaceView extends GameEngine {
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
 //		 actor.setAngularVelocity(10, 10, 10);
-		actor.setMaterial(new Material(1f * 0, 1f, 0.5f));
+		actor.setMaterial(new Material(1f *0, 1f*0, 0.5f*0));
 		world.add(actor);
 		World.debugid = actor.getID();
 		currentActor = actor2;

@@ -186,6 +186,10 @@ public class Vector3f {
 		return dot(vector.x, vector.y, vector.z);
 	}
 
+	public float dot() {
+		return x * x + y * y + z * z;
+	}
+
 	public Vector3f setCross(final float pX1, final float pY1, final float pZ1,
 			final float pX2, final float pY2, final float pZ2) {
 		return set(pY1 * pZ2 - pZ1 * pY2, pZ1 * pX2 - pX1 * pZ2, pX1 * pY2
@@ -201,8 +205,7 @@ public class Vector3f {
 	 * V perpendicular to B <br />
 	 * V dot A <= 0<br />
 	 * <br />
-	 * Ax(BxA) = (AxB)xA
-	 * <br />
+	 * Ax(BxA) = (AxB)xA <br />
 	 * AxB+AxC = Ax(B+C)
 	 */
 	public Vector3f setCross(final Vector3f vector1, final Vector3f vector2) {
@@ -233,7 +236,7 @@ public class Vector3f {
 
 	public Vector3f setDoubleCross(final Vector3f vector1,
 			final Vector3f vector2) {
-		return setDoubleCross(vector1, vector2, vector1.dot(vector1),
+		return setDoubleCross(vector1, vector2, vector1.dot(),
 				vector1.dot(vector2));
 	}
 
@@ -271,7 +274,7 @@ public class Vector3f {
 	}
 
 	public Vector3f norm() {
-		final float length2 = dot(this);
+		final float length2 = dot();
 		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			scale(1F / (float) Math.sqrt(length2));
 		}
@@ -279,7 +282,7 @@ public class Vector3f {
 	}
 
 	public float normLength() {
-		float length2 = dot(this);
+		float length2 = dot();
 		if (length2 == 0)
 			return 0;
 		if (Math.abs(length2 - 1) <= Tolerance.NULL)
@@ -290,7 +293,7 @@ public class Vector3f {
 	}
 
 	public Vector3f setNorm(Vector3f vector) {
-		final float length2 = vector.dot(vector);
+		final float length2 = vector.dot();
 		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return setScale(vector, 1F / (float) Math.sqrt(length2));
 		}
@@ -298,7 +301,7 @@ public class Vector3f {
 	}
 
 	public Vector3f norm(float l) {
-		final float length2 = dot(this);
+		final float length2 = dot();
 		if (length2 != 0) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
 				scale(l / (float) Math.sqrt(length2));
@@ -310,7 +313,7 @@ public class Vector3f {
 	}
 
 	public Vector3f setNorm(Vector3f vector, float l) {
-		final float length2 = vector.dot(vector);
+		final float length2 = vector.dot();
 		if (length2 != 0) {
 			if (Math.abs(length2 - 1) > Tolerance.NULL) {
 				return setScale(vector, l / (float) Math.sqrt(length2));
@@ -322,7 +325,7 @@ public class Vector3f {
 	}
 
 	public float length() {
-		final float length2 = dot(this);
+		final float length2 = dot();
 		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return (float) Math.sqrt(length2);
 		}

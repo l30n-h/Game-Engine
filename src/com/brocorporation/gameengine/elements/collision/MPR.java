@@ -319,7 +319,7 @@ public class MPR {
 
 	protected static boolean portalReachTolerance(Element e, Vector3f dir) {
 		final float min = temp2.setSubtract(e.v, e1.v).dot(dir);
-		return min <= 0 || min * min <= CollideEpsilon_2 * dir.dot(dir);
+		return min <= 0 || min * min <= CollideEpsilon_2 * dir.dot();
 	}
 
 	protected static void set(Element a, Element b) {

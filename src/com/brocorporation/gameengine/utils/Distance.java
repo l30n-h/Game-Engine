@@ -17,14 +17,14 @@ public class Distance {
 		if (ABdotA >= 0) {
 			result.set(A);
 		} else {
-			final float ABdotAB = AB.dot(AB);
+			final float ABdotAB = AB.dot();
 			if (-ABdotA >= ABdotAB) {
 				result.set(B);
 			} else {
 				result.setAddScaled(A, AB, -ABdotA / ABdotAB);
 			}
 		}
-		return result.dot(result);
+		return result.dot();
 	}
 
 	public static float distanceToPlane(Vector3f result, Vector3f A,
@@ -36,7 +36,7 @@ public class Distance {
 		if (an < 0) {
 			result.invert();
 		}
-		return (an * an) / result.dot(result);
+		return (an * an) / result.dot();
 	}
 
 	public static float closestPointToTriangle(Vector3f result, Simplex simplex) {
@@ -52,7 +52,7 @@ public class Distance {
 			simplex.removeB();
 			simplex.removeC();
 			result.set(A);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float bab = -B.dot(AB);
 		final float bac = -B.dot(AC);
@@ -60,14 +60,14 @@ public class Distance {
 			simplex.removeA();
 			simplex.removeC();
 			result.set(B);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float vc = aab * bac - bab * aac;
 		if (vc <= 0 && aab >= 0 && bab <= 0) {
 			simplex.removeC();
 			s = aab / (aab - bab);
 			result.setAddScaled(A, AB, s);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float cab = -C.dot(AB);
 		final float cac = -C.dot(AC);
@@ -75,14 +75,14 @@ public class Distance {
 			simplex.removeA();
 			simplex.removeB();
 			result.set(C);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float vb = cab * aac - aab * cac;
 		if (vb <= 0 && aac >= 0 && cac <= 0) {
 			simplex.removeB();
 			s = aac / (aac - cac);
 			result.setAddScaled(A, AC, s);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float va = bab * cac - cab * bac;
 		final float bacmbab, cabmcac;
@@ -90,22 +90,22 @@ public class Distance {
 			simplex.removeA();
 			s = bacmbab / (bacmbab + cabmcac);
 			result.setAddScaled(B, AB.setSubtract(C, B), s);
-			return result.dot(result);
+			return result.dot();
 		}
 		final float denom = 1 / (va + vb + vc);
 		s = vb * denom;
 		t = vc * denom;
 		result.setAddScaled(A, AB, s).addScaled(AC, t);
-		return result.dot(result);
+		return result.dot();
 	}
 
 	public static float closestPointToTriangle(Vector3f result, Vector3f A,
 			Vector3f B, Vector3f C) {
 		AB.setSubtract(B, A);
 		AC.setSubtract(C, A);
-		final float abab = AB.dot(AB);
+		final float abab = AB.dot();
 		final float abac = AB.dot(AC);
-		final float acac = AC.dot(AC);
+		final float acac = AC.dot();
 		final float aab = A.dot(AB);
 		final float aac = A.dot(AC);
 		final float det = Math.abs(abab * acac - abac * abac);
@@ -218,7 +218,7 @@ public class Distance {
 				}
 			}
 		}
-		return result.dot(result);
+		return result.dot();
 	}
 
 	public static int removeFromTriangle(Vector3f P, Vector3f A, Vector3f B,
@@ -282,7 +282,7 @@ public class Distance {
 			if (an < 0) {
 				result.invert();
 			}
-			return (an * an) / result.dot(result);
+			return (an * an) / result.dot();
 		} else if (front == 1) {
 			return closestPointToLineSegment(result, A, B);
 		} else if (front == 2) {
@@ -321,8 +321,8 @@ public class Distance {
 		CB.setAddScaled(from, dir, r).subtract(A);
 		AB.setSubtract(B, A);
 		AC.setSubtract(C, A);
-		float abab = AB.dot(AB);
-		float acac = AC.dot(AC);
+		float abab = AB.dot();
+		float acac = AC.dot();
 		float abac = AB.dot(AC);
 		float pab = CB.dot(AB);
 		float pac = CB.dot(AC);
@@ -346,8 +346,8 @@ public class Distance {
 		CB.setAddScaled(from, dir, r).subtract(A);
 		AB.setSubtract(B, A);
 		AC.setSubtract(C, A);
-		float abab = AB.dot(AB);
-		float acac = AC.dot(AC);
+		float abab = AB.dot();
+		float acac = AC.dot();
 		float abac = AB.dot(AC);
 		float pab = CB.dot(AB);
 		float pac = CB.dot(AC);
@@ -372,8 +372,8 @@ public class Distance {
 		CB.setAddScaled(from, dir, r).subtract(A);
 		AB.setSubtract(B, A);
 		AC.setSubtract(C, A);
-		float abab = AB.dot(AB);
-		float acac = AC.dot(AC);
+		float abab = AB.dot();
+		float acac = AC.dot();
 		float abac = AB.dot(AC);
 		float pab = CB.dot(AB);
 		float pac = CB.dot(AC);

@@ -229,7 +229,7 @@ public class Quaternion extends Vector4f {
 
 	public Quaternion getQuaternion(final Vector3f vector1,
 			final Vector3f vector2) {
-		w = (float) Math.sqrt(vector1.dot(vector1) * vector2.dot(vector2))
+		w = (float) Math.sqrt(vector1.dot() * vector2.dot())
 				+ vector1.dot(vector2);
 		((Quaternion) setCross(vector1, vector2)).norm();
 		return this;

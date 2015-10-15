@@ -7,7 +7,7 @@ import com.brocorporation.gameengine.utils.Vector3f;
 
 public class DynamicBody extends StaticBody {
 
-	protected final static float MIN_VELOCITY2 = 0.001F;
+	protected final static float MIN_VELOCITY2 = -0.001F;//TODO
 
 	protected final float mass;
 	protected final float inverseMass;
@@ -96,8 +96,9 @@ public class DynamicBody extends StaticBody {
 			linearVelocity.y -= World.GRAVITY * uInfo.getRate();
 		}
 
-		final float vv = linearVelocity.dot(linearVelocity);
-		if (isLinearMoving = (vv > MIN_VELOCITY2)) {
+		final float vv = linearVelocity.dot();
+		isLinearMoving = (vv > MIN_VELOCITY2);
+		if (isLinearMoving) {
 			isOnGround(false);
 			if (vv > maxVelocity2) {
 				linearVelocity.scale(maxVelocity / (float) Math.sqrt(vv));
@@ -109,7 +110,7 @@ public class DynamicBody extends StaticBody {
 	@Override
 	public void updatePosition(final IUpdateInfo uInfo) {
 		if (isLinearMoving
-				&& linearVelocity.dot(linearVelocity) > MIN_VELOCITY2) {
+				&& linearVelocity.dot() > MIN_VELOCITY2) {
 //			oldlinVel.add(linearVelocity).scale(0.5f);
 //			affineTransform.getTranslation().addScaled(oldlinVel,
 //					uInfo.getRate());
@@ -130,6 +131,25 @@ public class DynamicBody extends StaticBody {
 			final Vector3f hs = shape.getAABB().getHalfsize();
 			final Vector3f p = getPosition();
 			sweptAABB.setPosition(p.x + vX, p.y + vY, p.z + vZ);
+			sweptAABB.setHalfsize(hs.x + Math.abs(vX), hs.y + Math.abs(vY),
+					hs.z + Math.abs(vZ));
+		} else {
+			final AABB aabb = shape.getAABB();
+			sweptAABB.setPosition(aabb.getPosition());
+			final Vector3f h = aabb.getHalfsize();
+			sweptAABB.setHalfsize(h.x, h.y, h.z);
+		}
+	}
+	
+	public void generateSweptBoundsBackwards(final IUpdateInfo uInfo) {
+		if (isLinearMoving) {
+			final float halfdTime = uInfo.getHalfRate();
+			final float vX = linearVelocity.x * halfdTime;
+			final float vY = linearVelocity.y * halfdTime;
+			final float vZ = linearVelocity.z * halfdTime;
+			final Vector3f hs = shape.getAABB().getHalfsize();
+			final Vector3f p = getPosition();
+			sweptAABB.setPosition(p.x - vX, p.y - vY, p.z - vZ);
 			sweptAABB.setHalfsize(hs.x + Math.abs(vX), hs.y + Math.abs(vY),
 					hs.z + Math.abs(vZ));
 		} else {

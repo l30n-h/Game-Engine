@@ -28,12 +28,15 @@ public class Frustum {
 	}
 
 	public void setFrustum(final float[] frustumM) {
-		//hasChanged = m12 != frustumM[12] || m13 != frustumM[13]
-		//		|| m14 != frustumM[14];
-		hasChanged = !MatrixExt.equalsM(lastFrustum, frustumM);//TODO besser schon von Camera überprüfen
+		// hasChanged = m12 != frustumM[12] || m13 != frustumM[13]
+		// || m14 != frustumM[14];
+		hasChanged = !MatrixExt.equalsM(lastFrustum, frustumM);// TODO besser
+																// schon von
+																// Camera
+																// überprüfen
 		if (hasChanged) {
 			MatrixExt.setM(lastFrustum, frustumM);
-			
+
 			planes[FRONT].x = frustumM[12] + frustumM[8];
 			planes[FRONT].y = frustumM[13] + frustumM[9];
 			planes[FRONT].z = frustumM[14] + frustumM[10];
@@ -79,7 +82,7 @@ public class Frustum {
 
 	private static void normPlane(Vector4f plane) {
 		final Vector3f v = plane;
-		final float length2 = v.dot(v);
+		final float length2 = v.dot();
 		plane.scale(1F / (float) Math.sqrt(length2));
 	}
 
