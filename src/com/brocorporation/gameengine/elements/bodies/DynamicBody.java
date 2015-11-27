@@ -7,7 +7,7 @@ import com.brocorporation.gameengine.utils.Vector3f;
 
 public class DynamicBody extends StaticBody {
 
-	protected final static float MIN_VELOCITY2 = -0.001F;//TODO
+	protected final static float MIN_VELOCITY2 = -0.001F;// TODO
 
 	protected final float mass;
 	protected final float inverseMass;
@@ -20,8 +20,7 @@ public class DynamicBody extends StaticBody {
 	protected float maxVelocity;
 	protected float maxVelocity2 = Float.POSITIVE_INFINITY;
 
-	protected boolean gravityEnabled, isOnGround, updateLinearMomentum,
-			isLinearMoving;
+	protected boolean gravityEnabled, isOnGround, updateLinearMomentum, isLinearMoving;
 
 	public DynamicBody(final IShape shape, final float pMass) {
 		super(shape);
@@ -69,26 +68,29 @@ public class DynamicBody extends StaticBody {
 		}
 	}
 
-	public void addImpulse(final float impulseX, final float impulseY,
-			final float impulseZ) {
+	public void addImpulse(final float impulseX, final float impulseY, final float impulseZ) {
 		if (impulseX != 0 || impulseY != 0 || impulseZ != 0) {
 			linearMomentum.add(impulseX, impulseY, impulseZ);
 			updateLinearMomentum = true;
 		}
 	}
 
-	public void clearMomenta() {
+	public void clearLinearMomentum() {
 		linearMomentum.set(0, 0, 0);
 		updateLinearMomentum = false;
+	}
+
+	public void clearMomenta() {
+		clearLinearMomentum();
 	}
 
 	protected void applyMomenta() {
 		if (updateLinearMomentum) {
 			linearVelocity.addScaled(linearMomentum, inverseMass);
-			clearMomenta();
+			clearLinearMomentum();
 		}
 	}
-	
+
 	@Override
 	public void prepareUpdatePosition(final IUpdateInfo uInfo) {
 		applyMomenta();
@@ -106,17 +108,15 @@ public class DynamicBody extends StaticBody {
 		}
 	}
 
-//	Vector3f oldlinVel = new Vector3f();
+	// Vector3f oldlinVel = new Vector3f();
 	@Override
 	public void updatePosition(final IUpdateInfo uInfo) {
-		if (isLinearMoving
-				&& linearVelocity.dot() > MIN_VELOCITY2) {
-//			oldlinVel.add(linearVelocity).scale(0.5f);
-//			affineTransform.getTranslation().addScaled(oldlinVel,
-//					uInfo.getRate());
-//			oldlinVel.set(linearVelocity);
-			affineTransform.getTranslation().addScaled(linearVelocity,
-					uInfo.getRate());
+		if (isLinearMoving && linearVelocity.dot() > MIN_VELOCITY2) {
+			// oldlinVel.add(linearVelocity).scale(0.5f);
+			// affineTransform.getTranslation().addScaled(oldlinVel,
+			// uInfo.getRate());
+			// oldlinVel.set(linearVelocity);
+			affineTransform.getTranslation().addScaled(linearVelocity, uInfo.getRate());
 			updateTranslation = true;
 		}
 
@@ -131,8 +131,7 @@ public class DynamicBody extends StaticBody {
 			final Vector3f hs = shape.getAABB().getHalfsize();
 			final Vector3f p = getPosition();
 			sweptAABB.setPosition(p.x + vX, p.y + vY, p.z + vZ);
-			sweptAABB.setHalfsize(hs.x + Math.abs(vX), hs.y + Math.abs(vY),
-					hs.z + Math.abs(vZ));
+			sweptAABB.setHalfsize(hs.x + Math.abs(vX), hs.y + Math.abs(vY), hs.z + Math.abs(vZ));
 		} else {
 			final AABB aabb = shape.getAABB();
 			sweptAABB.setPosition(aabb.getPosition());
@@ -140,7 +139,7 @@ public class DynamicBody extends StaticBody {
 			sweptAABB.setHalfsize(h.x, h.y, h.z);
 		}
 	}
-	
+
 	public void generateSweptBoundsBackwards(final IUpdateInfo uInfo) {
 		if (isLinearMoving) {
 			final float halfdTime = uInfo.getHalfRate();
@@ -150,8 +149,7 @@ public class DynamicBody extends StaticBody {
 			final Vector3f hs = shape.getAABB().getHalfsize();
 			final Vector3f p = getPosition();
 			sweptAABB.setPosition(p.x - vX, p.y - vY, p.z - vZ);
-			sweptAABB.setHalfsize(hs.x + Math.abs(vX), hs.y + Math.abs(vY),
-					hs.z + Math.abs(vZ));
+			sweptAABB.setHalfsize(hs.x + Math.abs(vX), hs.y + Math.abs(vY), hs.z + Math.abs(vZ));
 		} else {
 			final AABB aabb = shape.getAABB();
 			sweptAABB.setPosition(aabb.getPosition());

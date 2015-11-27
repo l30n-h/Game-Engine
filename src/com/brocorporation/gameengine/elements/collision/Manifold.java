@@ -12,6 +12,7 @@ public class Manifold {
 	protected final static float eps = 0.04f;
 	protected final static float eps_2 = eps * eps;
 
+	private final static Manifold MANIFOLD = new Manifold();
 	public static HashMap<Manifold, Manifold> manifolds = new HashMap<Manifold, Manifold>();
 	protected static ArrayDeque<Manifold> unused = new ArrayDeque<Manifold>();
 
@@ -30,6 +31,11 @@ public class Manifold {
 		}
 		m2.addContact(c);
 		return m2;
+	}
+	
+	public static Manifold getManifold(StaticBody a, StaticBody b){
+		MANIFOLD.reset(a, b);
+		return manifolds.get(MANIFOLD);
 	}
 
 	public static void update() {
@@ -135,6 +141,7 @@ public class Manifold {
 		} else {
 			size++;
 		}
+		assert(insertIndex!=-1);
 		n.add(c.getPointA());
 		final ManifoldContact insertContact = contacts[insertIndex];
 		insertContact.distance = c.getDistance();
@@ -319,13 +326,7 @@ public class Manifold {
 		}
 
 		public void calcTangent() {
-			if (Math.abs(normal.x) >= 0.57735f) {
-				tangent1.set(normal.y, -normal.x, 0);
-			} else {
-				tangent1.set(0, normal.z, -normal.y);
-			}
-			tangent1.norm();
-			tangent2.setCross(normal, tangent1);
+			Vector3f.computeBasis(normal, tangent1, tangent2);
 		}
 	}
 }

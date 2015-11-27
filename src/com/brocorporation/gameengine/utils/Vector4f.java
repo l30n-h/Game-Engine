@@ -8,8 +8,7 @@ public class Vector4f extends Vector3f {
 		this(0, 0, 0, 0);
 	}
 
-	public Vector4f(final float pX, final float pY, final float pZ,
-			final float pW) {
+	public Vector4f(final float pX, final float pY, final float pZ, final float pW) {
 		set(pX, pY, pZ, pW);
 	}
 
@@ -17,8 +16,7 @@ public class Vector4f extends Vector3f {
 		this(vector.x, vector.y, vector.z, vector.w);
 	}
 
-	public Vector4f set(final float pX, final float pY, final float pZ,
-			final float pW) {
+	public Vector4f set(final float pX, final float pY, final float pZ, final float pW) {
 		x = pX;
 		y = pY;
 		z = pZ;
@@ -38,8 +36,7 @@ public class Vector4f extends Vector3f {
 		return this;
 	}
 
-	public Vector4f add(final float pX, final float pY, final float pZ,
-			final float pW) {
+	public Vector4f add(final float pX, final float pY, final float pZ, final float pW) {
 		x += pX;
 		y += pY;
 		z += pZ;
@@ -51,8 +48,7 @@ public class Vector4f extends Vector3f {
 		return add(vector.x, vector.y, vector.z, vector.w);
 	}
 
-	public Vector4f addScaled(final float pX, final float pY, final float pZ,
-			final float pW, final float scalar) {
+	public Vector4f addScaled(final float pX, final float pY, final float pZ, final float pW, final float scalar) {
 		x += pX * scalar;
 		y += pY * scalar;
 		z += pZ * scalar;
@@ -64,8 +60,7 @@ public class Vector4f extends Vector3f {
 		return addScaled(vector.x, vector.y, vector.z, vector.w, scalar);
 	}
 
-	public Vector4f subtract(final float pX, final float pY, final float pZ,
-			final float pW) {
+	public Vector4f subtract(final float pX, final float pY, final float pZ, final float pW) {
 		x -= pX;
 		y -= pY;
 		z -= pZ;
@@ -77,8 +72,7 @@ public class Vector4f extends Vector3f {
 		return subtract(vector.x, vector.y, vector.z, vector.w);
 	}
 
-	public Vector4f subtractScaled(final float pX, final float pY,
-			final float pZ, final float pW, final float scalar) {
+	public Vector4f subtractScaled(final float pX, final float pY, final float pZ, final float pW, final float scalar) {
 		x -= pX * scalar;
 		y -= pY * scalar;
 		z -= pZ * scalar;
@@ -90,38 +84,31 @@ public class Vector4f extends Vector3f {
 		return subtractScaled(vector.x, vector.y, vector.z, vector.w, scalar);
 	}
 
-	public Vector4f multiplyM4V(float[] lhsMat, int matOffset,
-			final Vector4f vector) {
-		return set(lhsMat[matOffset] * vector.x + lhsMat[matOffset + 1]
-				* vector.y + lhsMat[matOffset + 2] * vector.z
-				+ lhsMat[matOffset + 3] * vector.w, lhsMat[matOffset + 4]
-				* vector.x + lhsMat[matOffset + 5] * vector.y
-				+ lhsMat[matOffset + 6] * vector.z + lhsMat[matOffset + 7]
-				* vector.w, lhsMat[matOffset + 8] * vector.x
-				+ lhsMat[matOffset + 9] * vector.y + lhsMat[matOffset + 10]
-				* vector.z + lhsMat[matOffset + 11] * vector.w,
-				lhsMat[matOffset + 12] * vector.x + lhsMat[matOffset + 13]
-						* vector.y + lhsMat[matOffset + 14] * vector.z
-						+ lhsMat[matOffset + 15] * vector.w);
+	public Vector4f multiplyM4V(float[] lhsMat, int matOffset, final Vector4f vector) {
+		return set(
+				lhsMat[matOffset] * vector.x + lhsMat[matOffset + 1] * vector.y + lhsMat[matOffset + 2] * vector.z
+						+ lhsMat[matOffset + 3] * vector.w,
+				lhsMat[matOffset + 4] * vector.x + lhsMat[matOffset + 5] * vector.y + lhsMat[matOffset + 6] * vector.z
+						+ lhsMat[matOffset + 7] * vector.w,
+				lhsMat[matOffset + 8] * vector.x + lhsMat[matOffset + 9] * vector.y + lhsMat[matOffset + 10] * vector.z
+						+ lhsMat[matOffset + 11] * vector.w,
+				lhsMat[matOffset + 12] * vector.x + lhsMat[matOffset + 13] * vector.y
+						+ lhsMat[matOffset + 14] * vector.z + lhsMat[matOffset + 15] * vector.w);
 	}
 
 	public Vector4f multiplyVM4(Vector4f vector, float[] rhsMat, int matOffset) {
-		return set(vector.x * rhsMat[matOffset] + vector.y
-				* rhsMat[matOffset + 4] + vector.z * rhsMat[matOffset + 8]
-				+ vector.w * rhsMat[matOffset + 12], vector.x
-				* rhsMat[matOffset + 1] + vector.y * rhsMat[matOffset + 5]
-				+ vector.z * rhsMat[matOffset + 9] + vector.w
-				* rhsMat[matOffset + 13], vector.x * rhsMat[matOffset + 2]
-				+ vector.y * rhsMat[matOffset + 6] + vector.z
-				* rhsMat[matOffset + 10] + vector.w * rhsMat[matOffset + 14],
-				vector.x * rhsMat[matOffset + 3] + vector.y
-						* rhsMat[matOffset + 7] + vector.z
-						* rhsMat[matOffset + 11] + vector.w
-						* rhsMat[matOffset + 15]);
+		return set(
+				vector.x * rhsMat[matOffset] + vector.y * rhsMat[matOffset + 4] + vector.z * rhsMat[matOffset + 8]
+						+ vector.w * rhsMat[matOffset + 12],
+				vector.x * rhsMat[matOffset + 1] + vector.y * rhsMat[matOffset + 5] + vector.z * rhsMat[matOffset + 9]
+						+ vector.w * rhsMat[matOffset + 13],
+				vector.x * rhsMat[matOffset + 2] + vector.y * rhsMat[matOffset + 6] + vector.z * rhsMat[matOffset + 10]
+						+ vector.w * rhsMat[matOffset + 14],
+				vector.x * rhsMat[matOffset + 3] + vector.y * rhsMat[matOffset + 7] + vector.z * rhsMat[matOffset + 11]
+						+ vector.w * rhsMat[matOffset + 15]);
 	}
 
-	public Vector4f multiply(final float pX, final float pY, final float pZ,
-			final float pW) {
+	public Vector4f multiply(final float pX, final float pY, final float pZ, final float pW) {
 		x *= pX;
 		y *= pY;
 		z *= pZ;
@@ -142,12 +129,10 @@ public class Vector4f extends Vector3f {
 	}
 
 	public Vector4f setScale(final Vector4f vector, final float scalar) {
-		return set(vector.x * scalar, vector.y * scalar, vector.z * scalar,
-				vector.w * scalar);
+		return set(vector.x * scalar, vector.y * scalar, vector.z * scalar, vector.w * scalar);
 	}
 
-	public float dot(final float pX, final float pY, final float pZ,
-			final float pW) {
+	public float dot(final float pX, final float pY, final float pZ, final float pW) {
 		return x * pX + y * pY + z * pZ + w * pW;
 	}
 
@@ -222,8 +207,7 @@ public class Vector4f extends Vector3f {
 		return length2;
 	}
 
-	public static float length(final float x, final float y, final float z,
-			final float w) {
+	public static float length(final float x, final float y, final float z, final float w) {
 		final float length2 = x * x + y * y + z * z + w * w;
 		if (length2 != 0 && Math.abs(length2 - 1) > Tolerance.NULL) {
 			return (float) Math.sqrt(length2);
@@ -236,9 +220,21 @@ public class Vector4f extends Vector3f {
 	}
 
 	public boolean isAlmostZero() {
-		return Math.abs(x) <= Tolerance.NULL && Math.abs(y) <= Tolerance.NULL
-				&& Math.abs(z) <= Tolerance.NULL
+		return Math.abs(x) <= Tolerance.NULL && Math.abs(y) <= Tolerance.NULL && Math.abs(z) <= Tolerance.NULL
 				&& Math.abs(w) <= Tolerance.NULL;
+	}
+
+	public boolean isLinearDependent(Vector4f v, float eps) {
+		if (x == 0)
+			return Math.abs(v.x) <= eps;
+		if (y == 0)
+			return Math.abs(v.y) <= eps;
+		if (z == 0)
+			return Math.abs(v.z) <= eps;
+		if (w == 0)
+			return Math.abs(v.w) <= eps;
+		final float d = x / v.x;
+		return Math.abs(y - d * v.y) <= eps && Math.abs(z - d * v.z) <= eps && Math.abs(w - d * v.w) <= eps;
 	}
 
 	@Override

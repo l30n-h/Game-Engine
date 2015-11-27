@@ -34,13 +34,13 @@ public abstract class GameEngine implements IUpdateInfo {
 	protected abstract void render();
 
 	public void runFixedTimeSteps() {
-		double lastTime = System.nanoTime();
+		long lastTime = System.nanoTime();
 		double lag = 0;
 		isPreRendering(true);
 		boolean doRendering = false;
 		while (isRunning && !Display.isCloseRequested()) {
-			double currentTime = System.nanoTime();
-			double timeDiff = (currentTime - lastTime) / 1000000;
+			long currentTime = System.nanoTime();
+			double timeDiff = (currentTime - lastTime) / 1000000d;
 			lastTime = currentTime;
 			lag += timeDiff;
 			doRendering = lag >= framePeriod;

@@ -23,8 +23,7 @@ public class RigidBody extends DynamicBody {
 		inverseInertiaTensor[8] = diagI.z;
 	}
 
-	public void setAngularVelocity(final float degreeX, final float degreeY,
-			final float degreeZ) {
+	public void setAngularVelocity(final float degreeX, final float degreeY, final float degreeZ) {
 		if (degreeX != 0 || degreeY != 0 || degreeZ != 0) {
 			final float s = Quaternion.PIOVER180;
 			angularVelocity.set(degreeX * s, degreeY * s, degreeZ * s);
@@ -39,52 +38,61 @@ public class RigidBody extends DynamicBody {
 		return inverseInertiaTensor;
 	}
 
-	public void addImpulse(final float impulseX, final float impulseY,
-			final float impulseZ, final float pX, final float pY, final float pZ) {
+	public void addImpulse(final float impulseX, final float impulseY, final float impulseZ, final float pX,
+			final float pY, final float pZ) {
 		super.addImpulse(impulseX, impulseY, impulseZ);
 		final Vector3f p = shape.getPosition();
 		final float x = pX - p.x;
 		final float y = pY - p.y;
 		final float z = pZ - p.z;
-		angularMomentum.add(y * impulseZ - z * impulseY, z * impulseX - x
-				* impulseZ, x * impulseY - y * impulseX);
-		updateAngularMomantum = true;
+		addAngularMomentum(y * impulseZ - z * impulseY, z * impulseX - x * impulseZ, x * impulseY - y * impulseX);
 	}
 
-	@Override
-	public void clearMomenta() {
-		super.clearMomenta();
+	public void addAngularMomentum(Vector3f m) {
+		addAngularMomentum(m.x, m.y, m.z);
+	}
+
+	public void addAngularMomentum(final float x, final float y, final float z) {
+		if (x != 0 || y != 0 || z != 0) {
+			angularMomentum.add(x, y, z);
+			updateAngularMomantum = true;
+		}
+	}
+
+	public void clearAngularMomentum() {
 		angularMomentum.set(0, 0, 0);
 		updateAngularMomantum = false;
 	}
 
 	@Override
+	public void clearMomenta() {
+		super.clearMomenta();
+		clearAngularMomentum();
+	}
+
+	@Override
 	protected void applyMomenta() {
-		if (updateLinearMomentum) {
-			linearVelocity.addScaled(linearMomentum, inverseMass);
-			if (updateAngularMomantum) {
-				angularVelocity.add(tmp.multiplyM3V(inverseInertiaTensor, 0,
-						angularMomentum));
-			}
-			clearMomenta();
+		super.applyMomenta();
+		if (updateAngularMomantum) {
+			angularVelocity.add(tmp.multiplyM3V(inverseInertiaTensor, 0, angularMomentum));
+			clearAngularMomentum();
 		}
+
 	}
 
 	static Vector3f tmp = new Vector3f();
 	static float[] rot = new float[9];
-	
-//	Vector3f oldAngVel = new Vector3f();
+
+	// Vector3f oldAngVel = new Vector3f();
 	@Override
 	public void updatePosition(final IUpdateInfo uInfo) {
 		super.updatePosition(uInfo);
-		if (angularVelocity.x != 0 || angularVelocity.y != 0
-				|| angularVelocity.z != 0) {
-//			oldAngVel.add(angularVelocity).scale(0.5f);
-//			affineTransform.getOrientation().integrateRotationScaled(
-//					oldAngVel, uInfo.getRate());
-//			oldAngVel.set(angularVelocity);
-			affineTransform.getOrientation().integrateRotationScaled(
-					angularVelocity, uInfo.getRate());
+		if (angularVelocity.x != 0 || angularVelocity.y != 0 || angularVelocity.z != 0) {
+			// oldAngVel.add(angularVelocity).scale(0.5f);
+			// affineTransform.getOrientation().integrateRotationScaled(
+			// oldAngVel, uInfo.getRate());
+			// oldAngVel.set(angularVelocity);
+			affineTransform.getOrientation().integrateRotationScaled(angularVelocity, uInfo.getRate());
 			updateOrientation = true;
 		}
 		if (updateOrientation) {// TODO only if inertia is needed (Coins not)

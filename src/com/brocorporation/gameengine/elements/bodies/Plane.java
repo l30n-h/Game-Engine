@@ -21,6 +21,8 @@ public class Plane extends StaticBody {
 		super(pBounds);
 		normal = pNormal;
 		distance = pBounds.getVertices()[0].dot(normal);
+//		Vector3f h = getShape().getAABB().getHalfsize();//TODO mpr cheat
+//		getPosition().subtractScaled(normal, Math.max(h.x,Math.max(h.y, h.z)));
 	}
 
 	public byte getSide(final Vector3f position) {

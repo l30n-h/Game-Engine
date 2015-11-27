@@ -24,6 +24,7 @@ public class Actor extends RigidBody {
 
 	final static Vector3f f = new Vector3f(0, 0, 0);
 	byte walkDirection = 0;
+	byte rotateDirection = 0;
 
 	public void setJumpingVelocity(final float vY) {
 		jumpingVelocity = vY;
@@ -41,9 +42,10 @@ public class Actor extends RigidBody {
 	public void prepareUpdatePosition(final IUpdateInfo uInfo) {
 		if (isOnGround()) {
 			if (walkDirection != 0) {
-				if(linearVelocity.dot()<sprint_2){
-					f.set(0, 0, walkDirection*sprintAccerleration*mass*uInfo.getRate());
-					affineTransform.getOrientation().rotateV(f);
+				f.set(0, 0, walkDirection * sprintAccerleration * mass * uInfo.getRate());
+				affineTransform.getOrientation().rotateV(f);
+				if (Math.signum(f.getMaxValue()) != Math.signum(linearVelocity.getMaxValue())
+						|| linearVelocity.dot() < sprint_2) {
 					addImpulse(f.x, f.y, f.z);
 				}
 			}
@@ -54,6 +56,11 @@ public class Actor extends RigidBody {
 		}
 		walkDirection = 0;
 		jump = false;
+		if (rotateDirection != 0
+				&& (rotateDirection != Math.signum(angularVelocity.y) || angularVelocity.dot() < 0.625)) {
+			addAngularMomentum(0, rotateDirection * mass * 0.25f * uInfo.getRate(), 0);
+			rotateDirection = 0;
+		}
 		super.prepareUpdatePosition(uInfo);
 	}
 
@@ -63,5 +70,13 @@ public class Actor extends RigidBody {
 
 	public void pushInverse(IUpdateInfo uInfo) {
 		walkDirection = -1;
+	}
+
+	public void rotate(IUpdateInfo uInfo) {
+		rotateDirection = 1;
+	}
+
+	public void rotateInverse(IUpdateInfo uInfo) {
+		rotateDirection = -1;
 	}
 }

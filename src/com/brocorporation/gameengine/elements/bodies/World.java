@@ -22,6 +22,7 @@ import com.brocorporation.gameengine.elements.collision.RaycastHit;
 import com.brocorporation.gameengine.elements.collision.SpeculativeContactSolver;
 import com.brocorporation.gameengine.elements.collision.Tree;
 import com.brocorporation.gameengine.utils.MatrixExt;
+import com.brocorporation.gameengine.utils.Vector3f;
 
 public class World implements CollisionDetection.BroadphaseCallback {
 
@@ -36,49 +37,36 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	public static boolean debug = false;
 	public static int debugid;
 
+	public final static Vector3f temp = new Vector3f();
+
 	@Override
-	public void broadphaseCollision(final DynamicBody dynBody,
-			final StaticBody stcBody, final IUpdateInfo uInfo) {
+	public void broadphaseCollision(final DynamicBody dynBody, final StaticBody stcBody, final IUpdateInfo uInfo) {
 		final Contact c = Contact.DEFAULT;
 		final IShape stcShape = stcBody.getShape();
 		final IShape dynShape = dynBody.getShape();
-		if (GJK.distance(c, stcShape, dynShape) == 0) {
-			// if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
-			if (c.getDistance() == 0 || true) {
-				// float dd = AABB.getDistance(c.getNormal(),
-				// stcBody.getShape().getAABB(), dynBody.getShape().getAABB());
-				// if(dd<=0){
-				// c.setDistance(dd);
-				// ElasticContactSolver.addContact(stcBody, dynBody, c);
-				// }
-
-				// MPR.relVel.set(dynBody.getLinearVelocity());
+		// if(GJK.distance(c, stcShape, dynShape)==0){
+		// if(true){
+		if (GJK.intersects(c, stcShape, dynShape, 0.02f)) {
+			if (c.getDistance() == 0) {
+				// MPR.DIR.set(dynBody.getLinearVelocity());
+				if (stcBody instanceof Plane) {
+					temp.setSubtract(stcBody.getPosition(), dynBody.getPosition()).add(dynBody.getLinearVelocity());
+					if (temp.dot(((Plane) stcBody).getNormal()) > 0)
+						return;
+					MPR.DIR.setInvert(((Plane) stcBody).getNormal());
+					MPR.setDir(true);
+				}
 				if (MPR.intersects(c, stcShape, dynShape)) {
 					if (debug)
-						System.out
-								.println("=================mpr==============");
-					if (stcBody instanceof Plane
-							&& (Math.abs(((Plane) stcBody).getNormal().y) == 1
-									|| (Math.abs(((Plane) stcBody).getNormal().x) == 1) || Math
-									.abs(((Plane) stcBody).getNormal().z) == 1)) {
-						c.getNormal().set(((Plane) stcBody).getNormal());
-						dynShape.getMinAlongDirection(c.getPointB(),
-								c.getNormal());
-						c.setDistance(((Plane) stcBody).getDistance(c
-								.getPointB()));
-						c.getPointB().subtractScaled(c.getNormal(),
-								c.getDistance() / 2);
-						c.getPointA().set(c.getPointB());
-					}
+						System.out.println("=================mpr==============");
 					if (c.getDistance() <= 0) {
 						Manifold.add(stcBody, dynBody, c);
-						// ElasticContact ec =
-						// ElasticContactSolver.addContact(stcBody, dynBody, c);
 					}
 				}
 			} else {
 				if (debug)
 					System.out.println("=================gjk==============");
+				Manifold.add(stcBody, dynBody, c);
 			}
 		} else {
 			if (debug)
@@ -91,15 +79,11 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		if (debug && dynBody.getID() == World.debugid) {
 			System.out.println(stcBody);
 			if (dynBody instanceof RigidBody) {
-				MatrixExt.logM("inertia",
-						((RigidBody) dynBody).getInverseInertiaTensor());
-				System.out.println("ang:\t"
-						+ ((RigidBody) dynBody).getAngularVelocity());
-				System.out.println("ang:\t"
-						+ ((RigidBody) dynBody).getAngularVelocity().length());
+				MatrixExt.logM("inertia", ((RigidBody) dynBody).getInverseInertiaTensor());
+				System.out.println("ang:\t" + ((RigidBody) dynBody).getAngularVelocity());
+				System.out.println("ang:\t" + ((RigidBody) dynBody).getAngularVelocity().length());
 				System.out.println("lin:\t" + dynBody.getLinearVelocity());
-				System.out.println("lin:\t"
-						+ dynBody.getLinearVelocity().length());
+				System.out.println("lin:\t" + dynBody.getLinearVelocity().length());
 			}
 			System.out.println("pos:\t" + dynShape.getPosition());
 			System.out.println("p A:\t" + c.getPointA());
@@ -115,8 +99,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	}
 
 	@Override
-	public void broadphaseCollision(final DynamicBody dynBody1,
-			final DynamicBody dynBody2, final IUpdateInfo uInfo) {
+	public void broadphaseCollision(final DynamicBody dynBody1, final DynamicBody dynBody2, final IUpdateInfo uInfo) {
 		if ((dynBody1 instanceof Actor && dynBody2 instanceof Item)
 				|| (dynBody2 instanceof Actor && dynBody1 instanceof Item)) {
 			final Actor actor;
@@ -129,9 +112,8 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				item = (Item) dynBody1;
 			}
 			final AABB dynAABB = actor.getShape().getAABB();
-			if (AABB.intersectsRay(RaycastHit.DEFAULT, item.getShape()
-					.getAABB(), dynAABB.getHalfsize(), dynAABB.getPosition(),
-					actor.getLinearVelocity(), 0, uInfo.getRate())) {
+			if (AABB.intersectsRay(RaycastHit.DEFAULT, item.getShape().getAABB(), dynAABB.getHalfsize(),
+					dynAABB.getPosition(), actor.getLinearVelocity(), 0, uInfo.getRate())) {
 				dynBody1.onCollide(dynBody2);
 				dynBody2.onCollide(dynBody1);
 			}
@@ -140,15 +122,14 @@ public class World implements CollisionDetection.BroadphaseCallback {
 			final IShape dS1 = dynBody1.getShape();
 			final IShape dS2 = dynBody2.getShape();
 			if (GJK.distance(c, dS1, dS2) == 0) {
-				// if (GJK.intersects(c, dS1, dS2, 0.02f*0)) {
-				if (c.getDistance() == 0 || true) {
+				if (true) {
+					// if (GJK.intersects(c, dS1, dS2, 0.02f)) {
+					// if (c.getDistance() == 0) {
 					if (MPR.intersects(c, dS1, dS2)) {
-						// ElasticContactSolver.addContact(dynBody1, dynBody2,
-						// c);
 						Manifold.add(dynBody1, dynBody2, c);
 					}
 				} else {
-					// ElasticContactSolver.addContact(dynBody1, dynBody2, c);
+					Manifold.add(dynBody1, dynBody2, c);
 				}
 
 			} else {
@@ -171,22 +152,20 @@ public class World implements CollisionDetection.BroadphaseCallback {
 				collisionTree.hasMoved(shape.getAABB());
 			}
 
-//			dynBody.prepareUpdatePosition(uInfo);
-//			dynBody.generateSweptBounds(uInfo);
+			// dynBody.prepareUpdatePosition(uInfo);
+			// dynBody.generateSweptBounds(uInfo);
 			dynBody.generateSweptBoundsBackwards(uInfo);
 		}
 		for (final Constraint contraint : constraintList) {
 			contraint.solve(uInfo);
 		}
 		Manifold.update();
-		CollisionDetection.checkBroadphase(this, updateList, collisionTree,
-				uInfo);
+		CollisionDetection.checkBroadphase(this, updateList, collisionTree, uInfo);
 		Collection<Manifold> c = Manifold.manifolds.values();
 		for (Manifold m : c) {
 			for (int i = 0; i < m.size(); i++) {
 				if (m.getContact(i).getDistance() <= 0) {
-					ElasticContact e = ElasticContactSolver.addContact(
-							m.getBodyA(), (DynamicBody) m.getBodyB(),
+					ElasticContact e = ElasticContactSolver.addContact(m.getBodyA(), (DynamicBody) m.getBodyB(),
 							m.getContact(i));
 				}
 				// if(m.size()==4){
@@ -197,6 +176,10 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		ElasticContactSolver.run(uInfo);
 		SpeculativeContactSolver.run(uInfo);
 		collisionTree.optimize();
+		updatePreRendering(uInfo);
+	}
+
+	public void updatePreRendering(IUpdateInfo uInfo) {
 		if (uInfo.isPreRendering()) {
 			activeCamera.prepareUpdatePosition(uInfo);
 			if (activeCamera instanceof TrackingCamera) {
@@ -211,13 +194,11 @@ public class World implements CollisionDetection.BroadphaseCallback {
 	}
 
 	public void update2(IUpdateInfo uInfo) {
-		CollisionDetection.checkBroadphase(this, updateList, collisionTree,
-				uInfo);
+		CollisionDetection.checkBroadphase(this, updateList, collisionTree, uInfo);
 		Collection<Manifold> c = Manifold.manifolds.values();
 		for (Manifold m : c) {
 			for (int i = 0; i < m.size(); i++) {
-				ElasticContact e = ElasticContactSolver.addContact(
-						m.getBodyA(), (DynamicBody) m.getBodyB(),
+				ElasticContact e = ElasticContactSolver.addContact(m.getBodyA(), (DynamicBody) m.getBodyB(),
 						m.getContact(i));
 				// if(m.size()==4){
 				// e.setWarmStarting(m.j);
@@ -233,7 +214,7 @@ public class World implements CollisionDetection.BroadphaseCallback {
 		for (final Constraint contraint : constraintList) {
 			contraint.solve(uInfo);
 		}
-		
+
 		for (final DynamicBody dynBody : updateList) {
 			dynBody.updatePosition(uInfo);
 			dynBody.updateBounds();

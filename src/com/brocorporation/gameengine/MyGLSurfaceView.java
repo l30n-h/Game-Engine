@@ -15,7 +15,6 @@ import com.brocorporation.gameengine.elements.bodies.Camera;
 import com.brocorporation.gameengine.elements.bodies.DynamicBody;
 import com.brocorporation.gameengine.elements.bodies.Item;
 import com.brocorporation.gameengine.elements.bodies.Plane;
-import com.brocorporation.gameengine.elements.bodies.RigidBody;
 import com.brocorporation.gameengine.elements.bodies.StaticBody;
 import com.brocorporation.gameengine.elements.bodies.StaticLight;
 import com.brocorporation.gameengine.elements.bodies.TrackingCamera;
@@ -366,7 +365,7 @@ public class MyGLSurfaceView extends GameEngine {
 				new Vector3f(10.4F, 9.75F, 21.8F),
 				new Vector3f(10.4F, 9.75F, 18.6F) });
 		world.add(new Plane(normalUp, floorBig1));
-		// world.add(new RigidBody(floorBig1, 0));
+//		 world.add(new RigidBody(floorBig1, 0));
 		world.add(new Plane(normalUp, floorBig2));
 		world.add(new Plane(normalUp, floorBig3));
 		world.add(new Plane(normalDown, ceilingBig1));
@@ -441,7 +440,7 @@ public class MyGLSurfaceView extends GameEngine {
 		actor2.isGravityEnabled(true);
 		actor2.setMaxVelocity(13);
 		world.add(actor2);
-
+		//TODO
 		actor = new Actor(new Convex(a), 80);
 		actor.setGLShape(boxShape);
 //		 actor = new Actor(new Sphere(0.75f), 80);
@@ -450,7 +449,6 @@ public class MyGLSurfaceView extends GameEngine {
 //		 actor.setPosition(7, 8, -21.25f);
 		actor.setJumpingHeight(1);
 		actor.isGravityEnabled(true);
-//		 actor.setAngularVelocity(10, 10, 10);
 		actor.setMaterial(new Material(1f *0, 1f*0, 0.5f*0));
 		world.add(actor);
 		World.debugid = actor.getID();
@@ -631,12 +629,15 @@ public class MyGLSurfaceView extends GameEngine {
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
 			currentActor.pushInverse(uInfo);
+			
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-			currentActor.rotate(0, 90 * dTime, 0);
+//			currentActor.rotate(0, 90 * dTime, 0);
+			currentActor.rotate(uInfo);
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-			currentActor.rotate(0, -90 * dTime, 0);
+//			currentActor.rotate(0, -90 * dTime, 0);
+			currentActor.rotateInverse(uInfo);
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
 			currentActor.jump();
@@ -648,6 +649,8 @@ public class MyGLSurfaceView extends GameEngine {
 			cPSet = false;
 			updates++;
 			world.update(uInfo);
+		} else{
+			world.updatePreRendering(uInfo);
 		}
 		pause();
 	}
@@ -762,7 +765,7 @@ public class MyGLSurfaceView extends GameEngine {
 			for (Manifold m : manifolds) {
 				for (int i = 0; i < m.size(); i++) {
 					ManifoldContact c = m.getContact(i);
-					primitiveShape.setColor(1, 1f, 0, 1);
+					primitiveShape.setColor(i%2, i/2, 0, 1);
 					cPoint2.setPosition(c.getWorldA());
 					primitiveShape.addAABB(cPoint2);
 					Vector3f p = cPoint2.getPosition();
@@ -781,7 +784,6 @@ public class MyGLSurfaceView extends GameEngine {
 				}
 			}
 		}
-
 		if (selectedBody != null) {
 			primitiveShape.setColor(0, 1, 0, 1);
 			primitiveShape.addAABB(selectedBody.getAABB());

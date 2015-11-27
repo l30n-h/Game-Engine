@@ -16,7 +16,7 @@ import com.brocorporation.gameengine.elements.opengl.GLTexture;
 import com.brocorporation.gameengine.utils.Utils;
 import com.brocorporation.gameengine.utils.Vector3f;
 
-public class WavefrontParser extends SwingWorker<WavefrontObject, Integer> {
+public class WavefrontParser extends Thread {
 	private final BufferedReader[] bufferedReader = new BufferedReader[2];
 	private int buffer;
 	private final ArrayList<String> tempStringList = new ArrayList<String>(3);
@@ -46,19 +46,16 @@ public class WavefrontParser extends SwingWorker<WavefrontObject, Integer> {
 	private float maxY = Float.NEGATIVE_INFINITY;
 	private float maxZ = Float.NEGATIVE_INFINITY;
 
-	public WavefrontParser(final String objPath, final String mtlPath,
-			GLTexture pGLTexture) throws IOException {
-		bufferedReader[0] = Files.newBufferedReader(Paths.get(mtlPath),
-				StandardCharsets.UTF_8);
-		bufferedReader[1] = Files.newBufferedReader(Paths.get(objPath),
-				StandardCharsets.UTF_8);
+	public WavefrontParser(final String objPath, final String mtlPath, GLTexture pGLTexture) throws IOException {
+		bufferedReader[0] = Files.newBufferedReader(Paths.get(mtlPath), StandardCharsets.UTF_8);
+		bufferedReader[1] = Files.newBufferedReader(Paths.get(objPath), StandardCharsets.UTF_8);
 		glTexture = pGLTexture;
 	}
 
 	public void parse(final boolean pGenerateBounds) {
 		generateBounds = pGenerateBounds;
 		buffer = 0;
-		execute();
+		start();
 	}
 
 	private void parseMaterialFile(final String line) {
@@ -68,29 +65,22 @@ public class WavefrontParser extends SwingWorker<WavefrontObject, Integer> {
 				currentMaterial = new GLMaterial();
 				wavefrontMaterialMap.put(linecontent, currentMaterial);
 			} else if (line.startsWith("Ns ")) {
-				currentMaterial.setShininess(Utils.parseFloat(linecontent, 0,
-						linecontent.length()));
+				currentMaterial.setShininess(Utils.parseFloat(linecontent, 0, linecontent.length()));
 			} else if (line.startsWith("Ka ")) {
 				splitFloat(linecontent, ' ', tempFloat);
-				currentMaterial.setAmientColor(tempFloat[0], tempFloat[1],
-						tempFloat[2]);
+				currentMaterial.setAmientColor(tempFloat[0], tempFloat[1], tempFloat[2]);
 			} else if (line.startsWith("Kd ")) {
 				splitFloat(linecontent, ' ', tempFloat);
-				currentMaterial.setDiffuseColor(tempFloat[0], tempFloat[1],
-						tempFloat[2]);
+				currentMaterial.setDiffuseColor(tempFloat[0], tempFloat[1], tempFloat[2]);
 			} else if (line.startsWith("Ks ")) {
 				splitFloat(linecontent, ' ', tempFloat);
-				currentMaterial.setSpecularColor(tempFloat[0], tempFloat[1],
-						tempFloat[2]);
+				currentMaterial.setSpecularColor(tempFloat[0], tempFloat[1], tempFloat[2]);
 			} else if (line.startsWith("illum ")) {
-				currentMaterial.setIlluminance((short) Utils.parseFloat(
-						linecontent, 0, linecontent.length()));
+				currentMaterial.setIlluminance((short) Utils.parseFloat(linecontent, 0, linecontent.length()));
 			} else if (line.startsWith("Ni ")) {
-				currentMaterial.setRefractionIndex(Utils.parseFloat(
-						linecontent, 0, linecontent.length()));
+				currentMaterial.setRefractionIndex(Utils.parseFloat(linecontent, 0, linecontent.length()));
 			} else if (line.startsWith("d ")) {
-				currentMaterial.setDissolveFaktor(Utils.parseFloat(linecontent,
-						0, linecontent.length()));
+				currentMaterial.setDissolveFaktor(Utils.parseFloat(linecontent, 0, linecontent.length()));
 			} else if (line.startsWith("map_Kd ")) {
 				currentMaterial.setTexture(linecontent);
 				glTexture.loadTexture(linecontent);
@@ -204,15 +194,18 @@ public class WavefrontParser extends SwingWorker<WavefrontObject, Integer> {
 	}
 
 	@Override
-	protected WavefrontObject doInBackground() {
+	public void run() {
 		read(bufferedReader[buffer]);
 		buffer++;
 		read(bufferedReader[buffer]);
+	}
+
+	public WavefrontObject get() throws InterruptedException {
+		join();
 		return wavefrontObject;
 	}
 
-	private float[] splitToVertex(final String line, final char split,
-			final float[] vector) {
+	private float[] splitToVertex(final String line, final char split, final float[] vector) {
 		int start = 0;
 		int end = line.indexOf(split, start);
 		int i = 0;
@@ -226,8 +219,7 @@ public class WavefrontParser extends SwingWorker<WavefrontObject, Integer> {
 		return vector;
 	}
 
-	private void splitFloat(final String line, final char split,
-			final float[] array) {
+	private void splitFloat(final String line, final char split, final float[] array) {
 		int count = 0;
 		int start = 0;
 		int end = line.indexOf(split, start);
@@ -279,10 +271,8 @@ public class WavefrontParser extends SwingWorker<WavefrontObject, Integer> {
 			maxZ = vertex[2];
 		}
 
-		currentHalfsize.set(Math.abs(maxX - minX) / 2,
-				Math.abs(maxY - minY) / 2, Math.abs(maxZ - minZ) / 2);
-		currentPosition.set(maxX - currentHalfsize.x, maxY - currentHalfsize.y,
-				maxZ - currentHalfsize.z);
+		currentHalfsize.set(Math.abs(maxX - minX) / 2, Math.abs(maxY - minY) / 2, Math.abs(maxZ - minZ) / 2);
+		currentPosition.set(maxX - currentHalfsize.x, maxY - currentHalfsize.y, maxZ - currentHalfsize.z);
 	}
 
 	private void resetBounds() {
